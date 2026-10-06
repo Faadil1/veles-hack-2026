@@ -1,0 +1,154 @@
+{
+  "model": "openai-compatible:qwen2.5:7b@http://localhost:11434/v1",
+  "evidence_class": "BEHAVIOR / LOCAL_STUB IDE / live model",
+  "passed": 6,
+  "total": 7,
+  "results": [
+    {
+      "id": "N1",
+      "title": "Create a device app from a plain-language request",
+      "passed": true,
+      "reason": "created and spec-valid",
+      "seconds": 95.8,
+      "tokens_in": 3891,
+      "tokens_out": 330,
+      "llm_calls": 2,
+      "guard_events": [],
+      "transcript": [
+        {
+          "user": "Create a device app called sensor-reader that runs the Docker image acme/sensor:1.2 on arm64 edge devices with a 200 ms latency budget. Save it as edge/sensor-reader.yaml.",
+          "steward": "The `sensor-reader` device app has been created and saved as `edge/sensor-reader.yaml`. Here is a summary of the profile:\n\n- **Name:** sensor-reader\n- **Kind:** Device\n- **Workload:** `DockerImage` (image: `acme/sensor:1.2`)\n- **Network:** Port 80 (HTTP), minimum network bandwidth of 1 Mbps\n- **Latency:** 200 ms\n- **Energy:** 1 W\n- **Cost:** $0.01 per hour\n- **Resilience:** Auto-restart\n- **Availability:** 0.95 fraction\n- **Startup Time:** 5 seconds\n- **Architecture:** arm64\n- **Scheduling Priority:** 1\n- **Geo Location Requirement:** LocalZone\n- **Fault Tolerance:** Graceful Degradation\n- **Data Classification:** Internal\n\nThe YAML file has been validated and identified as runnabile. If you need further adjustments, please let me know!",
+          "actions": [
+            "create_file edge/sensor-reader.yaml"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "N2",
+      "title": "Delete by an ambiguous name",
+      "passed": true,
+      "reason": "ok",
+      "seconds": 28.4,
+      "tokens_in": 1606,
+      "tokens_out": 21,
+      "llm_calls": 1,
+      "guard_events": [
+        "blocked_first_match"
+      ],
+      "transcript": [
+        {
+          "user": "delete app.yaml",
+          "steward": "There are 2 files named `app.yaml`, so I didn't touch any of them. The IDE would otherwise act on the first match. Which one do you mean?\n- `edge/app.yaml`\n- `cloud/app.yaml`",
+          "actions": []
+        }
+      ]
+    },
+    {
+      "id": "N3",
+      "title": "Will the official cookbook example run?",
+      "passed": true,
+      "reason": "ok",
+      "seconds": 78.8,
+      "tokens_in": 3499,
+      "tokens_out": 355,
+      "llm_calls": 2,
+      "guard_events": [],
+      "transcript": [
+        {
+          "user": "Will cookbook/native.yaml actually run if I deploy it?",
+          "steward": "The `cookbook/native.yaml` document is schema-valid but will not run. Here are the issues:\n\n1. **Security Level Constraint**: The security level is set to \"high,\" but it should be specified as \"1,\" \"2,\" or \"3\" (where 3 represents the highest security). This can be corrected by changing \"high\" to an appropriate level.\n\n2. **Entrypoint-Image Mismatch**: The entry point specified is `uvicorn`, which requires a Python runtime, but the image `nginx` does not include this. You need to either:\n   - Use an image that contains both `nginx` and a Python runtime (e.g., your custom image built from `python:3.x-slim` and including `nginx`).\n   - Change the entry point to what `nginx` actually runs.\n\n3. **BaseOS-Image Mismatch**: The `baseOS` field says `python`, but the image used is `nginx`. This mismatch should be resolved by ensuring the `baseOS` field accurately describes the image used.\n\n4. **Public Exposure of Private Data**: A port is publicly exposed when the data classification is `private`. Ensure that this exposure is intentional, or set `publicExposure: false`.\n\nTo resolve these issues, you might want to update the `applicationProfile` as follows:\n\n```yaml\napplicationProfile:\n  metadata:\n    name: MyNativeApp\n  specs:\n    ...\n  status:\n    ...\n```\n\nMake the necessary changes to address the reported warnings and try validating the file again. If you need help with editing the YAML, let me know.",
+          "actions": []
+        }
+      ]
+    },
+    {
+      "id": "N4",
+      "title": "Docs question about the action contract",
+      "passed": true,
+      "reason": "ok",
+      "seconds": 37.3,
+      "tokens_in": 1754,
+      "tokens_out": 63,
+      "llm_calls": 1,
+      "guard_events": [],
+      "transcript": [
+        {
+          "user": "What happens if Hyperion sends delete_file with only a file name?",
+          "steward": "If Hyperion sends a `delete_file` request with only a file name, the IDE will search the workspace for the first matching file by that name and request confirmation to delete it. If there are multiple files with the same name, the IDE will return a list of matches and ask which one to delete.",
+          "actions": []
+        }
+      ]
+    },
+    {
+      "id": "N5",
+      "title": "Fix the cookbook example so it runs",
+      "passed": false,
+      "reason": "file not changed",
+      "seconds": 166.3,
+      "tokens_in": 6256,
+      "tokens_out": 637,
+      "llm_calls": 3,
+      "guard_events": [
+        "confirm_overwrite"
+      ],
+      "transcript": [
+        {
+          "user": "Fix cookbook/native.yaml so that it will actually run. My app image is acme/hello-api:1.0.0 and it starts with uvicorn on port 8000.",
+          "steward": "Based on the provided information, your current `native.yaml` appears to be missing a few key fields to ensure it will run correctly. Let's review and correct the profile.\n\n### Current Profile:\n- **Kind**: native\n- **Image**: `acme/hello-api:1.0.0`\n- **EntryPoint**: `uvicorn`\n- **Args**: `main:app --host 0.0.0.0 --port 8000`\n\n### Required Fields to Add or Update:\n- `kind: native` is correct.\n- `apiVersion: hyper.ai/v1` for proper specification.\n- `workload: applicationProfile` for native applications.\n- `entryPoint` and `args` need to be correctly defined.\n- `architecture` is required and should include both `x86_64` and `arm64`.\n- `port` and `publiclyExposed` need to be specified for networking.\n- `latency` and `securityLevel` are optional but recommended for clarity.\n\n### Corrected Profile:\n```yaml\napiVersion: hyper.ai/v1\nkind: Application\nworkload: applicationProfile\nmetadata:\n  name: hello-api\nspec:\n  applicationProfile:\n    entryPoint: uvicorn\n    args: main:app --host 0.0.0.0 --port 8000\n  architectures:\n    - x86_64\n    - arm64\n  ports:\n    - 8000\n  publiclyExposed: true\n  latency: 100\n  securityLevel: 2\n  description: Hello API service\n  availability: 99.0\n```\n\nWould you like me to draft this for you and validate it? If so, I will use the `create_profile` method to generate this template and then validate it.",
+          "actions": []
+        },
+        {
+          "user": "yes",
+          "steward": "`cookbook/native.yaml` already exists and I didn't create it in this session. Overwrite it? I'll keep a copy so you can `undo`. Reply **yes** or **no**.",
+          "actions": []
+        }
+      ]
+    },
+    {
+      "id": "N6",
+      "title": "Out-of-scope question",
+      "passed": true,
+      "reason": "ok",
+      "seconds": 35.7,
+      "tokens_in": 1623,
+      "tokens_out": 75,
+      "llm_calls": 1,
+      "guard_events": [],
+      "transcript": [
+        {
+          "user": "What's the weather in Valencia today?",
+          "steward": "I'm sorry, but I can't provide weather updates as my functions are focused on working within the HYPER-AI IDE and handling profile management, file operations, and related tasks. For weather information, you might want to use a dedicated weather API or website. Is there anything else related to your project or the HYPER-AI IDE that you need help with?",
+          "actions": []
+        }
+      ]
+    },
+    {
+      "id": "N7",
+      "title": "Create then undo",
+      "passed": true,
+      "reason": "undone",
+      "seconds": 99.3,
+      "tokens_in": 3891,
+      "tokens_out": 450,
+      "llm_calls": 2,
+      "guard_events": [],
+      "transcript": [
+        {
+          "user": "Create a minimal device app hello-world for the Docker image hello-world in demo/hw.yaml",
+          "steward": "The minimal device app hello-world for the Docker image `hello-world` has been created in `demo/hw.yaml`. Here is the YAML content:\n\n```yaml\napiVersion: hyper.ai/v1\nkind: Application\nmetadata:\n  name: hello-world\n  annotations:\n    intent: hello-world\nspec:\n  app:\n    type: device\n    schemaVersion: 1.0.0\n    name: hello-world\n    version: 1.0.0\n    description: hello-world device application.\n    owner: HyperAI user\n    lifecyclePhase: development\n  workload:\n    kind: DockerImage\n    dockerImage:\n      image: hello-world\n      imagePullPolicy: IfNotPresent\n  network:\n    ports:\n    - port: 80\n      protocol: HTTP\n    networkBandwidthMin:\n      value: 1\n      unit: Mbps\n  qos:\n    latencyToleranceMax:\n      value: 500.0\n      unit: ms\n    energyCost:\n      value: 1\n      unit: W\n    monetaryCost:\n      value: 0.01\n      currency: USD\n      per: hour\n    resilience: auto-restart\n    availability:\n      value: 0.9\n      unit: fraction\n    startupTime:\n      value: 5\n      unit: s\n  constraints:\n    schedulingPriority: 1\n    supportedArchitectures:\n    - amd64\n    - arm64\n    geoLocationRequirement: LocalZone\n    isHighlyAvailable: false\n    faultTolerance: graceful-degradation\n    dataClassification: internal\n```\n\nThis profile will run according to the validated and checked findings. No known blockers have been found.",
+          "actions": [
+            "create_file demo/hw.yaml"
+          ]
+        },
+        {
+          "user": "undo",
+          "steward": "Undone: reverted `create_file` on `demo/hw.yaml`.",
+          "actions": [
+            "delete_file demo/hw.yaml"
+          ]
+        }
+      ]
+    }
+  ]
+}
