@@ -1,0 +1,28 @@
+project:
+  id: veles_hack_2026
+  repository: Faadil1/veles-hack-2026
+  challenge: Veles Hack 2026 (Eclipse Foundation / TAIKAI)
+  benchmark: AUTONOMOUS_BUILD_BENCHMARK_V1_ROUND_1 (arm: Claude)
+  canonical_baseline:
+    repository: Faadil1/faadil-agent-system
+    version: 0.1.57-submission-execution-assurance-promoted
+    commit: 61f853a461634ca46746c63bbf6ced5fa05f8649
+    benchmark_overlay_commit: 9b1db87
+  updated_at: 2026-10-06T10:12Z
+  lifecycle_stage: QUALIFY
+  judged_build_stage: RUBRIC
+  track: NOT_SELECTED
+  concept: NOT_LOCKED
+  submission_execution_state: NOT_STARTED
+  deadline_utc: 2026-10-07T21:59Z
+  safety_boundary_utc: 2026-10-07T19:00Z
+  open_unknowns:
+    - judging_criteria
+    - deliverables_video_deck
+    - rules_text
+    - track_starter_repos_2_3_4
+  blockers: []
+  exact_next_gate: TRACK_AND_CONCEPT_QUALIFICATION
+  exact_next_action: >-
+    Finish reading required canon (hackathon profile, lifecycle, product reality, final assurance),
+    complete track feasibility comparison, run Winning Intelligence v2 / collision checks, then Concept Lock.
