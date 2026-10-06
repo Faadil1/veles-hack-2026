@@ -19,6 +19,6 @@ run under Node (LOCAL). "Official image" means `docker run donmichael/ide-backen
 | Profile builder | LOCAL: all builder outputs pass the real validator with no warnings | tests/test_validator_port.py; parity | — |
 | Docs Q&A with citations | TESTED retrieval; answers depend on model | scenarios N4, N8 | Judges' model quality UNKNOWN until the team key arrives |
 | Topical guardrail | TESTED | tests/test_guardrail.py; N6 | — |
-| Language layer with a real model | BEHAVIOR on open models (qwen2.5 3B/7B, llama3.1 8B) in CI, stub IDE | ci-evidence:scenarios/ | legion1 llama3.1 not called yet: needs the team key (HUMAN_REQUIRED) |
+| Language layer with a real model | BEHAVIOR on open models (qwen2.5 3B/7B) in CI, stub IDE; llama3.1 8B run in progress | ci-evidence:scenarios/ | legion1 llama3.1 not called yet: needs the team key (HUMAN_REQUIRED) |
 | Evaluation image `<user>/hyperion:latest` on Docker Hub | NOT_IMPLEMENTED until secrets exist; CI step ready | ci.yml | HUMAN_REQUIRED: Docker Hub account and token |
 | Production use | Not claimed | | Out of scope |

@@ -49,7 +49,6 @@ jobs:
           mkdir -p /tmp/out && cp evidence/scenarios/*.json /tmp/out/ 2>/dev/null || true
           git fetch origin ci-evidence || true
           git checkout -B ci-evidence origin/ci-evidence 2>/dev/null || git checkout --orphan ci-evidence
-          git rm -rq --cached . 2>/dev/null || true
           mkdir -p scenarios && cp /tmp/out/*.json scenarios/ 2>/dev/null || true
           git add scenarios && git commit -m "scenario report ${GITHUB_SHA::7} ${MODEL}" || echo "nothing to commit"
           for i in 1 2 3 4; do
