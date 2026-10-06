@@ -10,14 +10,14 @@
       "passed": true,
       "reason": "ok",
       "reply": "I'm Hyperion, the assistant for the HYPER-AI IDE, so I can only help with HYPER-AI and your workspace: questions about the platform, and creating, checking, fixing or deleting application profiles and files. Try something like “Create a device app for the nginx image” or “What are Open Connectors?”.",
-      "seconds": 4.6,
+      "seconds": 4.2,
       "files": [
         "cloud/app.yaml",
         "cookbook/native.yaml",
         "edge/app.yaml"
       ],
       "status_log_tail": [
-        "[INFO 4:06:33 PM] Workspace ready. Waiting for messages."
+        "[INFO 4:19:53 PM] Workspace ready. Waiting for messages."
       ]
     },
     {
@@ -25,15 +25,15 @@
       "text": "What is HyperAI?",
       "passed": true,
       "reason": "ok",
-      "reply": "HyperAI is an EU-funded Horizon Europe project that aims to redefine data processing by harnessing distributed computing swarms. These are autonomous networks of interconnected nodes that dynamically adapt and optimise resources throughout the computing continuum, promising enhanced self-configuring, self-healing, and self-optimising capabilities. The project also includes the development of an integrated development environment (IDE) and a microservice called Hyperion, which is powered by large language models and allows for natural language interactions with the IDE.",
-      "seconds": 258.5,
+      "reply": "HyperAI is a EU-funded Horizon Europe project that aims to redefine data processing by harnessing distributed computing swarms. These swarms are autonomous networks of interconnected nodes across Cloud, Edge, and IoT that adapt and optimise resources across the computing continuum, aiming at self-configuring, self-healing and self-optimising behaviour. Its broader ambition is to make complex Cloud, Edge and IoT environments easier to manage through intelligent, autonomous technologies.",
+      "seconds": 149.9,
       "files": [
         "cloud/app.yaml",
         "cookbook/native.yaml",
         "edge/app.yaml"
       ],
       "status_log_tail": [
-        "[INFO 4:06:33 PM] Workspace ready. Waiting for messages."
+        "[INFO 4:19:53 PM] Workspace ready. Waiting for messages."
       ]
     },
     {
@@ -42,7 +42,7 @@
       "passed": true,
       "reason": "new profiles ['nginx.yaml'], valid ['nginx.yaml']",
       "reply": "Created nginx.yaml (device profile for the image nginx, port 80) and opened it in the editor. The IDE validator reports it valid. Fields I wasn't told (owner, QoS, resources) use defaults you can see and edit in the file. Say undo to remove it.",
-      "seconds": 4.3,
+      "seconds": 4.5,
       "files": [
         "cloud/app.yaml",
         "cookbook/native.yaml",
@@ -50,8 +50,8 @@
         "nginx.yaml"
       ],
       "status_log_tail": [
-        "[INFO 4:06:33 PM] Workspace ready. Waiting for messages.",
-        "[OK 4:10:57 PM] Agent created file: nginx.yaml"
+        "[INFO 4:19:53 PM] Workspace ready. Waiting for messages.",
+        "[OK 4:22:28 PM] Agent created file: nginx.yaml"
       ]
     },
     {
@@ -68,8 +68,8 @@
         "nginx.yaml"
       ],
       "status_log_tail": [
-        "[INFO 4:06:33 PM] Workspace ready. Waiting for messages.",
-        "[OK 4:10:57 PM] Agent created file: nginx.yaml"
+        "[INFO 4:19:53 PM] Workspace ready. Waiting for messages.",
+        "[OK 4:22:28 PM] Agent created file: nginx.yaml"
       ]
     },
     {
@@ -86,9 +86,9 @@
         "nginx.yaml"
       ],
       "status_log_tail": [
-        "[INFO 4:06:33 PM] Workspace ready. Waiting for messages.",
-        "[OK 4:10:57 PM] Agent created file: nginx.yaml",
-        "[OK 4:11:04 PM] Agent rewrote file: cookbook/native.yaml"
+        "[INFO 4:19:53 PM] Workspace ready. Waiting for messages.",
+        "[OK 4:22:28 PM] Agent created file: nginx.yaml",
+        "[OK 4:22:36 PM] Agent rewrote file: cookbook/native.yaml"
       ]
     },
     {
@@ -96,8 +96,8 @@
       "text": "Which container image did you just put in that file?",
       "passed": true,
       "reason": "ok",
-      "reply": "The file cookbook/native.yaml does not exist. However, I did touch it when I previously updated it. \n\nI will try again by loading the previous version of the file. Here's the contents:\napiVersion: hyper.ai/v1\nkind: Application\nname: hello-native\nspec:\n  apiVersion: hyper.ai/v1\n  kind: Application\n  name: hello-native\n  runtime:\n    containerImage:\n      public:\n        registry: registry.hub.docker.com\n        uri: acme/hello-api:1.0.0\n      uri: acme/hello-api:1.0.0\n      private: {}\n    runtimeType: application\n\nSo, in the runtime.containerImage.uri field, I put acme/hello-api:1.0.0",
-      "seconds": 200.7,
+      "reply": "The image for the service is acme/hello-api:1.0.0.",
+      "seconds": 84.6,
       "files": [
         "cloud/app.yaml",
         "cookbook/native.yaml",
@@ -105,9 +105,9 @@
         "nginx.yaml"
       ],
       "status_log_tail": [
-        "[INFO 4:06:33 PM] Workspace ready. Waiting for messages.",
-        "[OK 4:10:57 PM] Agent created file: nginx.yaml",
-        "[OK 4:11:04 PM] Agent rewrote file: cookbook/native.yaml"
+        "[INFO 4:19:53 PM] Workspace ready. Waiting for messages.",
+        "[OK 4:22:28 PM] Agent created file: nginx.yaml",
+        "[OK 4:22:36 PM] Agent rewrote file: cookbook/native.yaml"
       ]
     },
     {
@@ -124,10 +124,10 @@
         "nginx.yaml"
       ],
       "status_log_tail": [
-        "[INFO 4:06:33 PM] Workspace ready. Waiting for messages.",
-        "[OK 4:10:57 PM] Agent created file: nginx.yaml",
-        "[OK 4:11:04 PM] Agent rewrote file: cookbook/native.yaml",
-        "[OK 4:14:29 PM] Agent rewrote file: cookbook/native.yaml"
+        "[INFO 4:19:53 PM] Workspace ready. Waiting for messages.",
+        "[OK 4:22:28 PM] Agent created file: nginx.yaml",
+        "[OK 4:22:36 PM] Agent rewrote file: cookbook/native.yaml",
+        "[OK 4:24:04 PM] Agent rewrote file: cookbook/native.yaml"
       ]
     }
   ]
