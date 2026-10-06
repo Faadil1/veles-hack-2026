@@ -124,7 +124,7 @@ jobs:
           for i in $(seq 1 30); do curl -fs localhost:8001/health >/dev/null && break; sleep 1; done
           curl -fsN -X POST localhost:8001/chat -H 'content-type: application/json' \
             -d '{"user_id":"ci","text":"check ci/hello.yaml"}' > /tmp/wired.txt
-          grep -q 'IDE validator: \*\*valid' /tmp/wired.txt || { echo "::error title=wired::$(head -c 600 /tmp/wired.txt | tr '\n' ' ') $(docker logs steward-wired 2>&1 | tail -10 | tr '\n' ' ')"; exit 1; }
+          grep -q 'IDE validator: valid' /tmp/wired.txt || { echo "::error title=wired::$(head -c 600 /tmp/wired.txt | tr '\n' ' ') $(docker logs steward-wired 2>&1 | tail -10 | tr '\n' ' ')"; exit 1; }
           echo "::notice title=wired::$(head -c 300 /tmp/wired.txt | tr '\n' ' ')"
       - name: Push image
         if: github.event_name != 'pull_request'
