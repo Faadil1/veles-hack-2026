@@ -11,7 +11,6 @@ from fastapi.responses import JSONResponse, StreamingResponse
 from steward.llm import LLMError, OpenAICompatibleLLM
 from tests.harness import Harness
 
-pytestmark = pytest.mark.asyncio
 DEVICE = (Path(__file__).parent / "fixtures" / "cookbook" / "device-hello-world-docker.yaml").read_text()
 
 

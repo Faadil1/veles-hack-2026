@@ -9,7 +9,6 @@ from steward.app import create_app
 from steward.llm import LLMTurn, ScriptedLLM
 from stub_ide.app import create_app as create_stub
 
-pytestmark = pytest.mark.asyncio
 
 
 def _events(body: str) -> list[dict]:

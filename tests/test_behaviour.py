@@ -25,7 +25,6 @@ def say(text: str) -> LLMTurn:
     return LLMTurn(text=text)
 
 
-pytestmark = pytest.mark.asyncio
 
 
 # I1 — ambiguity guard -------------------------------------------------------------------------------
