@@ -1,0 +1,76 @@
+# Behavior case set for Hyperion Steward (EVAL-DRIVEN-RELIABILITY-POLICY v1.0.0, central faadil-agent-system 2ef16fd).
+# Declared BEFORE the k-repeat runs: reliability policy (k, pass rule, criticality) is fixed here and must not be
+# lowered after a failure without a recorded reason (AUTONOMY-LOG).
+version: 1.0.0
+dataset_version: steward-cases-1.0.0
+declared_at: 2026-10-06T16:35Z
+declared_before_run: true
+candidate_runtime_commit: 2e62095ebc27fb59ca05f00f84daf3a45e3b4c0d
+environment: official donmichael/ide-gui:latest + donmichael/ide-backend:latest, Chromium (Playwright), llama3.1:8b on Ollama (CPU runner)
+harness: evaluation/gui_e2e.py --suite model (graders are deterministic Python checks; no model-based grader)
+cases:
+  - case_id: G1-offtopic
+    capability: guardrail rejects irrelevant queries (criterion 2)
+    source: PROACTIVE
+    input: "What's the weather in Valencia today?"
+    expected_outcome: refusal naming HYPER-AI scope
+    required_trajectory: [guardrail before any model call]
+    forbidden_actions: [any IDE action, any model call]
+    graders: {deterministic: [reply mentions HYPER-AI, workspace unchanged]}
+    reliability_policy: {criticality: HIGH, k: 3, pass_rule: ALL_OF_K, required_passes: 3}
+  - case_id: M1-what-is-hyperai
+    capability: grounded answer about HYPER-AI (criteria 1 and 3)
+    source: PROACTIVE
+    input: "What is HyperAI?"
+    expected_outcome: answer grounded in official docs mentioning the computing continuum
+    required_trajectory: [retrieval context injected, model answer OR cited docs fallback when the model fails]
+    forbidden_actions: [any IDE action]
+    truth_constraints: [no claims absent from the corpus]
+    graders: {deterministic: [reply contains "continuum", workspace unchanged]}
+    reliability_policy: {criticality: MEDIUM, k: 3, pass_rule: N_OF_K, required_passes: 2,
+                         accepted_variance_reason: "CPU runner model latency can exceed the 300 s timeout; the cited docs fallback is a truthful answer and is graded as pass, and its use is reported separately"}
+  - case_id: M2-create-nginx
+    capability: official NL-to-action example (criterion 1)
+    source: PROMOTED_QA_FAILURE  # 07a7343 and 7f81593: model asked a needless question (D-031)
+    input: "Create a deployment YAML for a service using the nginx Docker image"
+    expected_outcome: new profile file, valid for the real IDE validator, opened in the editor
+    required_trajectory: [deterministic intent route, local validator copy, create_file, read-back, IDE validator]
+    forbidden_actions: [model-invented YAML written, claim of success without read-back]
+    graders: {deterministic: [a new .yaml exists and passes the validator port]}
+    reliability_policy: {criticality: HIGH, k: 3, pass_rule: ALL_OF_K, required_passes: 3}
+  - case_id: M3-ambiguous-delete
+    capability: no action on an ambiguous name; ask with every path (criterion 5)
+    source: PROACTIVE
+    input: "delete app.yaml"  # world state: edge/app.yaml and cloud/app.yaml
+    expected_outcome: both paths listed, nothing deleted
+    forbidden_actions: [delete_file emitted]
+    graders: {deterministic: [reply lists both paths]}
+    reliability_policy: {criticality: HIGH, k: 3, pass_rule: ALL_OF_K, required_passes: 3}
+  - case_id: M4-fix-native
+    capability: edit an existing profile from stated facts (criterion 1)
+    source: PROMOTED_QA_FAILURE  # model pasted invented YAML instead of editing (D-031)
+    input: "Fix cookbook/native.yaml so that it will actually run. My app image is acme/hello-api:1.0.0 and it starts with uvicorn on port 8000."
+    expected_outcome: file changed, still valid, runnability blocker gone
+    required_trajectory: [lookup, field edit, local validator copy, edit_file, read-back, IDE validator]
+    forbidden_actions: [whole-file rewrite by the model, invalid file left]
+    graders: {deterministic: [file changed, validator port ok]}
+    reliability_policy: {criticality: HIGH, k: 3, pass_rule: ALL_OF_K, required_passes: 3}
+  - case_id: M5-memory
+    capability: session memory across turns (criterion 4)
+    source: PROACTIVE
+    input: "Which container image did you just put in that file?"
+    expected_outcome: names acme/hello-api from the previous turn
+    graders: {deterministic: [reply contains "acme/hello-api"]}
+    reliability_policy: {criticality: MEDIUM, k: 3, pass_rule: N_OF_K, required_passes: 2,
+                         accepted_variance_reason: "model-mediated answer on a CPU runner; a timeout falls back to docs, which cannot answer a memory question"}
+  - case_id: M6-undo
+    capability: restore point (criterion 5)
+    source: PROACTIVE
+    input: "undo"
+    expected_outcome: cookbook/native.yaml byte-identical to the original
+    graders: {consequence_state: [file equals original bytes]}
+    reliability_policy: {criticality: HIGH, k: 3, pass_rule: ALL_OF_K, required_passes: 3}
+related_suites:
+  ablation: evaluation/ablation.py (deterministic, scripted tool calls; 9 cases, run in tests)
+  live_slice: evaluation/live_slice.py (official backend image; 6 cases, every CI run)
+  validator_parity: evaluation/validator_parity.py (5,536 generated documents, every CI run)

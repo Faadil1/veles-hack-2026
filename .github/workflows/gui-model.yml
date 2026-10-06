@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
-    paths: ["evaluation/gui_e2e.py", ".github/workflows/gui-model.yml", "steward/**"]
+    paths: ["evaluation/gui_e2e.py", ".github/workflows/gui-model.yml", "steward/**", "evidence/reliability/CASES.yaml"]
 permissions:
   contents: write
 concurrency:
@@ -16,6 +16,10 @@ jobs:
   e2e:
     runs-on: ubuntu-latest
     timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        run: [1, 2, 3]  # k=3, predeclared in evidence/reliability/CASES.yaml
     env:
       MODEL: llama3.1:8b
       HYPERAI_API_KEY: ${{ secrets.HYPERAI_API_KEY }}
@@ -68,5 +72,6 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"; git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git fetch origin ci-evidence && git checkout -B ci-evidence origin/ci-evidence
-          rm -rf gui-model && mkdir -p gui-model && cp -r /tmp/gui-model/* gui-model/ && git add gui-model && git commit -m "gui-model ${GITHUB_SHA::7} ${ENDPOINT}" || true
-          for i in 1 2 3 4; do git push origin ci-evidence && break; sleep $((i*5)); git fetch origin ci-evidence && git rebase origin/ci-evidence; done
+          D=gui-model-k/${GITHUB_SHA::7}/run-${{ matrix.run }}
+          rm -rf "$D" && mkdir -p "$D" && cp -r /tmp/gui-model/* "$D"/ && git add "$D" && git commit -m "gui-model ${GITHUB_SHA::7} run ${{ matrix.run }} ${ENDPOINT}" || true
+          for i in 1 2 3 4 5 6; do git push origin ci-evidence && break; sleep $((i*7)); git fetch origin ci-evidence && git rebase origin/ci-evidence; done
