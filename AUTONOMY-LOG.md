@@ -296,6 +296,6 @@ Timezone of record: UTC (local Toronto = UTC-4).
 - **Reversible:** yes. **Human required:** no.
 
 ## D-036 — Timestamp correction (again)
-- **Timestamp:** 2026-10-06T16:10Z
+- **Timestamp:** 2026-10-06T16:08Z
 - **Observed:** entries D-031 to D-035, the depth review, FINAL-HANDOVER and CURRENT.yaml carried times up to 40 minutes ahead of the clock (written from estimates instead of `date -u`). Corrected to the commit times. Lesson already recorded once (timestamps from `date -u`); now also checked against `git log` before each log entry.
 - **Reversible:** n/a. **Human required:** no.
