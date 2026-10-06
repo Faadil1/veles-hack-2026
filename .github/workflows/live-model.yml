@@ -35,6 +35,7 @@ jobs:
           STEWARD_PROVIDER: openai_compatible
           OPENAI_BASE_URL: http://localhost:11434/v1
           STEWARD_MODEL: ${{ env.MODEL }}
+          STEWARD_LLM_TIMEOUT: "300"
         run: |
           SAFE=$(echo "$MODEL" | tr ':/' '__')
           python -m evaluation.scenarios --out "evidence/scenarios/${SAFE}-${GITHUB_SHA::7}.json" | tee /tmp/summary.txt

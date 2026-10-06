@@ -181,14 +181,14 @@ class Steward:
     def _docs_block(self, session: Session, text: str) -> str:
         """Retrieval by default: the most relevant official passages go into context on every turn, so answers
         stay grounded even when the model forgets to call search_docs."""
-        hits = self.docs.search(text, k=3, min_score=2.0)
+        hits = self.docs.search(text, k=2, min_score=2.5)
         if not hits:
             return ""
         session.receipt("docs_prefetch", hits=[c.citation for _, c in hits])
         lines = ["\n\nRelevant official HYPER-AI documentation for this message (cite as [D1], [D2]...; "
                  "answer from these when the user asks about HYPER-AI or the IDE):"]
         for i, (_, chunk) in enumerate(hits, 1):
-            lines.append(f"[D{i}] {chunk.citation}\n{chunk.text[:1200]}")
+            lines.append(f"[D{i}] {chunk.citation}\n{chunk.text[:900]}")
         return "\n\n".join(lines)
 
     async def _llm_turn(self, session: Session, text: str, ops: SafeOps) -> None:

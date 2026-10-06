@@ -85,7 +85,7 @@ class OpenAICompatibleLLM:
     loop keeps (text / tool_use / tool_result blocks) to and from the OpenAI wire format."""
 
     def __init__(self, base_url: str | None = None, model: str | None = None, api_key: str | None = None,
-                 max_tokens: int = 2048, timeout_s: float = 90.0, transport: Any = None):
+                 max_tokens: int = 2048, timeout_s: float | None = None, transport: Any = None):
         import httpx
 
         self.base_url = (base_url or os.environ.get("OPENAI_BASE_URL") or "").rstrip("/")
@@ -98,6 +98,7 @@ class OpenAICompatibleLLM:
         headers = {"Authorization": f"Bearer {key}"} if key else {}
         self.name = f"openai-compatible:{self.model}@{self.base_url}"
         self.max_tokens = max_tokens
+        timeout_s = timeout_s if timeout_s is not None else float(os.environ.get("STEWARD_LLM_TIMEOUT", "90"))
         self._client = httpx.AsyncClient(timeout=timeout_s, headers=headers, transport=transport)
         self._httpx = httpx
 
