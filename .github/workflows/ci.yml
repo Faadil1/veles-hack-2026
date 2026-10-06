@@ -39,7 +39,8 @@ jobs:
           labels: org.opencontainers.image.source=https://github.com/Faadil1/veles-hack-2026
       - name: Container smoke test (degraded mode, no secrets)
         run: |
-          docker run -d --name s -p 8000:8000 -e STEWARD_DISABLE_LLM=1 ghcr.io/faadil1/hyperion-steward:${{ github.sha }}
+          docker run -d --name s -p 8000:8000 -e STEWARD_DISABLE_LLM=1 ghcr.io/faadil1/hyperion-steward:${{ github.sha }} 2>/tmp/run.err \
+            || { echo "::error title=docker-run::$(tr '\n' ' ' </tmp/run.err) | images: $(docker images --format '{{.Repository}}:{{.Tag}}' | tr '\n' ' ')"; exit 1; }
           ok=0; for i in $(seq 1 30); do if curl -fs localhost:8000/health; then ok=1; break; fi; sleep 1; done
           if [ $ok -ne 1 ]; then echo "::error title=container-smoke::health never came up: $(docker logs s 2>&1 | tail -20 | tr '\n' ' ')"; exit 1; fi
           curl -fsN -X POST localhost:8000/chat -H 'content-type: application/json' \
