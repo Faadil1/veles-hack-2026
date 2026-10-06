@@ -9,12 +9,12 @@ Timezone of record: UTC (local Toronto = UTC-4).
 
 ## D-000 — Deadline and time budget
 - **Timestamp:** 2026-10-06T10:00Z
-- **Observed:** TAIKAI official timeline lists Hacking 2026-10-06 08:00 UTC, Project Submission Deadline 2026-10-07 21:59 UTC, Pitches 2026-10-08 07:00 UTC, four "Challenge N voting" tracks. Registration closed 2026-10-05 21:59 UTC. Rules page content not rendered without session (UNKNOWN).
+- **Observed (at ~10:00Z):** TAIKAI timeline listed Hacking 2026-10-06 08:00 UTC, Project Submission Deadline 2026-10-07 21:59 UTC, Pitches 2026-10-08 07:00 UTC, four "Challenge N voting" tracks. Registration closed 2026-10-05 21:59 UTC. Rules page content not rendered without session (UNKNOWN).
 - **Options:** (a) plan to the hard deadline; (b) plan to a frozen submission margin.
-- **Decision:** (b). Submission freeze 2026-10-07 19:00 UTC (15:00 Toronto), ~3h buffer for upload, video processing, form errors.
+- **Decision:** (b). ~~Submission freeze 2026-10-07 19:00 UTC~~ **SUPERSEDED by D-015: deadline 2026-10-07 14:59 UTC, freeze 2026-10-07 11:59 UTC.** 3 h buffer for upload, video processing, form errors.
 - **Justification:** Canon requires submission safety margin; platform uploads are a known failure point.
 - **Evidence:** https://taikai.network/en/eclipse-foundation/hackathons/veles-hack-2026/timeline (OBSERVED 2026-10-06T10:00Z)
-- **Expected consequence:** ~33h of build time.
+- **Expected consequence:** ~~~33h~~ superseded by D-015 (~25 h to freeze from 10:47Z).
 - **Reversible:** yes (margin can tighten only if submission is already validated).
 - **Human required:** YES, limited: confirm TAIKAI account registration status (registration closed). Not a product decision. Work continues in parallel.
 
@@ -95,7 +95,7 @@ Timezone of record: UTC (local Toronto = UTC-4).
 
 ## D-010 — Bundled human checkpoint
 - **Timestamp:** 2026-10-06T10:52Z
-- **Decision:** One message, three non-delegable items: (1) starter download (robots-refused source; human can open it), (2) LLM API key as GitHub secret (secret), (3) TAIKAI rules/judging text (account-gated, client-rendered).
+- **Decision:** One message, three non-delegable items: (1) starter download (robots-refused source; human can open it), (2) LLM API key as GitHub secret (secret) — **reclassified CONDITIONAL in D-016, request withdrawn**, (3) TAIKAI rules/judging text (account-gated, client-rendered).
 - **Product decision requested:** none.
 - **Human required:** YES.
 
@@ -128,3 +128,31 @@ Timezone of record: UTC (local Toronto = UTC-4).
 - **Observed:** first CI image job pushed, then failed the smoke test (exit 125, image not loaded locally).
 - **Decision:** build+load, smoke-test in degraded mode, push only on success.
 - **Reversible:** yes.
+
+---
+
+## D-015 — Deadline correction (binding)
+- **Timestamp:** 2026-10-06T10:47Z (clock-verified)
+- **Observed:** human reported the official timeline as Submission Deadline 2026-10-07 14:59 UTC, Pitches 2026-10-08 07:30 UTC. Re-fetched TAIKAI timeline at 10:46Z: **"10/7/2026 02:59 PM – Project Submission Deadline", "10/8/2026 07:30 AM – Pitches", "10/8/2026 10:00 AM – Award Ceremony"** (UTC). My 10:00Z fetch had returned 09:59 PM / 07:00 AM / 09:30 AM for the same three rows. Both observations are real; the published value changed or was mis-rendered earlier. The current, human-confirmed value binds.
+- **Decision:** official_deadline = **2026-10-07T14:59Z**; internal submission freeze = **2026-10-07T11:59Z** (3 h margin kept). All occurrences corrected in AUTONOMY-LOG, state/CURRENT.yaml, state/HANDOVER.yaml, docs/PRD.md, docs/CONDITIONAL-GATEWAY-REGISTRY.yaml, docs/CHALLENGE-REALITY.md, docs/CONCEPT-SELECTION.md, docs/PROJECT-CONTROL-PLANE.yaml.
+- **Consequence:** ~28 h to deadline, ~25 h to freeze from 10:47Z. Plan re-cut below. The freeze lands at 07:59 Toronto, so the human submit step must be scheduled for that morning.
+- **Lesson:** a deadline read once from a client-rendered page is not stable evidence. Re-verify the deadline at every milestone and before the freeze, and treat any change as binding toward the earlier value.
+- **Reversible:** only toward an earlier deadline. **Human required:** no.
+
+## D-016 — LLM key reclassified as CONDITIONAL dependency
+- **Timestamp:** 2026-10-06T10:47Z
+- **Observed:** no evidence yet that a personal key is needed. The starter, official rules or organiser resources may provide a model endpoint (UNKNOWN). Steward already runs without a model (degraded deterministic mode), and the model sits behind an interface.
+- **Decision:** withdraw the key request. Status `CONDITIONAL_DEPENDENCY`. A key is requested only if all three hold: (1) no hackathon-provided model/resource fits; (2) the chosen live path truly needs an external provider; (3) the secret's location is decided (Actions secret vs. runtime env of the judge-run container).
+- **Valid human checkpoints now:** (1) hyperion-starter ZIP; (2) authenticated TAIKAI Rules / Categories / FAQs and relevant Challenge 1 announcements.
+- **Engineering consequence:** make the model provider pluggable (Anthropic, OpenAI-compatible endpoint such as an organiser-provided or local server), selected by env, so whatever the starter specifies can be adopted without redesign.
+- **Reversible:** yes. **Human required:** no.
+
+## D-017 — Plan re-cut to the corrected clock
+- **Timestamp:** 2026-10-06T10:48Z
+- **Plan (UTC):**
+  - 10:48–14:00 Oct 6: provider-agnostic model layer; deepen core (multi-file awareness, explain/audit, intent-to-profile templates); scenario suite runnable with a real model.
+  - On starter arrival: adapter + Technical Reality Check + first live vertical slice (top priority, preempts everything).
+  - Oct 6 afternoon/evening: Post-Vertical-Slice Depth Gap Review and product exploitation loop.
+  - Oct 7 00:00–06:00: Engineering Quality pass, clean-room run, Reality Ledger, Evidence Graph.
+  - Oct 7 06:00–10:00: demo video, README, submission text, Q&A, Final Canonical Assurance.
+  - **Oct 7 11:59: freeze.** 11:59–14:59 human submission window and receipt verification.

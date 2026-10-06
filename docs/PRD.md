@@ -210,7 +210,7 @@ Submission-ready: per FINAL-CANONICAL-ASSURANCE-POLICY; MUST verified or limitat
 
 ## 14. Constraints
 
-- Deadline: 2026-10-07 21:59 UTC; internal boundary 19:00 UTC.
+- Deadline: 2026-10-07 14:59 UTC (corrected, D-015); internal freeze 2026-10-07 11:59 UTC.
 - Budget: LLM spend kept low; measured per turn.
 - Tools: Python 3, FastAPI, httpx, pydantic, PyYAML; Docker image built in GitHub Actions.
 - Environment: workspace cannot reach sponsor hosts; live runs need the starter + IDE backend (human-provided) or CI.
@@ -236,7 +236,7 @@ Submission-ready: per FINAL-CANONICAL-ASSURANCE-POLICY; MUST verified or limitat
 | ID | Risk | Severity | Mitigation |
 |---|---|---|---|
 | R-01 | No starter / no live IDE before deadline | High | Contract-faithful local stub (labelled LOCAL_STUB); honest PARTIAL claim |
-| R-02 | No LLM key | High | Deterministic paths still testable; live LLM path blocked until key |
+| R-02 | No model endpoint available for the live language path | High | Provider-agnostic layer (Anthropic or OpenAI-compatible, incl. organiser-provided/local); deterministic paths and degraded mode work without a model. Key is a CONDITIONAL dependency (D-016) |
 | R-03 | Starter imposes a different framework/endpoint | Medium | Keep core library independent of the HTTP layer |
 | R-04 | LLM produces wrong YAML | Medium | Local spec check + IDE validator + bounded repair |
 | R-05 | Crowded track | Medium | Differentiate on safety + validator loop, proven by ablation |
@@ -245,8 +245,8 @@ Submission-ready: per FINAL-CANONICAL-ASSURANCE-POLICY; MUST verified or limitat
 
 - External: HYPER-AI IDE backend (`/api/agent/file`, `/api/agent/validation/file`), IDE frontend action executor.
 - Repository: hyperion-starter (Eclipse GitLab) — pending human download.
-- Model/provider: Anthropic API (key pending as repo secret); provider abstraction allows OpenAI.
-- Human: starter zip, API key secret, rules text, final submission.
+- Model/provider: CONDITIONAL. Prefer any model/resource the hackathon provides (starter/rules UNKNOWN); otherwise Anthropic or an OpenAI-compatible endpoint selected by env. A personal key is requested only under D-016's three conditions.
+- Human: starter zip, authenticated rules text, final submission. (Model key: conditional, not requested.)
 
 ## 19. Open questions
 

@@ -22,7 +22,7 @@ Prize structure is identical per track (EUR 500 / 250), so the decision rests on
 
 ## 3. AI Commodity Test (Track 1)
 
-- **Event horizon:** ~36 h of build time.
+- **Event horizon:** ~31 h of total build window (08:00Z Oct 6 to 14:59Z Oct 7; corrected D-015).
 - **What a capable AI-assisted builder reproduces easily:** an SSE chat agent with tool calls mapped to the five actions plus doc RAG. Commodity exposure for that baseline: **HIGH**.
 - **What remains hard to copy — observed in the sponsor's own contract:**
   1. **First-match destructive actions (OBSERVED).** `delete_file`, `edit_file`, `delete_folder` accept a bare name and the IDE "uses the first match". `read_file` on the same ambiguous name returns **409 with all matches**. A naive agent can delete or overwrite the wrong file. The contract gives exactly the signal needed to prevent it.
@@ -59,5 +59,5 @@ Prize structure is identical per track (EUR 500 / 250), so the decision rests on
 ## 6. Open dependencies (human-bound, minimal)
 
 1. Hyperion starter (Eclipse GitLab; my fetchers are refused by robots.txt and I do not route around that).
-2. An LLM API key for the agent's model calls.
+2. ~~An LLM API key~~ — reclassified CONDITIONAL (D-016): only if no hackathon-provided model fits and the live path needs one.
 3. Official rules/judging text from TAIKAI (client-rendered, account-gated).

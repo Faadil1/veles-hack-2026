@@ -47,7 +47,7 @@ gateways:
     evidence: steward/ (core), tests/ 31 passing locally, CI test job green
   LIVE_DEPTH:
     status: BLOCKED
-    note: no live IDE backend (starter pending, D-010); no LLM key (pending). Everything so far is LOCAL / LOCAL_STUB.
+    note: no live IDE backend (starter pending, D-010); model endpoint is a CONDITIONAL dependency (D-016). Everything so far is LOCAL / LOCAL_STUB.
   EVIDENCE:
     status: ACTIVE
     note: evidence/ folder, Reality Ledger and Evidence Graph to be created at first runtime.
@@ -177,8 +177,9 @@ gateways:
   SUBMISSION_EXECUTION_ASSURANCE:
     status: ACTIVE
     submission_status: NOT_STARTED
-    official_deadline: 2026-10-07T21:59Z
-    event_specific_safety_margin: 3h (boundary 2026-10-07T19:00Z)
+    official_deadline: 2026-10-07T14:59Z  # corrected D-015, re-verified 2026-10-06T10:46Z
+    event_specific_safety_margin: 3h (freeze 2026-10-07T11:59Z)
+    deadline_reverification: required at each milestone and immediately before freeze (timeline changed once already)
     safety_margin_basis: >-
       TAIKAI form + possible video upload/processing + human-only final submit + platform not inspectable
       from workspace (form fields UNKNOWN) + overnight timezone gap for the human (Toronto).

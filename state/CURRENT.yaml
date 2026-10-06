@@ -2,20 +2,21 @@ project:
   id: veles_hack_2026
   repository: Faadil1/veles-hack-2026
   challenge: Veles Hack 2026 (Eclipse Foundation / TAIKAI)
-  benchmark: AUTONOMOUS_BUILD_BENCHMARK_V1_ROUND_1 (arm: Claude)
+  benchmark: "AUTONOMOUS_BUILD_BENCHMARK_V1_ROUND_1 (arm Claude)"
   canonical_baseline:
     repository: Faadil1/faadil-agent-system
     version: 0.1.57-submission-execution-assurance-promoted
     commit: 61f853a461634ca46746c63bbf6ced5fa05f8649
     benchmark_overlay_commit: 9b1db87
-  updated_at: 2026-10-06T10:27Z
+  updated_at: 2026-10-06T10:48Z
   lifecycle_stage: DELIVER
   judged_build_stage: EXECUTION (RUBRIC UNKNOWN pending human)
   track: CHALLENGE_1_HYPERION_HYPER_AI
   concept: HYPERION_STEWARD (provisional lock D-008; re-verify at Technical Reality Check)
   submission_execution_state: NOT_STARTED
-  deadline_utc: 2026-10-07T21:59Z
-  safety_boundary_utc: 2026-10-07T19:00Z
+  deadline_utc: 2026-10-07T14:59Z  # corrected D-015 (re-verified 2026-10-06T10:46Z)
+  safety_boundary_utc: 2026-10-07T11:59Z  # internal freeze, 3h margin
+  pitches_utc: 2026-10-08T07:30Z
   product_state:
     first_live_slice_proven: false
     reality: LOCAL + LOCAL_STUB only
@@ -27,7 +28,7 @@ project:
     - starter_route_and_ide_backend_runbook
   blockers:
     - HUMAN_REQUIRED starter zip (robots-refused source)
-    - HUMAN_REQUIRED LLM key as Actions secret
+    - CONDITIONAL_DEPENDENCY LLM provider/key (D-016; request only if starter/rules show no provided model and the live path needs one)
     - HUMAN_REQUIRED TAIKAI rules text
   exact_next_gate: TECHNICAL_REALITY_CHECK_AGAINST_REAL_IDE_BACKEND
   exact_next_action: >-

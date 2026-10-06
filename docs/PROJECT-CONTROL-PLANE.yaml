@@ -26,7 +26,7 @@ state:
   initialized_or_updated: true
 truth_boundary:
   observed:
-    - deadline_2026-10-07T21:59Z
+    - deadline_2026-10-07T14:59Z_corrected_D-015
     - four_tracks_and_owners
     - per_track_prizes
     - workspace_egress_limits

@@ -10,11 +10,11 @@ Last update: 2026-10-06T10:10Z.
 | Registration closed | 2026-10-05 21:59 | 17:59 |
 | Introduction | 2026-10-06 07:00 | 03:00 |
 | Hacking starts | 2026-10-06 08:00 | 04:00 |
-| **Project submission deadline** | **2026-10-07 21:59** | **17:59** |
-| Pitches | 2026-10-08 07:00 | 03:00 |
-| Award ceremony | 2026-10-08 09:30 | 05:30 |
+| **Project submission deadline** | **2026-10-07 14:59** | **10:59** |
+| Pitches | 2026-10-08 07:30 | 03:30 |
+| Award ceremony | 2026-10-08 10:00 | 06:00 |
 
-Internal submission safety boundary: **2026-10-07 19:00 UTC** (3 h before deadline). See AUTONOMY-LOG D-000.
+Internal submission freeze: **2026-10-07 11:59 UTC** (3 h before deadline). Corrected in AUTONOMY-LOG D-015: a fetch at ~10:00Z on 6 Oct showed 21:59 / 07:00 / 09:30 for these rows; the re-fetch at 10:46Z and the human's authenticated view show the values above, which bind.
 
 ## 2. Organisation and format (OBSERVED)
 
@@ -57,4 +57,4 @@ Internal submission safety boundary: **2026-10-07 19:00 UTC** (3 h before deadli
 
 ## 6. Workspace constraints (OBSERVED, AUTONOMY-LOG D-004)
 
-Reachable: npm, PyPI, api.anthropic.com, GitHub (session-scoped). Unreachable: TAIKAI, GitLab Eclipse, deploy-provider APIs, Docker Hub, sponsor hosts. No product LLM key in env.
+Reachable: npm, PyPI, api.anthropic.com, GitHub (session-scoped). Unreachable: TAIKAI, GitLab Eclipse, deploy-provider APIs, Docker Hub, sponsor hosts. No product LLM key in env (CONDITIONAL dependency, D-016).
