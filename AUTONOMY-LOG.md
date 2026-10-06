@@ -156,3 +156,29 @@ Timezone of record: UTC (local Toronto = UTC-4).
   - Oct 7 00:00–06:00: Engineering Quality pass, clean-room run, Reality Ledger, Evidence Graph.
   - Oct 7 06:00–10:00: demo video, README, submission text, Q&A, Final Canonical Assurance.
   - **Oct 7 11:59: freeze.** 11:59–14:59 human submission window and receipt verification.
+
+---
+
+## D-018 — Exercise the language layer with an open local model in CI (no personal key)
+- **Timestamp:** 2026-10-06T10:49Z
+- **Observed:** D-016 removed the key request; the language layer was untested with any real model.
+- **Options:** (a) wait for a key/organiser endpoint; (b) run an open model (Ollama) on the GitHub runner behind the OpenAI-compatible adapter.
+- **Decision:** (b). Scenario suite N1–N7 with deterministic pass/fail checks; reports pushed to `ci-evidence` branch.
+- **Boundary:** a 3B/7B local model is not the model judges will use. Results are BEHAVIOR evidence on the stub IDE, labelled as such, and are used to find product bugs, not to claim quality.
+- **Reversible:** yes. **Human required:** no.
+
+## D-019 — First live-model run: 2/7, safety held, two product bugs found
+- **Timestamp:** 2026-10-06T10:56Z
+- **Observed (qwen2.5:3b, code 01feac2):** N6, N7 pass; N1, N3, N4, N5 fail on model quality (invented YAML fields, misused tools); **N2: guard blocked the ambiguous delete correctly but the user received an empty reply** because the model said nothing. N3/N5: model passed a path to `check_profile`. No scenario caused workspace damage.
+- **Decision:** (1) guard and confirmation questions are now emitted deterministically by Steward and end the turn; (2) `check_profile` accepts a path; tool descriptions sharpened; (3) `create_profile` (D-020) removes hand-written YAML from the model's job.
+- **Evidence:** ci-evidence:scenarios/qwen2.5_3b-01feac2.json; fix commit f8c8f3d; tests 43 passing.
+- **Lesson:** a safety mechanism whose user-facing message depends on the model is only half a safety mechanism.
+- **Reversible:** yes. **Human required:** no.
+
+## D-020 — Deterministic profile builder
+- **Timestamp:** 2026-10-06T10:52Z
+- **Observed:** hand-writing ~40 typed, unit-bearing fields is where models fail (N1).
+- **Decision:** `create_profile` tool: model extracts parameters; `templates.py` emits a complete spec-correct profile with cookbook-aligned defaults visible in the YAML; still goes through SafeOps (validator, rollback).
+- **Evidence:** tests/test_templates.py.
+- **Reversible:** yes.
+- **Next:** re-run scenarios on 3B and 7B with f8c8f3d to measure the delta (product learning loop: feedback → decision → shipped delta → observed result).
