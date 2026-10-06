@@ -98,3 +98,33 @@ Timezone of record: UTC (local Toronto = UTC-4).
 - **Decision:** One message, three non-delegable items: (1) starter download (robots-refused source; human can open it), (2) LLM API key as GitHub secret (secret), (3) TAIKAI rules/judging text (account-gated, client-rendered).
 - **Product decision requested:** none.
 - **Human required:** YES.
+
+---
+
+## D-011 — Build the deterministic core before human dependencies land
+- **Timestamp:** 2026-10-06T10:16Z
+- **Observed:** starter, key and rules all pending human action.
+- **Options:** (a) wait; (b) build framework-independent core (spec, runnability, guard, journal, SSE) against the documented contract plus a contract-faithful LOCAL_STUB.
+- **Decision:** (b). HTTP layer mounts the plausible routes until the starter fixes the real one.
+- **Result (10:24Z):** 31 tests passing; CI test job green on GitHub runner.
+- **Reversible:** yes (adapter layer isolated). **Human required:** no.
+
+## D-012 — Spec ambiguity handled as warning, not error
+- **Timestamp:** 2026-10-06T10:20Z
+- **Observed:** native spec says securityLevel "1–3"; device spec and the native cookbook example use "high".
+- **Decision:** local checker warns; IDE validator decides. Avoids Steward blocking writes the platform accepts.
+- **Reversible:** yes, once live validator behaviour is seen.
+
+## D-013 — Ablation control made faithful after it flattered the baseline
+- **Timestamp:** 2026-10-06T10:25Z
+- **Observed:** first ablation run had the naive arm treat a 409 as "absent" and create a new file, which under-counted naive damage in S2.
+- **Decision:** naive/validator-only arms now edit whenever the name exists (as the real first-match IDE would). S7 models the realistic case where only the backend API is unreachable.
+- **Result:** A 1/7, B 1/7, C 7/7 acceptable; files damaged or lost A=4, B=4, C=0. Finding: validator-only does not reduce damage; guard + journal carry the value.
+- **Evidence:** evidence/ablation/ (TECHNICAL_PROOF, LOCAL_STUB, scripted tool calls).
+- **Reversible:** n/a. **Human required:** no.
+
+## D-014 — CI ordering: smoke-test before publishing
+- **Timestamp:** 2026-10-06T10:26Z
+- **Observed:** first CI image job pushed, then failed the smoke test (exit 125, image not loaded locally).
+- **Decision:** build+load, smoke-test in degraded mode, push only on success.
+- **Reversible:** yes.

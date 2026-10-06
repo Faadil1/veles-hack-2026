@@ -8,21 +8,29 @@ project:
     version: 0.1.57-submission-execution-assurance-promoted
     commit: 61f853a461634ca46746c63bbf6ced5fa05f8649
     benchmark_overlay_commit: 9b1db87
-  updated_at: 2026-10-06T10:12Z
-  lifecycle_stage: QUALIFY
-  judged_build_stage: RUBRIC
-  track: NOT_SELECTED
-  concept: NOT_LOCKED
+  updated_at: 2026-10-06T10:27Z
+  lifecycle_stage: DELIVER
+  judged_build_stage: EXECUTION (RUBRIC UNKNOWN pending human)
+  track: CHALLENGE_1_HYPERION_HYPER_AI
+  concept: HYPERION_STEWARD (provisional lock D-008; re-verify at Technical Reality Check)
   submission_execution_state: NOT_STARTED
   deadline_utc: 2026-10-07T21:59Z
   safety_boundary_utc: 2026-10-07T19:00Z
+  product_state:
+    first_live_slice_proven: false
+    reality: LOCAL + LOCAL_STUB only
+    tests_local: 31 passing
+    ablation: evidence/ablation/ABLATION.md (stub, scripted) C=7/7 acceptable, A=B=1/7
   open_unknowns:
     - judging_criteria
     - deliverables_video_deck
-    - rules_text
-    - track_starter_repos_2_3_4
-  blockers: []
-  exact_next_gate: TRACK_AND_CONCEPT_QUALIFICATION
+    - starter_route_and_ide_backend_runbook
+  blockers:
+    - HUMAN_REQUIRED starter zip (robots-refused source)
+    - HUMAN_REQUIRED LLM key as Actions secret
+    - HUMAN_REQUIRED TAIKAI rules text
+  exact_next_gate: TECHNICAL_REALITY_CHECK_AGAINST_REAL_IDE_BACKEND
   exact_next_action: >-
-    Finish reading required canon (hackathon profile, lifecycle, product reality, final assurance),
-    complete track feasibility comparison, run Winning Intelligence v2 / collision checks, then Concept Lock.
+    On starter arrival: adapt HTTP route and Dockerfile to the starter contract, run the IDE backend (CI runner if not
+    runnable here), confirm 409/validator/timing assumptions A-02/A-03, run first live vertical slice, then
+    Post-Vertical-Slice Depth Gap Review. Until then: deepen deterministic core, live LLM path in CI once key exists.
