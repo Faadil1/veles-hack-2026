@@ -1,0 +1,52 @@
+# Claim -> evidence -> runtime binding (EVIDENCE-GRAPH-POLICY). Runtime revision = last commit touching the image
+# contents (Dockerfile, requirements.txt, steward/). Updated 2026-10-06T16:43Z.
+runtime:
+  image: docker.io/faadil12/hyperion:latest
+  revision: d00df7b63dcf8aca7e11fdb72572b6cfe40b975c
+  verified_digests:
+    - sha256:8ca152236ead48db051706ef76afcc1b95faebc57502e1069b2ca6aa1732bde8  # evidence/published-image/d00df7b (superseded build)
+    - sha256:438f8bfab6da59254fbcd7361a0fe6e707620c3d05445edc582d793b04268afb  # current latest; evidence/published-image/d00df7b-438f8bf
+  official_ide_images:
+    gui: donmichael/ide-gui:latest sha256:a805e9d3acf827e251016c0bbe5f7608062b71c50f66b478ff804d7ba50c7053
+    backend: donmichael/ide-backend:latest sha256:3b2906879ea72dc4ac386745502ec2baa831640a9f0956c2dcf40c9c907ba906
+claims:
+  - claim: "The official create example works in the official IDE: file created, opened, validated"
+    class: LIVE images in CI (browser); model llama3.1 8B on Ollama
+    evidence: [evidence/published-image/d00df7b/model/gui-e2e-model.json (M2), evidence/reliability/LEDGER.yaml (M2 3/3)]
+    runtime_revision: d00df7b
+  - claim: "Irrelevant queries are declined"
+    class: LIVE images in CI
+    evidence: [evidence/published-image/d00df7b/no-model/gui-e2e-deterministic.json (G1), tests/test_guardrail.py]
+    runtime_revision: d00df7b
+  - claim: "Answers grounded in HYPER-AI documents"
+    class: LIVE images in CI; one of three k-runs used the cited-docs fallback after a CPU timeout
+    evidence: [evidence/reliability/LEDGER.yaml (M1), steward/docs/]
+    runtime_revision: d00df7b
+  - claim: "Session memory across turns"
+    class: LIVE images in CI
+    evidence: [evidence/reliability/LEDGER.yaml (M5 3/3 with truth constraint)]
+    runtime_revision: d00df7b
+  - claim: "Ambiguous names: nothing touched, every path listed"
+    class: LIVE images in CI
+    evidence: [evidence/reliability/LEDGER.yaml (M3), evidence/live-slice/ci-official-image-d6924d9.json (L3)]
+    runtime_revision: d00df7b
+  - claim: "Undo restores identical bytes"
+    class: LIVE backend image
+    evidence: [evidence/live-slice/ci-official-image-d6924d9.json, evidence/reliability/LEDGER.yaml (M6)]
+    runtime_revision: d00df7b
+  - claim: "0 disagreements with the IDE validator over 5,536 profiles"
+    class: LIVE (validator code copied from the official image, run under Node in CI)
+    evidence: [evidence/validator-parity/ci-official-image-d6924d9.json, CI job real-ide on every commit]
+    runtime_revision: d00df7b (hyperai_schema.py unchanged since d6924d9)
+  - claim: "Steward 9/9 safe outcomes and 0 false success claims; naive 1/9 and 5"
+    class: TECHNICAL (stub mirroring the shipped IDE, scripted tool calls)
+    evidence: [evidence/ablation/ABLATION.md, tests/test_ablation_regression.py]
+    runtime_revision: d00df7b
+  - claim: "Runs as the organiser runs it"
+    class: LIVE (clean pull from Docker Hub in CI)
+    evidence: [evidence/published-image/d00df7b/]
+    runtime_revision: d00df7b
+not_claimed:
+  - Quality on the organiser's legion1 server (not measured)
+  - Runtime success of deployed profiles on HYPER-AI infrastructure
+  - Any user adoption

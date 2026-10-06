@@ -1,196 +1,250 @@
-version: 0.1.0
+version: 0.2.0
 project: VELES_HACK_2026
-updated_at: 2026-10-06T10:27Z
-canonical_baseline: faadil-agent-system@61f853a461634ca46746c63bbf6ced5fa05f8649 (0.1.57)
-allowed_statuses: [PROVEN, ACTIVE, BLOCKED, PENDING, N/A, UNKNOWN]
+updated_at: 2026-10-06T16:43Z
+canonical_baseline: faadil-agent-system@61f853a (0.1.57), reconciled at sweep time with main@2ef16fd (0.1.58), D-035
+allowed_statuses:
+- PROVEN
+- SATISFIED
+- N/A_WITH_REASON
+- ACTIVE
+- AWAITING_HUMAN_APPROVAL
+- BLOCKED
+- PENDING
+- UNKNOWN
 rule: every_registered_or_triggered_gate_is_explicit__nothing_is_silently_omitted
-note: >-
-  Status vocabulary follows the canonical project registries (ryo-chan-2026 precedent). PENDING = triggered later
-  by a known condition. N/A always carries a reason. A gate is never deleted; it changes status.
-
+note: Status vocabulary follows the canonical project registries (ryo-chan-2026 precedent). PENDING = triggered later by a
+  known condition. N/A always carries a reason. A gate is never deleted; it changes status.
 gateways:
   CORE_LIFECYCLE:
-    status: ACTIVE
+    status: SATISFIED
+    evidence: QUALIFY to AUDIT executed (AUTONOMY-LOG D-000..D-037); current stage AUDIT. EXPAND (post-mortem) follows the
+      event by definition.
     sequence: QUALIFY__DECIDE__DESIGN__DELIVER__AUDIT__EXPAND
-    current: DELIVER
+    current: AUDIT
   JUDGED_BUILD_CYCLE:
-    status: ACTIVE
+    status: SATISFIED
+    evidence: 'RUBRIC..Q&A covered: README criteria table, deck, docs/pitch/PITCH.md (script + Q&A).'
     sequence: RUBRIC__PAIN__PROBLEM__NEGATIVE_EVENT__DIFFERENTIATOR__EXECUTION__LIVE_DEPTH__EVIDENCE__STORY__DEMO__Q_AND_A
-
   SYSTEM_CONTROL_PLANE_BOOTSTRAP:
     status: PROVEN
     evidence: docs/PROJECT-CONTROL-PLANE.yaml, state/CURRENT.yaml, state/HANDOVER.yaml
   CANONICAL_BASELINE_PIN:
-    status: PROVEN
-    evidence: state/CURRENT.yaml canonical_baseline; AUTONOMY-LOG D-003
-    note: central main advanced to c4404a1; delta not adopted (benchmark fairness pin). Classify only if a material transition depends on it.
+    status: SATISFIED
+    evidence: 'Pinned 61f853a (0.1.57). Central main 2ef16fd (0.1.58) reconciled at sweep time: delta = Eval-Driven Reliability
+      v1 (adopted, D-035) + ARC project files (not applicable). Status RECONCILED.'
   RULES_ELIGIBILITY_SUBMISSION_REQUIREMENTS:
     status: PROVEN
-    evidence: docs/CHALLENGE-REALITY.md §4 (TAIKAI rules + FAQ pasted by human; Challenge 1 PDF). Repo public, created in-event, Apache-2.0.
+    evidence: docs/CHALLENGE-REALITY.md §4; public repo created in-event; Apache-2.0; image faadil12/hyperion:latest on Docker
+      Hub.
   RUBRIC:
     status: PROVEN
-    evidence: Challenge 1 PDF "Expectations" 1-5; mapped in README "Evaluation criteria" table and deck slide 8.
+    evidence: Challenge 1 PDF expectations 1-5 mapped in README and deck slide 8.
   PAIN:
     status: PROVEN
-    evidence: GUI bundle (fire-and-forget actions, silent no-ops) OBSERVED in donmichael/ide-gui:latest; D-026.
+    evidence: Fire-and-forget actions and silent no-ops OBSERVED in donmichael/ide-gui:latest (D-026); ablation false-claim
+      metric; PRD v0.3 §4.
   PROBLEM:
-    status: ACTIVE
-    evidence: docs/PRD.md §3-4
+    status: PROVEN
+    evidence: Fire-and-forget actions and silent no-ops OBSERVED in donmichael/ide-gui:latest (D-026); ablation false-claim
+      metric; PRD v0.3 §4.
   NEGATIVE_EVENT:
     status: PROVEN
-    evidence: an agent reports done while nothing changed (ambiguous name, existing file, closed tab); ablation S1,S2,S7,S8,S9 false claims for naive arm. First-match claim WITHDRAWN (D-026).
+    evidence: Fire-and-forget actions and silent no-ops OBSERVED in donmichael/ide-gui:latest (D-026); ablation false-claim
+      metric; PRD v0.3 §4.
   DIFFERENTIATOR:
     status: PROVEN
-    evidence: evidence/ablation/ABLATION.md A=B=1/9, C=9/9, false claims 5/5/0; validator parity 0/5,536 on official image code.
+    evidence: Ablation 9/9 vs 1/9, false claims 0 vs 5; validator parity 0/5,536 on the official image's code; read-back verification.
   EXECUTION:
     status: PROVEN
-    evidence: 97 tests; CI test, real-ide, gui-e2e, image jobs green.
+    evidence: 103 tests; CI jobs test, real-ide, gui-e2e, image all green.
   LIVE_DEPTH:
-    status: ACTIVE
-    evidence: live slice 6/6 on official backend image; GUI e2e 4/4 official images; model e2e (llama3.1 8B) running. legion1 path BLOCKED on team key (HUMAN_REQUIRED).
+    status: PROVEN
+    evidence: 'Official GUI + backend images driven by a browser: deterministic 4/4; llama3.1 8B k=3 21/21 on candidate d00df7b;
+      clean pull of faadil12/hyperion 4/4 + 7/7 (evidence/published-image/d00df7b).'
   EVIDENCE:
-    status: ACTIVE
-    evidence: evidence/, ci-evidence branch (digests + commit SHAs), docs/REALITY-LEDGER.md.
+    status: PROVEN
+    evidence: evidence/, branch ci-evidence with commit SHAs and image digests; docs/EVIDENCE-GRAPH.yaml.
   STORY:
-    status: ACTIVE
-    evidence: README "The problem we found in the shipped IDE"; deck slides 5-6.
+    status: PROVEN
+    evidence: README 'The problem we found in the shipped IDE'; deck slides 5-6.
   DEMO:
-    status: ACTIVE
-    evidence: browser-driven screenshots of the official IDE (ci-evidence:gui-e2e); model demo pending gui-model-e2e.
+    status: PROVEN
+    evidence: Browser-driven screenshots and 8x time-lapse of the official IDE (evidence/gui-model); deterministic demo path
+      needs no model.
   Q_AND_A:
-    status: ACTIVE
-    note: Q&A prep in docs/pitch/ before freeze.
-
+    status: PROVEN
+    evidence: docs/pitch/PITCH.md Q&A table.
   OPPORTUNITY_INTELLIGENCE_HOI:
-    status: ACTIVE
-    note: HOI repo (dc030e5) to be read before Concept Lock.
+    status: N/A_WITH_REASON
+    reason: Opportunity selected and registered by the human before the run (ROUND-1 SELECTED_AND_REGISTERED); in-event track
+      choice recorded in docs/CONCEPT-SELECTION.md and D-007.
   AUTHORIZATION_CHIEF_OF_STAFF:
-    status: ACTIVE
-    note: benchmark ROUND-1 records SELECTED_AND_REGISTERED by human; Chief of Staff read only as routed.
+    status: PROVEN
+    evidence: benchmark ROUND-1 SELECTED_AND_REGISTERED; human delegation brief.
   PRE_BUILD_REALITY_GATE:
-    status: ACTIVE
+    status: SATISFIED
+    evidence: docs/CHALLENGE-REALITY.md; D-004 workspace egress.
   TRACK_FEASIBILITY_FROM_WORKSPACE:
-    status: ACTIVE
-    note: workspace egress limits (D-004) make tracks needing organiser-hosted infra unverifiable from here.
+    status: SATISFIED
+    evidence: docs/CONCEPT-SELECTION.md §1; CI used as live environment (D-009).
   PROTOTYPE_KILLER_SIMPLER_ALTERNATIVE:
-    status: ACTIVE
+    status: PROVEN
+    evidence: 'The obvious lane (chat + 5 tools + RAG) is the ablation''s naive arm: 1/9 acceptable, 5 false claims.'
   COMPETITIVE_NOVELTY_KILL_GATE:
-    status: ACTIVE
+    status: SATISFIED
+    evidence: Novelty rests on observed shipped-IDE behaviour, validator parity and read-back verification, none of which
+      the starter or tutorial provide.
   INTERNAL_PORTFOLIO_COLLISION:
-    status: PENDING
-    note: check only if the locked concept resembles a prior Faadil build; prior repos not preloaded.
+    status: N/A_WITH_REASON
+    reason: 'Benchmark rule: prior Faadil projects not preloaded; concept derived from the challenge contract. The receipts
+      timeline is a generic observability pattern, not reused code.'
   EXTERNAL_CURRENT_COLLISION:
-    status: PENDING
+    status: N/A_WITH_REASON
+    reason: Competing Challenge 1 submissions are not public before the deadline; nothing to compare against.
   DEEP_PROBLEM_INTELLIGENCE:
-    status: ACTIVE
+    status: PROVEN
+    evidence: Shipped GUI bundle and backend source read (D-024..D-026).
   WINNING_INTELLIGENCE_V2:
-    status: ACTIVE
-    trigger_reason: AI-era commodity exposure is material (at least one track is an LLM assistant).
+    status: SATISFIED
+    evidence: docs/CONCEPT-SELECTION.md §2-3; evidence-backed non-commodity advantage = observed contract + parity + read-back
+      (ablation, live runs).
   AI_COMMODITY_TEST:
-    status: ACTIVE
+    status: SATISFIED
+    evidence: docs/CONCEPT-SELECTION.md §3; commodity baseline measured as ablation arm A.
   CREATIVE_DIVERGENCE:
-    status: PENDING
+    status: SATISFIED
+    evidence: Five concept lanes, docs/CONCEPT-SELECTION.md §4.
   CAUSAL_MECHANISM_ASSURANCE:
     status: PROVEN
-    trigger_reason: guard/validator/read-back/rollback/undo are the differentiator
-    evidence: ablation (stub mirroring shipped GUI) + live slice on official backend image.
+    evidence: Ablation (same tool calls, three action layers) + live slice on the official backend image.
   REFERENCE_INTELLIGENCE:
-    status: PENDING
-    note: lookup when architecture domain is known.
+    status: N/A_WITH_REASON
+    reason: The references are the organiser's own starter and IDE images, used directly; no external reference architecture
+      was needed.
   OSSIUM_OSS_DISCOVERY:
-    status: PENDING
-
+    status: N/A_WITH_REASON
+    reason: Minimal dependencies (FastAPI, httpx, PyYAML); the validator is ported from the sponsor's code, not sourced from
+      OSS.
   SPONSOR_NATIVE_ADVANTAGE:
-    status: PENDING
+    status: PROVEN
+    evidence: Uses the sponsor's validator rules, backend API, documents and model-server defaults.
   SPONSOR_REMOVAL_TEST:
-    status: BLOCKED
-    note: requires locked architecture
+    status: SATISFIED
+    evidence: Removing the HYPER-AI contract removes the product's value (it is a gate on the IDE's own actions); sponsor-native
+      by construction.
   TECHNICAL_REALITY_CHECK:
     status: PROVEN
-    evidence: A-02 409 confirmed live; A-03 resolved (actions fire-and-forget, read-back verification); validator contract ported with parity. D-024..D-026.
+    evidence: A-02 409 confirmed live; A-03 resolved (fire-and-forget + read-back); validator parity (D-024..D-026).
   TRUTH_BOUNDARY:
-    status: ACTIVE
+    status: PROVEN
+    evidence: docs/REALITY-LEDGER.md; withdrawn claims logged (D-026, D-033, D-037).
   NEGATIVE_PATH:
-    status: ACTIVE
-    evidence: tests/test_behaviour.py (ambiguity, decline, backend down, model failure, traversal)
+    status: PROVEN
+    evidence: tests (ambiguity, decline, backend down, GUI not applying actions, model failure, traversal, typo path); ablation
+      S1-S9.
   EVIDENCE_INTEGRITY:
-    status: ACTIVE
+    status: PROVEN
+    evidence: Grader weakness found and tightened, never loosened (D-037); timestamp corrections (D-015, D-036).
   CLAIM_RUNTIME_EVIDENCE_GRAPH:
-    status: ACTIVE
-    evidence: docs/REALITY-LEDGER.md maps each claim to evidence file, class and commit.
+    status: PROVEN
+    evidence: docs/EVIDENCE-GRAPH.yaml binds each claim to evidence, runtime revision d00df7b and image digest.
   RUNTIME_COMMIT_BINDING:
-    status: ACTIVE
-    evidence: CI evidence carries commit SHA and image digests (real-ide/commit.txt, gui-e2e/images.txt). Docker Hub image digest pending secrets.
+    status: PROVEN
+    evidence: Image label org.opencontainers.image.revision = last runtime commit d00df7b; clean pull verified it (evidence/published-image/d00df7b).
   DETERMINISTIC_DEMO:
-    status: PENDING
+    status: PROVEN
+    evidence: gui_e2e deterministic suite 4/4 on the pulled image without a model.
   FAILURE_RECOVERY:
-    status: ACTIVE
-    evidence: rollback on validator rejection, undo journal, degraded mode (tests)
+    status: PROVEN
+    evidence: Rollback, undo (identical bytes, live), unconfirmed-change reporting, docs fallback on model timeout (observed
+      live).
   EXTERNAL_DEPENDENCY_FAILURE:
-    status: ACTIVE
-    evidence: backend-unreachable and model-failure tests; live check PENDING
+    status: PROVEN
+    evidence: Model timeout fallback observed in the official GUI; backend-down and GUI-closed paths tested; no-model mode
+      verified on the pulled image.
   REAL_USER_OPERATOR_LOOP:
-    status: PENDING
+    status: N/A_WITH_REASON
+    reason: Hackathon prototype judged by the organisers; no user or adoption claim is made.
   EXTERNAL_USER_OPERATOR_EVIDENCE:
-    status: PENDING
+    status: N/A_WITH_REASON
+    reason: As above; the organiser's evaluation run is the first external use.
   TIME_TO_FIRST_VALUE:
-    status: PENDING
+    status: PROVEN
+    evidence: 'Official create example: file created, validated and opened in 4 s in the official GUI.'
   OPERATIONAL_ECONOMICS:
-    status: PENDING
-    note: material if an LLM API is in the core loop.
+    status: SATISFIED
+    evidence: Model is organiser-provided; guardrail and deterministic action route avoid model calls; context fitted to 8k.
   SHARED_PRODUCT_CORE:
-    status: PENDING
+    status: N/A_WITH_REASON
+    reason: Single surface (the IDE panel); no shared core across products.
   REALITY_LEDGER:
-    status: ACTIVE
+    status: PROVEN
+    evidence: docs/REALITY-LEDGER.md
   OBSERVABILITY_RECEIPTS:
-    status: ACTIVE
-    evidence: per-session receipts + journal at GET /receipts/{user_id}
+    status: PROVEN
+    evidence: GET /receipts/{user_id}/view; effect, validator and model receipts.
   JUDGE_OPERATOR_SELF_SERVE:
-    status: PENDING
+    status: PROVEN
+    evidence: README run line = the organiser's procedure; reproduced by the published-image workflow from a clean pull.
   SETUP_REPRODUCIBILITY:
-    status: PENDING
+    status: PROVEN
+    evidence: Clean clone (5fea8f8) and clean pull (published-image workflow).
   CLEAN_ROOM_CORE_PATH:
-    status: PENDING
+    status: PROVEN
+    evidence: Clean pull + official IDE + browser, with and without a model.
   POST_VERTICAL_SLICE_DEPTH_GAP_REVIEW:
-    status: N/A
-    reason: no first live vertical slice yet
+    status: PROVEN
+    evidence: docs/DEPTH-GAP-REVIEW.md
   PRODUCT_EXPLOITATION_LOOP:
-    status: PENDING
-    activation_condition: first_live_vertical_slice
+    status: PROVEN
+    evidence: 'Capability deltas after the first slice: read-back verification, deterministic action route, edit_profile,
+      near-miss recovery (D-026, D-031, D-037).'
   ACTION_DEPTH_SELECTION:
-    status: PENDING
+    status: SATISFIED
+    evidence: Highest safe tier = real writes in the IDE workspace with confirmation and undo. Deployment stays with the IDE's
+      Deploy button (human; needs HYPER-AI infrastructure).
   LIVING_PRD_PBPD:
-    status: ACTIVE
-    evidence: docs/PRD.md v0.1 (PRD_VALIDATED_WITH_OPEN_DEPENDENCIES)
+    status: PROVEN
+    evidence: docs/PRD.md v0.3
   SPEC_KIT:
-    status: PENDING
-    note: conditional; activate only if spec/convergence protocol adds material value.
+    status: N/A_WITH_REASON
+    reason: No spec/convergence protocol needed; PRD + tests + ablation cover the contract.
   ENGINEERING_QUALITY_ASSURANCE:
-    status: PENDING
-    activation_condition: before BUILD_CANDIDATE_READY (material AI-written code exists)
+    status: SATISFIED
+    evidence: 'docs/assurance/ENGINEERING-QUALITY.md: ruff F/B clean, 103 tests, CI; 40 style findings accepted as non-functional
+      debt.'
   TRACE_DESIGN_ASSURANCE:
-    status: PENDING
-    activation_condition: evaluator-facing interface exists
+    status: SATISFIED
+    evidence: The UI is the organiser's GUI; Steward's surface is its replies. Plain-text output fixed after observing raw
+      markdown in the panel (D-029); copy reviewed on screenshots.
   JUDGE_MEDIA_GENERATION:
-    status: UNKNOWN
-    note: depends on whether a demo video is required (rules UNKNOWN). Plan for a video regardless.
+    status: N/A_WITH_REASON
+    reason: Pitch is live, free format; no video deliverable required. A CI time-lapse of the official IDE exists as backup.
   DEPLOYMENT_POLICY:
-    status: ACTIVE
-    note: deploy route = container image on GHCR built/smoke-tested/pushed by CI. Runtime target is the HYPER-AI IDE (local backend), not a hosted URL.
+    status: PROVEN
+    evidence: faadil12/hyperion:latest on Docker Hub, pushed by CI after smoke and wired tests; kept stable when the runtime
+      revision is unchanged.
   SUBMISSION_EXECUTION_ASSURANCE:
-    status: ACTIVE
-    submission_status: NOT_STARTED
-    official_deadline: 2026-10-07T14:59Z  # corrected D-015, re-verified 2026-10-06T10:46Z
+    status: SATISFIED
+    evidence: docs/SUBMISSION.md (text, organiser message, steps); deadline re-verified against the human's TAIKAI view.
+    official_deadline: 2026-10-07T14:59Z
     event_specific_safety_margin: 3h (freeze 2026-10-07T11:59Z)
     deadline_reverification: required at each milestone and immediately before freeze (timeline changed once already)
-    safety_margin_basis: >-
-      TAIKAI form + possible video upload/processing + human-only final submit + platform not inspectable
+    safety_margin_basis: TAIKAI form + possible video upload/processing + human-only final submit + platform not inspectable
       from workspace (form fields UNKNOWN) + overnight timezone gap for the human (Toronto).
+    submission_status: READY_AWAITING_HUMAN_SUBMIT
   FINAL_CANONICAL_ASSURANCE:
-    status: PENDING
-    activation_condition: BUILD_CANDIDATE_READY; Project Finisher b5ea200
+    status: SATISFIED
+    evidence: docs/assurance/FINAL-CANONICAL-ASSURANCE-RECEIPT.yaml, validated with faadil-project-finisher-agent b5ea200
+      validator.
   PROTECTED_SUBMISSION:
-    status: PENDING
+    status: AWAITING_HUMAN_APPROVAL
+    reason: TAIKAI submit and organiser message are human actions.
     owner: human
   POST_MORTEM:
     status: PENDING
+    reason: After the pitches (2026-10-08).
+  EVAL_DRIVEN_RELIABILITY:
+    status: PROVEN
+    evidence: 'evidence/reliability/CASES.yaml (predeclared), LEDGER.yaml: candidate d00df7b 21/21 over k=3, baseline 2e62095
+      20/21; 3 failures promoted (D-031 x2, D-037).'

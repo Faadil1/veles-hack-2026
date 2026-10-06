@@ -1,0 +1,308 @@
+version: 1.0.0
+receipt_type: FINAL_CANONICAL_ASSURANCE
+generated_at: 2026-10-06T16:50Z
+project:
+  project_id: veles_hack_2026
+  repository: Faadil1/veles-hack-2026
+  project_type: hackathon (Veles Hack 2026, Challenge 1 HYPER-AI)
+  terminal_target: SUBMISSION
+candidate:
+  commit_sha: d00df7b63dcf8aca7e11fdb72572b6cfe40b975c
+  runtime:
+    required: true
+    url: docker.io/faadil12/hyperion:latest
+    deployment_identity: faadil12/hyperion@sha256:438f8bfab6da59254fbcd7361a0fe6e707620c3d05445edc582d793b04268afb
+    deployed_commit_sha: d00df7b63dcf8aca7e11fdb72572b6cfe40b975c
+    commit_match: true
+    not_required_reason: ''
+canonical_context:
+  central_repository: Faadil1/faadil-agent-system
+  central_commit_sha: 2ef16fdcf2166385d08676c8dd680962cc3745e2
+  central_current_pointer: state/CURRENT.yaml
+  central_handover_pointer: state/HANDOVER.yaml
+  project_current_pointer: state/CURRENT.yaml
+  project_handover_pointer: state/HANDOVER.yaml
+  prd_pointer: docs/PRD.md (v0.3)
+  applicable_policy_inventory:
+  - SYSTEM-CONTROL-PLANE-POLICY.yaml
+  - PROJECT-LIFECYCLE-COMPLETENESS-POLICY.yaml
+  - PRODUCT-REALITY-POLICY.yaml
+  - EVIDENCE-GRAPH-POLICY.yaml
+  - FINAL-CANONICAL-ASSURANCE-POLICY.yaml (1.0.2)
+  - EVAL-DRIVEN-RELIABILITY-POLICY.yaml (1.0.0, adopted at sweep, D-035)
+  - ENGINEERING-QUALITY-ASSURANCE-POLICY.yaml
+  - DEPLOYMENT-POLICY.yaml
+  - WINNER-INTELLIGENCE-CAUSAL-MECHANISM-ASSURANCE-POLICY.yaml
+  - project-profiles/hackathon.yaml
+triggered_obligations:
+- id: CANONICAL_BASELINE_RECONCILIATION
+  owner: project_finisher
+  status: SATISFIED
+  material: true
+  evidence_pointers:
+  - AUTONOMY-LOG.md D-035
+  - docs/CONDITIONAL-GATEWAY-REGISTRY.yaml CANONICAL_BASELINE_PIN
+  reason: 'Pin 61f853a (0.1.57) vs central 2ef16fd (0.1.58): delta is Eval-Driven Reliability v1 (adopted) and ARC project
+    files (not applicable). Status RECONCILED.'
+- id: EVAL_DRIVEN_RELIABILITY
+  owner: pbpd_or_router_resolved_existing_owner
+  status: PROVEN
+  material: true
+  evidence_pointers:
+  - evidence/reliability/CASES.yaml
+  - evidence/reliability/LEDGER.yaml
+  - evidence/reliability/LEDGER-baseline-2e62095.yaml
+  reason: Predeclared k=3 cases; candidate 21/21 (HIGH 15/15); baseline 20/21; failures promoted (D-031 x2, D-037); deterministic
+    graders only.
+- id: CHALLENGE_EVALUATION_CRITERIA_1_TO_5
+  owner: pbpd
+  status: PROVEN
+  material: true
+  evidence_pointers:
+  - README.md criteria table
+  - evidence/published-image/d00df7b-438f8bf/
+  reason: Each criterion exercised on the pulled evaluation image behind the official IDE images.
+- id: SUBMISSION_PACKAGE
+  owner: pbpd
+  status: SATISFIED
+  material: true
+  evidence_pointers:
+  - docs/SUBMISSION.md
+  - docs/pitch/Hyperion-Steward-VelesHack.pptx
+  - docs/pitch/PITCH.md
+  reason: Project text, organiser message, deck on the official template, pitch script and Q&A ready.
+assurance:
+  lifecycle_completeness:
+    status: SATISFIED
+    material: true
+    evidence_pointers:
+    - AUTONOMY-LOG.md
+    - docs/CONDITIONAL-GATEWAY-REGISTRY.yaml CORE_LIFECYCLE
+    reason: QUALIFY to AUDIT executed; EXPAND is post-event.
+  conditional_gateway_registry:
+    status: SATISFIED
+    material: true
+    evidence_pointers:
+    - docs/CONDITIONAL-GATEWAY-REGISTRY.yaml
+    reason: '66 gates: 38 PROVEN, 16 SATISFIED, 10 N/A with reason; PROTECTED_SUBMISSION awaits the human; POST_MORTEM is
+      post-event.'
+  official_requirements_and_eligibility:
+    status: PROVEN
+    material: true
+    evidence_pointers:
+    - docs/CHALLENGE-REALITY.md §4
+    reason: Fresh public repo created in-event, Apache-2.0 licence, README, image on Docker Hub, organiser confirmed key provisioning
+      (D-030).
+  current_state_and_living_prd_reconciliation:
+    status: SATISFIED
+    material: true
+    evidence_pointers:
+    - state/CURRENT.yaml
+    - docs/PRD.md v0.3
+    reason: PRD re-framed on observed behaviour; state files current.
+  problem_and_negative_event_truth:
+    status: PROVEN
+    material: true
+    evidence_pointers:
+    - AUTONOMY-LOG.md D-026
+    - evidence/ablation/ABLATION.md
+    reason: Fire-and-forget actions OBSERVED in shipped code; first-match claim withdrawn.
+  competitive_novelty_and_technical_reality:
+    status: SATISFIED
+    material: true
+    evidence_pointers:
+    - docs/CONCEPT-SELECTION.md
+    - evidence/validator-parity/
+    reason: Technical reality proven live; competitors' submissions not public.
+  product_reality:
+    status: PROVEN
+    material: true
+    evidence_pointers:
+    - evidence/published-image/d00df7b-438f8bf/
+    reason: Real writes in the official IDE workspace from a browser, verified by read-back and the IDE validator.
+  integration_first_and_product_exploitation:
+    status: PROVEN
+    material: true
+    evidence_pointers:
+    - docs/DEPTH-GAP-REVIEW.md
+    - AUTONOMY-LOG.md D-031 D-037
+    reason: Integrated with the sponsor's GUI, backend, validator and model server; capability deltas after the first slice.
+  live_core_loop:
+    status: PROVEN
+    material: true
+    evidence_pointers:
+    - evidence/reliability/LEDGER.yaml
+    reason: Official IDE images + pulled image + llama3.1 8B, k=3.
+  load_bearing_integrations:
+    status: PROVEN
+    material: true
+    evidence_pointers:
+    - evidence/live-slice/ci-official-image-d6924d9.json
+    - evidence/validator-parity/ci-official-image-d6924d9.json
+    reason: IDE backend lookup/validator live; GUI action execution live in browser.
+  highest_safe_action_tier:
+    status: SATISFIED
+    material: true
+    evidence_pointers:
+    - docs/CONDITIONAL-GATEWAY-REGISTRY.yaml ACTION_DEPTH_SELECTION
+    reason: Workspace writes with confirmation and undo; deployment remains the IDE's human Deploy button.
+  real_consequence:
+    status: PROVEN
+    material: true
+    evidence_pointers:
+    - evidence/published-image/d00df7b-438f8bf/model/gui-e2e-model.json
+    reason: Files created, edited, restored in the real IDE workspace (official images).
+  representative_scenarios:
+    status: PROVEN
+    material: true
+    evidence_pointers:
+    - evidence/reliability/CASES.yaml
+    - evidence/ablation/ABLATION.md
+    reason: Success, negative, boundary and recovery cases.
+  failure_and_recovery:
+    status: PROVEN
+    material: true
+    evidence_pointers:
+    - tests/test_real_ide_semantics.py
+    - evidence/reliability/LEDGER.yaml
+    reason: Rollback, undo, unconfirmed-change reporting, docs fallback on model timeout observed live.
+  real_user_or_operator_evidence:
+    status: N/A_WITH_REASON
+    material: false
+    evidence_pointers: []
+    reason: Hackathon prototype; no user or adoption claim. The organiser's evaluation is the first external use.
+  truth_boundary:
+    status: PROVEN
+    material: true
+    evidence_pointers:
+    - docs/REALITY-LEDGER.md
+    reason: Every claim labelled; legion1 quality explicitly not claimed.
+  evidence_integrity:
+    status: PROVEN
+    material: true
+    evidence_pointers:
+    - AUTONOMY-LOG.md D-033 D-036 D-037
+    reason: Grader weakness found and tightened; corrections logged.
+  claim_runtime_evidence_graph:
+    status: PROVEN
+    material: true
+    evidence_pointers:
+    - docs/EVIDENCE-GRAPH.yaml
+    reason: ''
+  runtime_commit_deployment_binding:
+    status: PROVEN
+    material: true
+    evidence_pointers:
+    - evidence/published-image/d00df7b-438f8bf/revision.txt
+    reason: Pulled image label revision = candidate d00df7b; digest sha256:438f8bfa…
+  external_dependency_behavior:
+    status: PROVEN
+    material: true
+    evidence_pointers:
+    - evidence/published-image/d00df7b-438f8bf/no-model/
+    - tests/
+    reason: No-model mode verified on the pulled image; model timeout and backend-down paths.
+  reproducibility_and_clean_room:
+    status: PROVEN
+    material: true
+    evidence_pointers:
+    - .github/workflows/published-image.yml
+    reason: Clean pull + official IDE + browser; clean clone earlier.
+  engineering_quality_assurance:
+    status: SATISFIED
+    material: true
+    evidence_pointers:
+    - docs/assurance/ENGINEERING-QUALITY.md
+    reason: ''
+  security_privacy_accessibility_performance:
+    status: SATISFIED
+    material: true
+    evidence_pointers:
+    - docs/assurance/ENGINEERING-QUALITY.md
+    reason: No secrets in image; non-root; open CORS required by the GUI contract; action latency 3-5 s; accessibility of
+      the GUI is the organiser's.
+  trace_design_assurance:
+    status: SATISFIED
+    material: true
+    evidence_pointers:
+    - AUTONOMY-LOG.md D-029
+    reason: Steward's surface is plain-text replies in the organiser's GUI; raw markdown defect found and fixed.
+  judge_or_operator_self_serve:
+    status: PROVEN
+    material: true
+    evidence_pointers:
+    - README.md Run it
+    - evidence/published-image/
+    reason: The organiser's procedure reproduced from a clean pull.
+  judge_performance_assurance:
+    status: SATISFIED
+    material: true
+    evidence_pointers:
+    - docs/pitch/PITCH.md
+    reason: 6-minute script, demo order, Q&A.
+  judge_media_integrity:
+    status: SATISFIED
+    material: true
+    evidence_pointers:
+    - evidence/gui-model/
+    - docs/pitch/Hyperion-Steward-VelesHack.pptx
+    reason: Screenshots and recording are real CI captures of the official IDE; captions state the model and runner.
+  submission_integrity:
+    status: SATISFIED
+    material: true
+    evidence_pointers:
+    - docs/SUBMISSION.md
+    reason: Text matches the evidence; image name and repo verified.
+pre_launch_ship:
+  pre_launch_code_ok:
+    status: PROVEN
+    material: true
+    evidence_pointers:
+    - CI ci workflow green on c6adde6 (tests, real-ide, gui-e2e, image)
+    reason: ''
+  deploy:
+    status: PROVEN
+    material: true
+    evidence_pointers:
+    - faadil12/hyperion:latest = sha256:438f8bfa… (revision d00df7b)
+    reason: ''
+  live_runtime_check:
+    status: PROVEN
+    material: true
+    evidence_pointers:
+    - evidence/published-image/d00df7b-438f8bf/
+    reason: ''
+  critical_path_pass:
+    status: PROVEN
+    material: true
+    evidence_pointers:
+    - evidence/reliability/LEDGER.yaml (HIGH 15/15)
+    reason: ''
+  proof_captured:
+    status: PROVEN
+    material: true
+    evidence_pointers:
+    - evidence/
+    - branch ci-evidence
+    reason: ''
+  ship:
+    status: AWAITING_HUMAN_APPROVAL
+    material: true
+    evidence_pointers:
+    - docs/SUBMISSION.md
+    reason: TAIKAI submit and the organiser message are protected human actions.
+  protected_action_required: true
+  execution_evidence_pointer: ''
+limitations:
+- Answer quality on the organiser's legion1 server not measured before submission (he injects his own key).
+- Model runs are on a CPU runner with Ollama; one of three k-runs answered M1 from the cited docs fallback after a timeout.
+- Runnability findings are rules, not a deployment on HYPER-AI infrastructure.
+- The GUI creates a new user_id per page load, so session memory resets on reload.
+- This assurance was executed by the same autonomous agent that built the candidate (benchmark arm), using the Project Finisher
+  contract and validator at b5ea200; an independent read-only cross-check is recorded in docs/assurance/INDEPENDENT-CHECK.md.
+blockers: []
+terminal_verdict: SUBMISSION_READY
+terminal_promotion_allowed: true
+exact_next_action: 'Human: send the organiser message and submit on TAIKAI before 2026-10-07T14:59Z. Agent: any runtime change
+  after d00df7b invalidates this receipt and requires re-running the k=3 suite, the published-image verification and this
+  assurance.'
