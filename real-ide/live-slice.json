@@ -125,7 +125,7 @@
       "id": "L6",
       "title": "Undo restores the deleted file byte for byte",
       "passed": true,
-      "seconds": 0.25,
+      "seconds": 0.26,
       "actions": [
         "create_file steward-live/web.yaml"
       ],
