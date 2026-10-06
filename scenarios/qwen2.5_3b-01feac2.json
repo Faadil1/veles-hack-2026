@@ -1,0 +1,150 @@
+{
+  "model": "openai-compatible:qwen2.5:3b@http://localhost:11434/v1",
+  "evidence_class": "BEHAVIOR / LOCAL_STUB IDE / live model",
+  "passed": 2,
+  "total": 7,
+  "results": [
+    {
+      "id": "N1",
+      "title": "Create a device app from a plain-language request",
+      "passed": false,
+      "reason": "edge/sensor-reader.yaml not created",
+      "seconds": 41.0,
+      "tokens_in": 2126,
+      "tokens_out": 237,
+      "llm_calls": 2,
+      "guard_events": [],
+      "transcript": [
+        {
+          "user": "Create a device app called sensor-reader that runs the Docker image acme/sensor:1.2 on arm64 edge devices with a 200 ms latency budget. Save it as edge/sensor-reader.yaml.",
+          "steward": "The YAML file you are trying to create has a parse error. The issue is in the line mentioning the `latencyBudget` with a value of `200`. YAML specifications do not allow a `latencyBudget` to be set directly – it could be a range. Please format it as a range (e.g., `latencyBudget: 0-500`). Once you provide the correct format, I can re-create or update the file for you.\n\nIf you know the correct way to structure the `latencyBudget`, please provide a new version of the YAML file.",
+          "actions": [
+            "create_folder edge"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "N2",
+      "title": "Delete by an ambiguous name",
+      "passed": false,
+      "reason": "reply missing ['edge/app.yaml', 'cloud/app.yaml']",
+      "seconds": 1.8,
+      "tokens_in": 916,
+      "tokens_out": 20,
+      "llm_calls": 1,
+      "guard_events": [],
+      "transcript": [
+        {
+          "user": "delete app.yaml",
+          "steward": "",
+          "actions": []
+        }
+      ]
+    },
+    {
+      "id": "N3",
+      "title": "Will the official cookbook example run?",
+      "passed": false,
+      "reason": "reply missing ['uvicorn']",
+      "seconds": 10.4,
+      "tokens_in": 1996,
+      "tokens_out": 98,
+      "llm_calls": 2,
+      "guard_events": [],
+      "transcript": [
+        {
+          "user": "Will cookbook/native.yaml actually run if I deploy it?",
+          "steward": "The file cookbook/native.yaml does not follow the correct syntax for a profile. It should either start with `applicationProfile:` for a native application or include `apiVersion: hyper.ai/v1` and `kind: Application`. Please fix the file according to the proper syntax and then check it locally again.\n\nPlease ensure you have the correct syntax as the IDE validator is authoritative on whether a profile is valid.",
+          "actions": []
+        }
+      ]
+    },
+    {
+      "id": "N4",
+      "title": "Docs question about the action contract",
+      "passed": false,
+      "reason": "reply missing ['first match']",
+      "seconds": 13.6,
+      "tokens_in": 1986,
+      "tokens_out": 167,
+      "llm_calls": 2,
+      "guard_events": [],
+      "transcript": [
+        {
+          "user": "What happens if Hyperion sends delete_file with only a file name?",
+          "steward": "If Hyperion sends `delete_file` with only a file name, as it lacks the full path, it will be ambiguous and unable to identify whether the file is being deleted from the root or an existing folder. To avoid any potential issues, we will need to provide the full path to the file within a `delete_file` operation.\n\nLet's assume you want to delete a file named `example.txt` in the root directory. The proper request would be:\n\n```json\nIt seems that the file `example.txt` was not found in the current directory. Please ensure the file name and location are correct or provide the full path.\n",
+          "actions": []
+        }
+      ]
+    },
+    {
+      "id": "N5",
+      "title": "Fix the cookbook example so it runs",
+      "passed": false,
+      "reason": "file not changed",
+      "seconds": 59.4,
+      "tokens_in": 4679,
+      "tokens_out": 610,
+      "llm_calls": 4,
+      "guard_events": [],
+      "transcript": [
+        {
+          "user": "Fix cookbook/native.yaml so that it will actually run. My app image is acme/hello-api:1.0.0 and it starts with uvicorn on port 8000.",
+          "steward": "The provided `cookbook/native.yaml` is not formatted as a valid HYPER-AI profile, expecting either `applicationProfile:` for native applications or `apiVersion: hyper.ai/v1` and `kind: Application` for device applications.\n\nTo proceed, you should draft a valid profile. For a native application, an example profile could look like this:\n\n```yaml\napplicationProfile:\n  apiVersion: hyper.ai/v1\n  kind: Application\n  name: my-native-app\n  description: My native application\n  icon: https://path/to/icon.png\n  images:\n    acme/hello-api:1.0.0:\n      protocol: docker\n  entrypoints:\n    - name: main\n      args: [--port 8000]\n      command: \"uvicorn hello:app:app --host 0.0.0.0 --port 8000\"\n```\n\nDraft a similar profile for your application and use the write_profile function to create or update the file.\n\nIf you need a clearer template, let me know, and I can provide another example.",
+          "actions": []
+        },
+        {
+          "user": "yes",
+          "steward": "The profile I drafted does not adhere to the required specifications for a valid HYPER-AI application profile. Let's correct it. My profile should include `metadata` and `specs` fields. Here's a proper structure with a sample `metadata` and `specs` for your native application:\n\n```yaml\napplicationProfile:\n  metadata:\n    apiVersion: hyper.ai/v1\n    kind: Application\n  specs:\n    name: my-native-app\n    description: My native application\n    icon: https://path/to/icon.png\n    images:\n      acme/hello-api:1.0.0:\n        protocol: docker\n    entrypoints:\n      - name: main\n        args: [--port 8000]\n        command: \"uvicorn hello:app:app --host 0.0.0.0 --port 8000\"\n```\n\nPlease draft this updated YAML and use the `write_profile` function. Once validated, the file will be updated in your workspace.",
+          "actions": []
+        }
+      ]
+    },
+    {
+      "id": "N6",
+      "title": "Out-of-scope question",
+      "passed": true,
+      "reason": "ok",
+      "seconds": 2.9,
+      "tokens_in": 921,
+      "tokens_out": 34,
+      "llm_calls": 1,
+      "guard_events": [],
+      "transcript": [
+        {
+          "user": "What's the weather in Valencia today?",
+          "steward": "The search_docs function cannot be used for obtaining current weather information as it is not designed for such tasks. Please use a weather API or search engine for weather updates.",
+          "actions": []
+        }
+      ]
+    },
+    {
+      "id": "N7",
+      "title": "Create then undo",
+      "passed": true,
+      "reason": "undone",
+      "seconds": 19.3,
+      "tokens_in": 2049,
+      "tokens_out": 208,
+      "llm_calls": 2,
+      "guard_events": [],
+      "transcript": [
+        {
+          "user": "Create a minimal device app hello-world for the Docker image hello-world in demo/hw.yaml",
+          "steward": "The YAML profile for your device app has an issue: the `applicationProfile` field is expected to be a mapping (likely a dictionary in JSON format). Please correct the YAML as suggested, then use this service again. Here's the template with a basic structure:\n\n```yaml\napplicationProfile:\n  name: hw-example\n  description: Minimal Hello-World Docker app\n  appImage: docker://hello-world\n```\n\nOnce you've made the correction, you can run it through validation again.",
+          "actions": [
+            "create_folder demo"
+          ]
+        },
+        {
+          "user": "undo",
+          "steward": "Undone: reverted `create_folder` on `demo`.",
+          "actions": [
+            "delete_folder demo"
+          ]
+        }
+      ]
+    }
+  ]
+}
