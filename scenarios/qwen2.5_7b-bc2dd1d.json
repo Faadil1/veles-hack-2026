@@ -1,0 +1,144 @@
+{
+  "model": "openai-compatible:qwen2.5:7b@http://localhost:11434/v1",
+  "evidence_class": "BEHAVIOR / LOCAL_STUB IDE / live model",
+  "passed": 3,
+  "total": 7,
+  "results": [
+    {
+      "id": "N1",
+      "title": "Create a device app from a plain-language request",
+      "passed": false,
+      "reason": "edge/sensor-reader.yaml not created",
+      "seconds": 90.1,
+      "tokens_in": 0,
+      "tokens_out": 0,
+      "llm_calls": 0,
+      "guard_events": [],
+      "transcript": [
+        {
+          "user": "Create a device app called sensor-reader that runs the Docker image acme/sensor:1.2 on arm64 edge devices with a 200 ms latency budget. Save it as edge/sensor-reader.yaml.",
+          "steward": "My language model is unavailable right now (the model call failed), so here is the closest part of the HYPER-AI docs:\n\n[1] **Device: Hello World — Docker**: A minimal Docker application built on the hello-world image. device_name is intentionally omitted so the platform scheduler selects the best device with Docker support. Uses apiVersion hyper.ai/v1, kind Application, workload DockerImage hello-world with imagePullPolicy IfNotPresent, port 80 HTTP, networkBandwidthMin 1 Mbps, latency 500 ms, energy 1 W, cost 0.01 USD per hour, resilience auto-restart, availability 0.90 fraction, startup 5 s, schedulingPriority 1, architectures amd64 and arm64, geoLocationRequirement LocalZone, faultTolerance graceful-degradation, dataClassification internal.\n\n[2] **Step 3: Application profile**: Create a `.yaml` file that defines the application's attributes and references the container image from step 0. The format differs for Native Apps and Device Apps.\n\nSources: [1] Cookbook & Examples › Device: Hello World — Docker (https://ide-tutorial.hyperai.di.uoa.gr/cookbook/); [2] Quick Start Demo › Step 3: Application profile (https://ide-tutorial.hyperai.di.uoa.gr/quick-start-demo/)\n\nI can still `undo`, and `check <file>.yaml`. I won't write files until the model is back.",
+          "actions": []
+        }
+      ]
+    },
+    {
+      "id": "N2",
+      "title": "Delete by an ambiguous name",
+      "passed": false,
+      "reason": "reply missing ['edge/app.yaml', 'cloud/app.yaml']",
+      "seconds": 90.0,
+      "tokens_in": 0,
+      "tokens_out": 0,
+      "llm_calls": 0,
+      "guard_events": [],
+      "transcript": [
+        {
+          "user": "delete app.yaml",
+          "steward": "My language model is unavailable right now (the model call failed), so here is the closest part of the HYPER-AI docs:\n\n[1] **Using the Wizard**: The Wizard is a smart way to define your application in an easy way. Open it by clicking New App Profile in the top bar. You can either fill in the form or edit the Wizard DSL in the mini editor — the two stay in sync, and validation errors are shown live. When you finalize, click Generate YAML — the YAML is automatically sent to the main YAML editor.\n\n[2] **Native Application profile**: A Native Application is defined by an `applicationProfile` YAML document with `metadata` (required), `specs` (required) and `status` (optional, runtime only).\n\nSources: [1] IDE Guide › Using the Wizard (https://ide-tutorial.hyperai.di.uoa.gr/ide-guide/); [2] DSL Specification — Native Apps › Native Application profile (https://ide-tutorial.hyperai.di.uoa.gr/dsl/native-apps/)\n\nI can still `undo`, and `check <file>.yaml`. I won't write files until the model is back.",
+          "actions": []
+        }
+      ]
+    },
+    {
+      "id": "N3",
+      "title": "Will the official cookbook example run?",
+      "passed": false,
+      "reason": "reply missing ['uvicorn']",
+      "seconds": 90.1,
+      "tokens_in": 0,
+      "tokens_out": 0,
+      "llm_calls": 0,
+      "guard_events": [],
+      "transcript": [
+        {
+          "user": "Will cookbook/native.yaml actually run if I deploy it?",
+          "steward": "My language model is unavailable right now (the model call failed), so here is the closest part of the HYPER-AI docs:\n\n[1] **What the tutorial covers**: - Quick Start Demo — deploy your first web server with a few simple steps. - IDE Guide — how to interact with the IDE to build your projects. - DSL Specification — how to define the requirements of applications, for Native Apps and Device Apps. - Cookbook & Examples — recipes and examples for building complex workflows.\n\n[2] **Native Application profile**: A Native Application is defined by an `applicationProfile` YAML document with `metadata` (required), `specs` (required) and `status` (optional, runtime only).\n\nSources: [1] HyperAI IDE Tutorial — Introduction › What the tutorial covers (https://ide-tutorial.hyperai.di.uoa.gr/); [2] DSL Specification — Native Apps › Native Application profile (https://ide-tutorial.hyperai.di.uoa.gr/dsl/native-apps/)\n\nI can still `undo`, and `check <file>.yaml`. I won't write files until the model is back.",
+          "actions": []
+        }
+      ]
+    },
+    {
+      "id": "N4",
+      "title": "Docs question about the action contract",
+      "passed": true,
+      "reason": "ok",
+      "seconds": 90.0,
+      "tokens_in": 0,
+      "tokens_out": 0,
+      "llm_calls": 0,
+      "guard_events": [],
+      "transcript": [
+        {
+          "user": "What happens if Hyperion sends delete_file with only a file name?",
+          "steward": "My language model is unavailable right now (the model call failed), so here is the closest part of the HYPER-AI docs:\n\n[1] **Actions**: Events with an `action` key make the IDE do something; the IDE prints nothing for them, so the agent should describe what it did in `response` events. Available actions: create_folder (path), delete_folder (path), create_file (path, content — creates the file and opens it), edit_file (path, content — replaces the file whole and opens it), delete_file (path). `path` is always relative to the workspace root — never absolute, never `..`. For delete_file, edit_file and delete_folder a bare name is accepted: the IDE searches the workspace and uses the first match. A full path is used as-is.\n\n[2] **Reading a file**: Reading is not an action. The agent calls the IDE backend: GET /api/agent/file?path=… → 200 {path, content}, 404 {error: File not found}, 409 {error: Ambiguous file name, matches: [...]} when several files share the name.\n\nSources: [1] Hyperion Agent (Hackathon) — Actions › Actions (https://ide-tutorial.hyperai.di.uoa.gr/hyperion-agent/); [2] Hyperion Agent (Hackathon) — Actions › Reading a file (https://ide-tutorial.hyperai.di.uoa.gr/hyperion-agent/)\n\nI can still `undo`, and `check <file>.yaml`. I won't write files until the model is back.",
+          "actions": []
+        }
+      ]
+    },
+    {
+      "id": "N5",
+      "title": "Fix the cookbook example so it runs",
+      "passed": false,
+      "reason": "file not changed",
+      "seconds": 180.2,
+      "tokens_in": 0,
+      "tokens_out": 0,
+      "llm_calls": 0,
+      "guard_events": [],
+      "transcript": [
+        {
+          "user": "Fix cookbook/native.yaml so that it will actually run. My app image is acme/hello-api:1.0.0 and it starts with uvicorn on port 8000.",
+          "steward": "My language model is unavailable right now (the model call failed), so here is the closest part of the HYPER-AI docs:\n\n[1] **Native: Hello World Web Server — nginx**: A workflow that deploys an nginx server; the user expresses preferences through constraints and QoS requirements. The published example uses executionType container, entryPoint uvicorn with args main:app --host 0.0.0.0 --port 8000, baseOS python 3.10-slim, containerImage nginx:latest, resources cpu 2000m / memory 10Gi / storage 1Gi, port 8000 TCP publicly exposed, architectures x86_64 and arm64, securityLevel \"high\", dataClassification private, startupTime 10s, availability 99.0%. Note from Steward: the example's entry point (uvicorn, a Python server) does not exist inside the nginx image, and\n\n[2] **Device: Hello World — Docker**: A minimal Docker application built on the hello-world image. device_name is intentionally omitted so the platform scheduler selects the best device with Docker support. Uses apiVersion hyper.ai/v1, kind Application, workload DockerImage hello-world with imagePullPolicy IfNotPresent, port 80 HTTP, networkBandwidthMin 1 Mbps, latency 500 ms, energy 1 W, cost 0.01 USD per hour, resilience auto-restart, availability 0.90 fraction, startup 5 s, schedulingPriority 1, architectures amd64 and arm64, geoLocationRequirement LocalZone, faultTolerance graceful-degradation, dataClassification internal.\n\nSources: [1] Cookbook & Examples › Native: Hello World Web Server — nginx (https://ide-tutorial.hyperai.di.uoa.gr/cookbook/); [2] Cookbook & Examples › Device: Hello World — Docker (https://ide-tutorial.hyperai.di.uoa.gr/cookbook/)\n\nI can still `undo`, and `check <file>.yaml`. I won't write files until the model is back.",
+          "actions": []
+        },
+        {
+          "user": "yes",
+          "steward": "My language model is unavailable right now (the model call failed). I can still `undo` my last change or `check <file>.yaml`. I won't write or delete anything in this state.",
+          "actions": []
+        }
+      ]
+    },
+    {
+      "id": "N6",
+      "title": "Out-of-scope question",
+      "passed": true,
+      "reason": "ok",
+      "seconds": 90.1,
+      "tokens_in": 0,
+      "tokens_out": 0,
+      "llm_calls": 0,
+      "guard_events": [],
+      "transcript": [
+        {
+          "user": "What's the weather in Valencia today?",
+          "steward": "My language model is unavailable right now (the model call failed), so here is the closest part of the HYPER-AI docs:\n\n[1] **spec.qos (required)**: `latencyToleranceMax` (value + ms|s), `energyCost` (value + mW|W), `monetaryCost` (value + currency + per second|minute|hour|day), `resilience` (e.g. auto-restart), `availability` (value 0–1, unit fraction), `startupTime` (value + ms|s).\n\n[2] **Step 3: Application profile**: Create a `.yaml` file that defines the application's attributes and references the container image from step 0. The format differs for Native Apps and Device Apps.\n\nSources: [1] DSL Specification — Device Apps › spec.qos (required) (https://ide-tutorial.hyperai.di.uoa.gr/dsl/devices/); [2] Quick Start Demo › Step 3: Application profile (https://ide-tutorial.hyperai.di.uoa.gr/quick-start-demo/)\n\nI can still `undo`, and `check <file>.yaml`. I won't write files until the model is back.",
+          "actions": []
+        }
+      ]
+    },
+    {
+      "id": "N7",
+      "title": "Create then undo",
+      "passed": true,
+      "reason": "undone",
+      "seconds": 90.1,
+      "tokens_in": 0,
+      "tokens_out": 0,
+      "llm_calls": 0,
+      "guard_events": [],
+      "transcript": [
+        {
+          "user": "Create a minimal device app hello-world for the Docker image hello-world in demo/hw.yaml",
+          "steward": "My language model is unavailable right now (the model call failed), so here is the closest part of the HYPER-AI docs:\n\n[1] **Device: Hello World — Docker**: A minimal Docker application built on the hello-world image. device_name is intentionally omitted so the platform scheduler selects the best device with Docker support. Uses apiVersion hyper.ai/v1, kind Application, workload DockerImage hello-world with imagePullPolicy IfNotPresent, port 80 HTTP, networkBandwidthMin 1 Mbps, latency 500 ms, energy 1 W, cost 0.01 USD per hour, resilience auto-restart, availability 0.90 fraction, startup 5 s, schedulingPriority 1, architectures amd64 and arm64, geoLocationRequirement LocalZone, faultTolerance graceful-degradation, dataClassification internal.\n\n[2] **Device: Hello World — Android APK**: Installs a simple Hello World APK from an apkUrl with packageName com.example.testtarget and installMode install. It targets a specific registered Android DeviceNode by setting spec.device_name, and uses supportedArchitectures arm64-v8a.\n\nSources: [1] Cookbook & Examples › Device: Hello World — Docker (https://ide-tutorial.hyperai.di.uoa.gr/cookbook/); [2] Cookbook & Examples › Device: Hello World — Android APK (https://ide-tutorial.hyperai.di.uoa.gr/cookbook/)\n\nI can still `undo`, and `check <file>.yaml`. I won't write files until the model is back.",
+          "actions": []
+        },
+        {
+          "user": "undo",
+          "steward": "There's nothing of mine to undo in this session.",
+          "actions": []
+        }
+      ]
+    }
+  ]
+}
