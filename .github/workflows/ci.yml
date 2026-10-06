@@ -88,6 +88,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - name: Runtime revision (last commit touching what the image contains)
+        id: rev
+        run: echo "sha=$(git log -1 --format=%H -- Dockerfile requirements.txt steward)" >> "$GITHUB_OUTPUT"
       - uses: docker/setup-buildx-action@v3
       - uses: docker/login-action@v3
         if: github.event_name != 'pull_request'
@@ -104,7 +108,8 @@ jobs:
             ghcr.io/faadil1/hyperion-steward:latest
           labels: |
             org.opencontainers.image.source=https://github.com/Faadil1/veles-hack-2026
-            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.revision=${{ steps.rev.outputs.sha }}
+            io.veles.build-commit=${{ github.sha }}
       - name: Container smoke test (degraded mode, no secrets)
         run: |
           docker run -d --name steward-smoke -p 8000:8000 -e STEWARD_DISABLE_LLM=1 ghcr.io/faadil1/hyperion-steward:${{ github.sha }} 2>/tmp/run.err \
@@ -134,7 +139,7 @@ jobs:
           docker push ghcr.io/faadil1/hyperion-steward:${{ github.sha }}
           docker push ghcr.io/faadil1/hyperion-steward:latest
           echo "::notice title=image::ghcr.io/faadil1/hyperion-steward:${{ github.sha }}"
-      - name: Push evaluation image to Docker Hub (<user>/hyperion:latest), when the team account is configured
+      - name: Push evaluation image to Docker Hub (faadil12/hyperion:latest), when the team account is configured
         if: github.event_name != 'pull_request'
         env:
           DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
@@ -147,4 +152,4 @@ jobs:
           docker tag ghcr.io/faadil1/hyperion-steward:${{ github.sha }} "$DOCKERHUB_USERNAME/hyperion:${GITHUB_SHA::7}"
           docker push "$DOCKERHUB_USERNAME/hyperion:latest"; docker push "$DOCKERHUB_USERNAME/hyperion:${GITHUB_SHA::7}"
           digest=$(docker image inspect "$DOCKERHUB_USERNAME/hyperion:latest" --format '{{index .RepoDigests 0}}')
-          echo "::notice title=dockerhub::$DOCKERHUB_USERNAME/hyperion:latest = ${GITHUB_SHA::7} ($digest)"
+          echo "::notice title=dockerhub::$DOCKERHUB_USERNAME/hyperion:latest runtime=${{ steps.rev.outputs.sha }} build=${GITHUB_SHA::7} ($digest)"
