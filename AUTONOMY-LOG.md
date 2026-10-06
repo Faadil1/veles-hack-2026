@@ -275,3 +275,9 @@ Timezone of record: UTC (local Toronto = UTC-4).
 - **Observed:** the gui-model publish step failed: the raw WebM (110.64 MB) exceeds GitHub's 100 MB limit. A pre-fix live-model publish (workflow of d6924d9) had also wiped other evidence folders again; they were restored from their commits (0a0c8ec, d02b9e2, 6b07870, e9c26e7).
 - **Decision:** transcode the recording in CI to an 8x time-lapse MP4 at 1280 px (libx264, crf 30), delete the WebM, refuse any file over 90 MB before pushing.
 - **Reversible:** yes. **Human required:** no.
+
+## D-033 — Re-run in the official GUI after D-031: 7/7
+- **Timestamp:** 2026-10-06T16:30Z
+- **Observed (2e62095, official images, llama3.1:8b Ollama CPU):** 7/7. Action steps (create, ambiguous delete, fix, undo) now take 3 to 5 s instead of minutes. Memory question answered by the model from session history. Caveat recorded, not hidden: "What is HyperAI?" hit the 300 s model timeout on the CPU runner and was answered by the cited documentation fallback; the same step passed with the model in 07a7343. Recording published as an 8x time-lapse (1 MB).
+- **Evidence:** evidence/gui-model/ (copied from ci-evidence:gui-model, commit 2e62095). Docker Hub image pushed at 2e62095 (digest sha256:c2c1d6fc…).
+- **Reversible:** n/a. **Human required:** Docker Hub username for the README, deck and organiser message.
