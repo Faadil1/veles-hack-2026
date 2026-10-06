@@ -1,0 +1,41 @@
+INFO:     Started server process [3605]
+INFO:     Waiting for application startup.
+2026-10-06 16:50:17,741 INFO steward Hyperion Steward ready: ide=http://localhost:3001/api model=openai-compatible:llama3.1:8b@http://localhost:11434/v1
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:     127.0.0.1:57118 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57120 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57134 - "OPTIONS /chat HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57136 - "POST /chat HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57136 - "POST /chat HTTP/1.1" 200 OK
+2026-10-06 16:53:33,724 INFO httpx HTTP Request: POST http://localhost:11434/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-06 16:54:35,790 INFO httpx HTTP Request: POST http://localhost:11434/v1/chat/completions "HTTP/1.1 200 OK"
+INFO:     127.0.0.1:57136 - "POST /chat HTTP/1.1" 200 OK
+2026-10-06 16:55:29,021 INFO httpx HTTP Request: GET http://localhost:3001/api/agent/file?path=nginx.yaml "HTTP/1.1 404 Not Found"
+2026-10-06 16:55:29,024 INFO httpx HTTP Request: GET http://localhost:3001/api/files?path= "HTTP/1.1 200 OK"
+2026-10-06 16:55:29,026 INFO httpx HTTP Request: GET http://localhost:3001/api/files?path=cloud "HTTP/1.1 200 OK"
+2026-10-06 16:55:29,028 INFO httpx HTTP Request: GET http://localhost:3001/api/files?path=cookbook "HTTP/1.1 200 OK"
+2026-10-06 16:55:29,029 INFO httpx HTTP Request: GET http://localhost:3001/api/files?path=edge "HTTP/1.1 200 OK"
+2026-10-06 16:55:29,032 INFO httpx HTTP Request: GET http://localhost:3001/api/agent/file?path=nginx.yaml "HTTP/1.1 404 Not Found"
+2026-10-06 16:55:29,287 INFO httpx HTTP Request: GET http://localhost:3001/api/agent/file?path=nginx.yaml "HTTP/1.1 200 OK"
+2026-10-06 16:55:29,309 INFO httpx HTTP Request: GET http://localhost:3001/api/agent/validation/file?path=nginx.yaml "HTTP/1.1 200 OK"
+INFO:     127.0.0.1:57136 - "POST /chat HTTP/1.1" 200 OK
+2026-10-06 16:55:33,372 INFO httpx HTTP Request: GET http://localhost:3001/api/agent/file?path=app.yaml "HTTP/1.1 409 Conflict"
+INFO:     127.0.0.1:57136 - "POST /chat HTTP/1.1" 200 OK
+2026-10-06 16:55:36,716 INFO httpx HTTP Request: GET http://localhost:3001/api/agent/file?path=cookbook%2Fnative.yaml "HTTP/1.1 200 OK"
+2026-10-06 16:55:36,738 INFO httpx HTTP Request: GET http://localhost:3001/api/agent/file?path=cookbook%2Fnative.yaml "HTTP/1.1 200 OK"
+2026-10-06 16:55:36,775 INFO httpx HTTP Request: GET http://localhost:3001/api/agent/file?path=cookbook%2Fnative.yaml "HTTP/1.1 200 OK"
+2026-10-06 16:55:36,780 INFO httpx HTTP Request: GET http://localhost:3001/api/agent/file?path=cookbook%2Fnative.yaml "HTTP/1.1 200 OK"
+2026-10-06 16:55:37,033 INFO httpx HTTP Request: GET http://localhost:3001/api/agent/file?path=cookbook%2Fnative.yaml "HTTP/1.1 200 OK"
+2026-10-06 16:55:37,041 INFO httpx HTTP Request: GET http://localhost:3001/api/agent/validation/file?path=cookbook%2Fnative.yaml "HTTP/1.1 200 OK"
+INFO:     127.0.0.1:57136 - "POST /chat HTTP/1.1" 200 OK
+2026-10-06 16:58:28,160 INFO httpx HTTP Request: POST http://localhost:11434/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-06 16:58:28,503 INFO httpx HTTP Request: GET http://localhost:3001/api/agent/file?path=cooking%2Fnative.yaml "HTTP/1.1 404 Not Found"
+2026-10-06 16:58:28,512 INFO httpx HTTP Request: GET http://localhost:3001/api/files?path= "HTTP/1.1 200 OK"
+2026-10-06 16:58:28,517 INFO httpx HTTP Request: GET http://localhost:3001/api/files?path=cloud "HTTP/1.1 200 OK"
+2026-10-06 16:58:28,520 INFO httpx HTTP Request: GET http://localhost:3001/api/files?path=cookbook "HTTP/1.1 200 OK"
+2026-10-06 16:58:28,524 INFO httpx HTTP Request: GET http://localhost:3001/api/files?path=edge "HTTP/1.1 200 OK"
+2026-10-06 16:58:37,645 INFO httpx HTTP Request: POST http://localhost:11434/v1/chat/completions "HTTP/1.1 200 OK"
+INFO:     127.0.0.1:57136 - "POST /chat HTTP/1.1" 200 OK
+2026-10-06 16:58:48,342 INFO httpx HTTP Request: GET http://localhost:3001/api/agent/file?path=cookbook%2Fnative.yaml "HTTP/1.1 200 OK"
+2026-10-06 16:58:48,595 INFO httpx HTTP Request: GET http://localhost:3001/api/agent/file?path=cookbook%2Fnative.yaml "HTTP/1.1 200 OK"
