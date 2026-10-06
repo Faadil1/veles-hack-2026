@@ -24,6 +24,7 @@ from .engine import SafeOps, SessionStore
 from .ide import IdeClient, response_event
 from .llm import LLM, LLMError, build_llm_from_env
 from .retrieval import DocsIndex
+from .viewer import render
 
 log = logging.getLogger("steward")
 CHAT_ROUTES = ("/", "/chat", "/api/chat", "/agent", "/hyperion", "/query", "/stream", "/v1/chat")
@@ -116,6 +117,10 @@ def create_app(ide_base_url: str | None = None, llm: LLM | None | str = "auto",
         journal = [vars(e) | {"before": _clip(e.before), "after": _clip(e.after)} for e in session.journal]
         return JSONResponse({"user_id": user_id, "receipts": session.receipts, "journal": journal,
                              "pending": session.pending.summary if session.pending else None})
+
+    @app.get("/receipts/{user_id}/view", response_class=HTMLResponse)
+    async def receipts_view(user_id: str) -> str:
+        return render(state["sessions"].peek(user_id), user_id)
 
     @app.get("/", response_class=HTMLResponse)
     async def index() -> str:

@@ -54,3 +54,13 @@ async def test_receipts_endpoint_records_turn():
     kinds = [x["kind"] for x in r.json()["receipts"]]
     assert kinds[:2] == ["route", "user"] and "turn_done" in kinds
     assert h.json()["degraded"] is True
+
+
+async def test_receipts_view_renders_and_escapes():
+    app = await _client(None)
+    async with app.router.lifespan_context(app), \
+            httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://s") as c:
+        await c.post("/chat", json={"user_id": "v1", "text": "check <script>x</script>.yaml"})
+        r = await c.get("/receipts/v1/view")
+    assert r.status_code == 200 and "Steward receipts" in r.text
+    assert "<script>x" not in r.text
