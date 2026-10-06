@@ -58,7 +58,7 @@
       "id": "L2",
       "title": "Write the official native cookbook example: schema-valid, runnability blocker surfaced",
       "passed": true,
-      "seconds": 0.28,
+      "seconds": 0.27,
       "actions": [
         "create_file steward-live/native.yaml"
       ],
