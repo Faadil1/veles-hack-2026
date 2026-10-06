@@ -175,7 +175,7 @@ async def test_guard_question_is_said_even_if_model_stays_silent():
 async def test_confirmation_question_is_deterministic_and_ends_turn():
     h = Harness({"demo/app.yaml": DEVICE_OK}, llm=ScriptedLLM([tool("delete_file", path="demo/app.yaml")]))
     turn = await h.say("delete demo/app.yaml")
-    assert "Reply **yes** or **no**" in turn.text and turn.actions == []
+    assert "Reply yes or no" in turn.text and turn.actions == []
 
 
 async def test_check_profile_accepts_a_path():
@@ -221,13 +221,13 @@ async def test_bare_name_is_not_consent_to_overwrite():
     h = Harness({"demo/app.yaml": DEVICE_OK},
                 llm=ScriptedLLM([tool("write_profile", path="demo/app.yaml", yaml=changed)]))
     turn = await h.say("rename the app in app.yaml")
-    assert turn.actions == [] and "Reply **yes** or **no**" in turn.text
+    assert turn.actions == [] and "Reply yes or no" in turn.text
 
 
 async def test_naming_a_path_never_skips_delete_confirmation():
     h = Harness({"demo/app.yaml": DEVICE_OK}, llm=ScriptedLLM([tool("delete_file", path="demo/app.yaml")]))
     turn = await h.say("delete demo/app.yaml")
-    assert turn.actions == [] and "Reply **yes** or **no**" in turn.text
+    assert turn.actions == [] and "Reply yes or no" in turn.text
 
 
 def test_context_fits_the_8k_window_by_dropping_oldest_history():

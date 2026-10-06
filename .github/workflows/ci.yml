@@ -54,6 +54,35 @@ jobs:
           git fetch origin ci-evidence && git checkout -B ci-evidence origin/ci-evidence
           rm -rf real-ide && mkdir -p real-ide && cp -r /tmp/out/* real-ide/ && git add real-ide && git commit -m "real-ide ${GITHUB_SHA::7}" || true
           for i in 1 2 3 4; do git push origin ci-evidence && break; sleep $((i*5)); git fetch origin ci-evidence && git rebase origin/ci-evidence; done
+  gui-e2e:
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12"}
+      - run: pip install -r requirements-dev.txt playwright==1.55.0 && python -m playwright install --with-deps chromium
+      - name: Official IDE (GUI + backend) and Steward without a model
+        run: |
+          docker run -d --rm -p 3001:3001 -e AUTH_ENABLED=false --name ide-backend donmichael/ide-backend:latest
+          docker run -d --rm -p 5000:80 --name ide-gui donmichael/ide-gui:latest
+          (STEWARD_DISABLE_LLM=1 IDE_BACKEND_URL=http://localhost:3001/api nohup python main.py > /tmp/steward.log 2>&1 &)
+          for i in $(seq 1 60); do curl -fs -o /dev/null localhost:3001/api/files && curl -fs -o /dev/null localhost:5000 && curl -fs -o /dev/null localhost:8000/health && break; sleep 1; done
+          docker image inspect donmichael/ide-gui:latest donmichael/ide-backend:latest --format '{{.RepoTags}} {{.Id}}' > /tmp/images.txt
+      - name: Browser drives the Hyperion panel
+        run: |
+          python -m evaluation.gui_e2e --suite deterministic --out /tmp/gui-e2e
+          cp /tmp/images.txt /tmp/gui-e2e/; echo "${GITHUB_SHA}" > /tmp/gui-e2e/commit.txt
+          echo "::notice title=gui-e2e::$(python3 -c 'import json;d=json.load(open("/tmp/gui-e2e/gui-e2e-deterministic.json"));print(d["passed"],"/",d["total"])')"
+      - name: Publish evidence
+        if: always() && github.event_name != 'pull_request'
+        run: |
+          git config user.name "github-actions[bot]"; git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin ci-evidence && git checkout -B ci-evidence origin/ci-evidence
+          rm -rf gui-e2e && mkdir -p gui-e2e && cp -r /tmp/gui-e2e/* gui-e2e/ && git add gui-e2e && git commit -m "gui-e2e ${GITHUB_SHA::7}" || true
+          for i in 1 2 3 4; do git push origin ci-evidence && break; sleep $((i*5)); git fetch origin ci-evidence && git rebase origin/ci-evidence; done
   image:
     needs: test
     runs-on: ubuntu-latest

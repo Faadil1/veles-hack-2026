@@ -1,0 +1,61 @@
+name: gui-model-e2e
+# The judges' setup, as close as a CI runner allows: the official IDE GUI and backend images, Steward, and
+# llama3.1 8B (the model family the organisers serve) through the same OpenAI-compatible adapter. A browser types
+# into the Hyperion panel. When the HYPERAI_API_KEY secret exists, the organisers' server is used instead of Ollama.
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ["evaluation/gui_e2e.py", ".github/workflows/gui-model.yml", "steward/**"]
+permissions:
+  contents: write
+concurrency:
+  group: gui-model
+  cancel-in-progress: false
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      MODEL: llama3.1:8b
+      HYPERAI_API_KEY: ${{ secrets.HYPERAI_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12"}
+      - run: pip install -r requirements-dev.txt playwright==1.55.0 && python -m playwright install --with-deps chromium
+      - name: Model endpoint (organisers' server if the team key is set, else Ollama)
+        run: |
+          if [ -n "$HYPERAI_API_KEY" ] && curl -fs -m 15 -H "Authorization: Bearer $HYPERAI_API_KEY" https://legion1.di.uoa.gr/v1/models >/dev/null; then
+            echo "OPENAI_BASE_URL=https://legion1.di.uoa.gr/v1" >> $GITHUB_ENV; echo "STEWARD_MODEL=llama3.1" >> $GITHUB_ENV
+            echo "API_KEY=$HYPERAI_API_KEY" >> $GITHUB_ENV; echo "ENDPOINT=legion1" >> $GITHUB_ENV
+          else
+            curl -fsSL https://ollama.com/install.sh | sh
+            (ollama serve > /tmp/ollama.log 2>&1 &)
+            for i in $(seq 1 30); do curl -fs localhost:11434/api/tags && break; sleep 1; done
+            ollama pull "$MODEL"
+            echo "OPENAI_BASE_URL=http://localhost:11434/v1" >> $GITHUB_ENV; echo "STEWARD_MODEL=$MODEL" >> $GITHUB_ENV
+            echo "ENDPOINT=ollama-$MODEL" >> $GITHUB_ENV
+          fi
+      - name: Official IDE (GUI + backend) and Steward
+        env:
+          STEWARD_LLM_TIMEOUT: "300"
+        run: |
+          docker run -d --rm -p 3001:3001 -e AUTH_ENABLED=false --name ide-backend donmichael/ide-backend:latest
+          docker run -d --rm -p 5000:80 --name ide-gui donmichael/ide-gui:latest
+          (IDE_BACKEND_URL=http://localhost:3001/api nohup python main.py > /tmp/steward.log 2>&1 &)
+          for i in $(seq 1 60); do curl -fs -o /dev/null localhost:3001/api/files && curl -fs -o /dev/null localhost:5000 && curl -fs -o /dev/null localhost:8000/health && break; sleep 1; done
+          curl -s localhost:8000/health
+      - name: Browser drives the Hyperion panel with a real model
+        run: |
+          python -m evaluation.gui_e2e --suite model --out /tmp/gui-model || true
+          echo "$ENDPOINT" > /tmp/gui-model/endpoint.txt; echo "${GITHUB_SHA}" > /tmp/gui-model/commit.txt
+          tail -50 /tmp/steward.log > /tmp/gui-model/steward-log-tail.txt
+          echo "::notice title=gui-model::$ENDPOINT $(python3 -c 'import json;d=json.load(open("/tmp/gui-model/gui-e2e-model.json"));print(d["passed"],"/",d["total"],[(r["sid"],r["passed"],r["seconds"]) for r in d["results"]])')"
+      - name: Publish evidence
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"; git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin ci-evidence && git checkout -B ci-evidence origin/ci-evidence
+          rm -rf gui-model && mkdir -p gui-model && cp -r /tmp/gui-model/* gui-model/ && git add gui-model && git commit -m "gui-model ${GITHUB_SHA::7} ${ENDPOINT}" || true
+          for i in 1 2 3 4; do git push origin ci-evidence && break; sleep $((i*5)); git fetch origin ci-evidence && git rebase origin/ci-evidence; done

@@ -52,7 +52,7 @@ async def test_write_file_creates_then_overwrite_of_foreign_file_needs_confirmat
     h, llm, turn = await _run({"notes.md": "old"}, [call("write_file", path="docs/readme.md", content="# hi")])
     assert h.ws.files["docs/readme.md"] == "# hi"
     h2, llm2, turn2 = await _run({"notes.md": "old"}, [call("write_file", path="notes.md", content="new")])
-    assert h2.ws.files["notes.md"] == "old" and "Reply **yes** or **no**" in turn2.text
+    assert h2.ws.files["notes.md"] == "old" and "Reply yes or no" in turn2.text
 
 
 async def test_create_folder_and_undo_tool():

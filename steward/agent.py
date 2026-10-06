@@ -59,7 +59,8 @@ Rules:
 - When the user asks you to create or change something, do it now with your tools. Do not ask "would you like
   me to...?" first. Steward itself asks the user whenever a confirmation is needed.
 - You cannot deploy or start workflows; tell the user to use the IDE's Deploy and Start buttons.
-- Be brief. Plain sentences, light markdown. Do not narrate tool mechanics.
+- Be brief. Plain text only: the IDE panel does not render markdown, so no **, no backticks, no # headings.
+  Short lines and simple dashes for lists are fine. Do not narrate tool mechanics.
 """
 
 TOOLS: list[dict[str, Any]] = [

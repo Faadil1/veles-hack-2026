@@ -59,3 +59,10 @@ async def test_confirmed_delete_that_never_lands_is_reported_as_unconfirmed():
     turn = await h.say("yes")
     assert "can't confirm" in turn.text and "Deleted" not in turn.text
     assert "demo/a.yaml" in h.ws.files
+
+
+async def test_no_markdown_reaches_the_ide_panel():
+    # The GUI renders agent text as is (OBSERVED): ** and backticks would show literally.
+    h = Harness({"edge/app.yaml": DEVICE, "cloud/app.yaml": DEVICE})
+    turn = await h.say("check app.yaml")
+    assert "edge/app.yaml" in turn.text and "**" not in turn.text and "`" not in turn.text

@@ -167,7 +167,9 @@ class SafeOps:
     # -- emits ------------------------------------------------------------------------------------
 
     async def say(self, text: str) -> None:
-        await self.emit(response_event(text))
+        # The IDE panel shows text as is (no markdown rendering, OBSERVED in the GUI), so emphasis marks and
+        # backticks would appear literally. Strip them at the single exit point for user-facing text.
+        await self.emit(response_event(plain_text(text)))
 
     async def _act(self, action: str, path: str, content: str | None, before: str | None,
                    reversible: bool = True, record: bool = True) -> JournalEntry | None:
@@ -388,6 +390,10 @@ class SafeOps:
             return {"status": "undone", "action": entry.action, "path": entry.path, "journal_id": entry.entry_id,
                     "effect": self.last_effect}
         return {"status": "nothing_to_undo"}
+
+
+def plain_text(text: str) -> str:
+    return text.replace("**", "").replace("`", "")
 
 
 def _validation_summary(report: ValidationResult) -> dict[str, Any]:
