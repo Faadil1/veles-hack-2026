@@ -261,7 +261,7 @@ Timezone of record: UTC (local Toronto = UTC-4).
 - **Reversible:** n/a. **Human required:** Docker Hub secrets; optional team key.
 
 ## D-031 — First runs in the official GUI with llama3.1 8B: diagnose and re-route actions
-- **Timestamp:** 2026-10-06T15:45Z
+- **Timestamp:** 2026-10-06T15:37Z
 - **Observed (official GUI + backend images, llama3.1:8b on Ollama CPU):** run 07a7343 5/7; run 7f81593 4/7 (step M1 hit the 420 s limit while video recording slowed the CPU runner). Passing: off-topic refusal, "What is HyperAI?" grounded answer, ambiguous delete (real 409), undo. Failing in both runs: (M2) on the official example "Create a deployment YAML for a service using the nginx Docker image" the model asked "which architecture?" instead of acting; (M4/M5) asked to fix cookbook/native.yaml, the model pasted an invented YAML into the chat and asked to confirm, then on "yes" (nothing pending in Steward) it asked what to build. No workspace damage in any step.
 - **Root cause:** an 8B model is unreliable at deciding to act and at re-emitting whole profiles; the conversational "yes" refers to a model-side proposal that Steward never registered.
 - **Options:** (a) prompt tuning only; (b) route unambiguous action requests deterministically before the model, and give the model a field-level `edit_profile` tool instead of whole-file rewrites; (c) both.
@@ -271,26 +271,31 @@ Timezone of record: UTC (local Toronto = UTC-4).
 - **Reversible:** yes. **Human required:** no.
 
 ## D-032 — Evidence push failed on a 110 MB recording
-- **Timestamp:** 2026-10-06T15:45Z
+- **Timestamp:** 2026-10-06T15:37Z
 - **Observed:** the gui-model publish step failed: the raw WebM (110.64 MB) exceeds GitHub's 100 MB limit. A pre-fix live-model publish (workflow of d6924d9) had also wiped other evidence folders again; they were restored from their commits (0a0c8ec, d02b9e2, 6b07870, e9c26e7).
 - **Decision:** transcode the recording in CI to an 8x time-lapse MP4 at 1280 px (libx264, crf 30), delete the WebM, refuse any file over 90 MB before pushing.
 - **Reversible:** yes. **Human required:** no.
 
 ## D-033 — Re-run in the official GUI after D-031: 7/7
-- **Timestamp:** 2026-10-06T16:30Z
+- **Timestamp:** 2026-10-06T15:53Z
 - **Observed (2e62095, official images, llama3.1:8b Ollama CPU):** 7/7. Action steps (create, ambiguous delete, fix, undo) now take 3 to 5 s instead of minutes. Memory question answered by the model from session history. Caveat recorded, not hidden: "What is HyperAI?" hit the 300 s model timeout on the CPU runner and was answered by the cited documentation fallback; the same step passed with the model in 07a7343. Recording published as an 8x time-lapse (1 MB).
 - **Evidence:** evidence/gui-model/ (copied from ci-evidence:gui-model, commit 2e62095). Docker Hub image pushed at 2e62095 (digest sha256:c2c1d6fc…).
 - **Reversible:** n/a. **Human required:** Docker Hub username for the README, deck and organiser message.
 
 ## D-034 — Evaluation image name fixed; verify the published artifact, not the build
-- **Timestamp:** 2026-10-06T16:05Z
+- **Timestamp:** 2026-10-06T16:01Z
 - **Observed:** the human gave the Docker Hub user: the evaluation image is `faadil12/hyperion:latest`.
 - **Decision:** placeholders replaced in README, deck, SUBMISSION, FINAL-HANDOVER, depth review, ledger (historical log entries left as written). Images now carry `org.opencontainers.image.revision` = commit SHA, so the pulled artifact can be bound to a commit. New workflow `published-image` runs after every green `ci` on main: deletes any local copy, pulls `faadil12/hyperion:latest` from Docker Hub, records digest and revision, then runs it as the organiser would (port 8000, host.docker.internal) behind the official GUI and backend images with a browser: suite 1 without a model, suite 2 with llama3.1 8B reached from inside the container.
 - **Reversible:** yes. **Human required:** no.
 
 ## D-035 — Central canon moved: adopt Eval-Driven Reliability v1 before the final verdict
-- **Timestamp:** 2026-10-06T16:35Z
+- **Timestamp:** 2026-10-06T16:08Z
 - **Observed:** Final Canonical Assurance requires reconciling the project pin (61f853a, v0.1.57) against current central canon at sweep time. Central main is now 2ef16fd (v0.1.58): ARC project files (not applicable) and EVAL-DRIVEN-RELIABILITY-POLICY v1 (CONDITIONAL_AUTO; triggered here: material LLM agent behaviour, load-bearing tool calls, observed failures, BUILD_CANDIDATE relies on agent behaviour). FCA policy at the pin and at main both block a ready verdict while a material reconciliation is open.
 - **Options:** (a) keep the benchmark pin and record MATERIAL_RECONCILIATION_REQUIRED (blocks readiness); (b) reconcile: adopt the triggered policy for this project.
 - **Decision:** (b). The pin protected fairness at start (D-003); terminal assurance reconciles at sweep time by rule. Case set predeclared in evidence/reliability/CASES.yaml (k=3; ALL_OF_K for deterministic and safety cases, 2-of-3 with stated reason for the two model-mediated cases) before running. D-031 failures promoted as regression cases (M2, M4) and as unit tests. k=3 runs in parallel in workflow gui-model-e2e; the published image is also run by workflow published-image.
 - **Reversible:** yes. **Human required:** no.
+
+## D-036 — Timestamp correction (again)
+- **Timestamp:** 2026-10-06T16:10Z
+- **Observed:** entries D-031 to D-035, the depth review, FINAL-HANDOVER and CURRENT.yaml carried times up to 40 minutes ahead of the clock (written from estimates instead of `date -u`). Corrected to the commit times. Lesson already recorded once (timestamps from `date -u`); now also checked against `git log` before each log entry.
+- **Reversible:** n/a. **Human required:** no.
