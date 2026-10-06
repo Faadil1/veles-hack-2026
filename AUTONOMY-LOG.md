@@ -65,6 +65,8 @@ Timezone of record: UTC (local Toronto = UTC-4).
 
 ---
 
+> Timestamp correction (clock-verified 10:15Z): D-007..D-010 below carry estimated times; they actually occurred between 10:08Z and 10:14Z. All later entries use `date -u`.
+
 ## D-007 — Track selection: Challenge 1 (Hyperion / HYPER-AI)
 - **Timestamp:** 2026-10-06T10:40Z
 - **Observed:** Track 1 has a fully documented public contract (SSE schema, 5 actions, read/validate endpoints, DSL specs). Track 2 read path undocumented and Tangle unreachable. Track 3 needs organiser clusters (unreachable) and Java/Eclipse IDE. Track 4 has no discoverable contract.

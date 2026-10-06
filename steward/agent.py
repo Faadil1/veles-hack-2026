@@ -1,0 +1,308 @@
+"""Hyperion Steward turn handling.
+
+Routing order for each user message:
+  1. A pending confirmation is answered first (deterministic yes/no, EN/FR/ES).
+  2. Deterministic commands that must never depend on a model: undo, check/validate <file>.
+  3. Otherwise the language model plans with tools. Every tool that changes the workspace goes through SafeOps.
+  4. If the model is unavailable, a degraded deterministic mode answers doc questions and explains the outage;
+     it never guesses a write.
+"""
+
+from __future__ import annotations
+
+import json
+import re
+import time
+from typing import Any
+
+from . import runnability, spec
+from .engine import SafeOps, Session
+from .ide import IdeClient
+from .llm import LLM, LLMError, LLMTurn
+from .retrieval import DocsIndex
+
+MAX_STEPS = 8
+
+YES = re.compile(r"^\s*(y|yes|yep|yeah|ok|okay|sure|confirm|confirmed|go ahead|do it|oui|ouais|vas-y|d'accord|"
+                 r"confirme|sí|si|vale)\b[\s.!]*$", re.I)
+NO = re.compile(r"^\s*(n|no|nope|cancel|stop|don't|do not|non|annule|annuler|pas question|no gracias)\b[\s.!]*$", re.I)
+UNDO = re.compile(r"^\s*(undo|revert|undo (that|it|last( change)?)|annule(r)?( ça| la dernière modification)?|"
+                  r"deshacer)\s*[.!]*\s*$", re.I)
+CHECK = re.compile(r"^\s*(check|validate|verify|vérifie|valide)\s+(?P<target>[\w./-]+\.ya?ml)\s*[.!?]*\s*$", re.I)
+
+SYSTEM_PROMPT = """You are Hyperion Steward, the assistant inside the HYPER-AI IDE.
+You answer questions about HYPER-AI and you act in the user's workspace through tools.
+
+Your promise: you never leave the workspace worse than you found it.
+
+Rules:
+- For any question about HYPER-AI, the IDE, the DSL or deployment, call search_docs first and answer only from
+  the returned passages. Cite sources as [n] using the numbers returned. If the docs do not cover it, say so.
+- To create or change an application profile, call write_profile with the full YAML. It checks the profile
+  locally, writes it, asks the IDE validator, and rolls back automatically if the validator rejects it.
+  Never say a profile is valid unless write_profile or validate_file reported valid=true.
+- Before writing, draft complete profiles that satisfy the DSL: Native apps use `applicationProfile:`;
+  Device apps use `apiVersion: hyper.ai/v1` and `kind: Application`. Use search_docs for field details.
+- When a tool returns status "ambiguous", list the matching paths and ask which one. Never guess.
+- When a tool returns "needs_confirmation", ask the user a clear yes/no question and stop.
+- Report runnability findings honestly: a schema-valid profile can still fail to run.
+- To change an existing file, read_file it first. Use full paths once you know them.
+- Paths are relative to the workspace root. Never use absolute paths or "..".
+- You cannot deploy or start workflows; tell the user to use the IDE's Deploy and Start buttons.
+- Be brief. Plain sentences, light markdown. Do not narrate tool mechanics.
+"""
+
+TOOLS: list[dict[str, Any]] = [
+    {"name": "search_docs", "description": "Search the official HYPER-AI documentation. Returns numbered passages with sources.",
+     "input_schema": {"type": "object", "properties": {"query": {"type": "string"}}, "required": ["query"]}},
+    {"name": "read_file", "description": "Read a workspace file by full path or bare name. Returns content, or matches if ambiguous.",
+     "input_schema": {"type": "object", "properties": {"path": {"type": "string"}}, "required": ["path"]}},
+    {"name": "validate_file", "description": "Ask the IDE validator to check an existing profile file.",
+     "input_schema": {"type": "object", "properties": {"path": {"type": "string"}}, "required": ["path"]}},
+    {"name": "check_profile", "description": "Check YAML text locally (spec rules + runnability) without writing anything.",
+     "input_schema": {"type": "object", "properties": {"yaml": {"type": "string"}}, "required": ["yaml"]}},
+    {"name": "write_profile", "description": "Create or update a .yaml application profile safely (local check, write, IDE validation, auto-rollback).",
+     "input_schema": {"type": "object", "properties": {"path": {"type": "string"}, "yaml": {"type": "string"}},
+                      "required": ["path", "yaml"]}},
+    {"name": "write_file", "description": "Create or update a non-profile text file (README, notes, scripts).",
+     "input_schema": {"type": "object", "properties": {"path": {"type": "string"}, "content": {"type": "string"}},
+                      "required": ["path", "content"]}},
+    {"name": "create_folder", "description": "Create a folder in the workspace.",
+     "input_schema": {"type": "object", "properties": {"path": {"type": "string"}}, "required": ["path"]}},
+    {"name": "delete_file", "description": "Request deletion of a file. Resolves the exact file and asks the user to confirm.",
+     "input_schema": {"type": "object", "properties": {"path": {"type": "string"}}, "required": ["path"]}},
+    {"name": "delete_folder", "description": "Request deletion of a folder. Always asks the user to confirm; not reversible.",
+     "input_schema": {"type": "object", "properties": {"path": {"type": "string"}}, "required": ["path"]}},
+    {"name": "undo", "description": "Revert the most recent change Steward made in this session.",
+     "input_schema": {"type": "object", "properties": {}}},
+]
+
+
+class Steward:
+    def __init__(self, ide: IdeClient, docs: DocsIndex, llm: LLM | None):
+        self.ide = ide
+        self.docs = docs
+        self.llm = llm
+
+    async def handle(self, session: Session, text: str, ops: SafeOps) -> None:
+        started = time.perf_counter()
+        session.receipt("user", text=text[:500])
+        try:
+            if session.pending is not None:
+                if YES.match(text):
+                    await self._report_tool(ops, "confirmation", await ops.resolve_pending(True))
+                    return
+                if NO.match(text):
+                    await self._report_tool(ops, "confirmation", await ops.resolve_pending(False))
+                    return
+                session.receipt("guard", rule="I4", decision="pending_cleared_by_new_request",
+                                path=session.pending.path)
+                await ops.say(f"(I've cancelled the pending request to {session.pending.summary}.) ")
+                session.pending = None
+            if UNDO.match(text):
+                await self._report_tool(ops, "undo", await ops.undo())
+                return
+            match = CHECK.match(text)
+            if match:
+                await self._check_command(ops, match.group("target"))
+                return
+            if self.llm is None:
+                await self._degraded(ops, text, reason="no language model is configured")
+                return
+            await self._llm_turn(session, text, ops)
+        finally:
+            session.receipt("turn_done", latency_ms=int((time.perf_counter() - started) * 1000))
+
+    # -- deterministic paths ----------------------------------------------------------------------
+
+    async def _check_command(self, ops: SafeOps, target: str) -> None:
+        res = await ops.resolve(target)
+        if res.status == "ambiguous":
+            await ops.say(_ambiguity_text(target, res.matches))
+            return
+        if res.status != "resolved":
+            await ops.say(_unresolved_text(target, res.status, res.detail))
+            return
+        report = await ops.validate(res.path)
+        run = runnability.assess(res.content or "")
+        await ops.say(_check_text(res.path, report, run))
+
+    async def _report_tool(self, ops: SafeOps, tool: str, result: dict[str, Any]) -> None:
+        await ops.say(_result_text(tool, result))
+
+    async def _degraded(self, ops: SafeOps, text: str, reason: str) -> None:
+        ops.s.receipt("degraded_mode", reason=reason)
+        hits = self.docs.search(text, k=2)
+        if hits:
+            parts = [f"My language model is unavailable right now ({reason}), so here is the closest part of the "
+                     "HYPER-AI docs:\n\n"]
+            for i, (_, chunk) in enumerate(hits, 1):
+                excerpt = chunk.text.strip().replace("\n", " ")
+                parts.append(f"[{i}] **{chunk.heading}**: {excerpt[:600]}\n\n")
+            parts.append("Sources: " + "; ".join(f"[{i}] {c.citation}" for i, (_, c) in enumerate(hits, 1)))
+            parts.append("\n\nI can still `undo`, and `check <file>.yaml`. I won't write files until the model is back.")
+            await ops.say("".join(parts))
+        else:
+            await ops.say(f"My language model is unavailable right now ({reason}). I can still `undo` my last change "
+                          "or `check <file>.yaml`. I won't write or delete anything in this state.")
+
+    # -- model-driven path ------------------------------------------------------------------------
+
+    async def _llm_turn(self, session: Session, text: str, ops: SafeOps) -> None:
+        assert self.llm is not None
+        system = SYSTEM_PROMPT + _context_block(session)
+        messages = [*session.history, {"role": "user", "content": text}]
+        final_text: list[str] = []
+        actions_before = len(session.journal)
+        for step in range(MAX_STEPS):
+            try:
+                turn: LLMTurn = await self.llm.step(system, messages, TOOLS, on_text=ops.say)
+            except LLMError as exc:
+                session.receipt("llm_error", error=str(exc)[:300], step=step)
+                await self._degraded(ops, text, reason="the model call failed")
+                return
+            session.receipt("llm", model=turn.model, step=step, input_tokens=turn.input_tokens,
+                            output_tokens=turn.output_tokens, latency_ms=turn.latency_ms,
+                            tools=[c.name for c in turn.tool_calls])
+            if turn.text:
+                final_text.append(turn.text)
+            messages.append({"role": "assistant", "content": turn.raw_content})
+            if not turn.tool_calls:
+                break
+            results = []
+            for call in turn.tool_calls:
+                output = await self._run_tool(ops, call.name, call.input)
+                results.append({"type": "tool_result", "tool_use_id": call.id,
+                                "content": json.dumps(output, ensure_ascii=False)[:12000]})
+            messages.append({"role": "user", "content": results})
+        else:
+            await ops.say("\n\n(I stopped after several steps to avoid looping. Tell me how to continue.)")
+        changed = [f"{e.action} {e.path}" for e in session.journal[actions_before:]]
+        summary = "".join(final_text).strip()
+        if changed:
+            summary += "\n[workspace changes this turn: " + "; ".join(changed) + "]"
+        session.history.extend([{"role": "user", "content": text},
+                                {"role": "assistant", "content": summary or "(no text)"}])
+        del session.history[:-24]
+
+    async def _run_tool(self, ops: SafeOps, name: str, args: dict[str, Any]) -> dict[str, Any]:
+        try:
+            if name == "search_docs":
+                hits = self.docs.search(str(args.get("query", "")), k=4)
+                ops.s.receipt("search_docs", query=args.get("query"), hits=[c.citation for _, c in hits])
+                if not hits:
+                    return {"status": "no_results", "note": "The official docs corpus has nothing on this."}
+                return {"status": "ok", "passages": [
+                    {"n": i, "source": c.citation, "fidelity": c.fidelity, "text": c.text[:1500]}
+                    for i, (_, c) in enumerate(hits, 1)]}
+            if name == "read_file":
+                res = await ops.resolve(str(args.get("path", "")))
+                return {"status": res.status, "path": res.path, "content": res.content, "matches": res.matches,
+                        "detail": res.detail}
+            if name == "validate_file":
+                res = await ops.resolve(str(args.get("path", "")))
+                if res.status != "resolved":
+                    return {"status": res.status, "matches": res.matches, "detail": res.detail}
+                report = await ops.validate(res.path)
+                return {"status": report.outcome.value, "path": res.path, "valid": report.valid,
+                        "errors": report.errors, "warnings": report.warnings,
+                        "runnability": runnability.assess(res.content or "").as_dict()}
+            if name == "check_profile":
+                text = str(args.get("yaml", ""))
+                local = spec.check_profile(text)
+                return {"status": "ok", "kind": local.kind.value, "parse_error": local.parse_error,
+                        "issues": [i.as_dict() for i in local.issues],
+                        "runnability": runnability.assess(text).as_dict(),
+                        "note": "Local check only; the IDE validator is authoritative."}
+            if name == "write_profile":
+                return await ops.write_profile(str(args.get("path", "")), str(args.get("yaml", "")))
+            if name == "write_file":
+                return await ops.write_text_file(str(args.get("path", "")), str(args.get("content", "")))
+            if name == "create_folder":
+                return await ops.create_folder(str(args.get("path", "")))
+            if name == "delete_file":
+                return await ops.request_delete(str(args.get("path", "")))
+            if name == "delete_folder":
+                return await ops.request_delete_folder(str(args.get("path", "")))
+            if name == "undo":
+                return await ops.undo()
+            return {"status": "unknown_tool", "tool": name}
+        except Exception as exc:  # a tool bug must not crash the stream or emit half an action
+            ops.s.receipt("tool_error", tool=name, error=f"{type(exc).__name__}: {exc}"[:300])
+            return {"status": "error", "error": f"{type(exc).__name__}: {exc}"[:300]}
+
+
+# -- text helpers -----------------------------------------------------------------------------------
+
+def _context_block(session: Session) -> str:
+    lines = []
+    if session.known_paths:
+        lines.append("Files touched or read in this session (most recent last): " + ", ".join(session.known_paths[-10:]))
+    if session.created_paths:
+        lines.append("Files you created in this session: " + ", ".join(sorted(session.created_paths)))
+    undoable = [e for e in session.journal if not e.undone]
+    if undoable:
+        last = undoable[-1]
+        lines.append(f"Last reversible change: {last.action} {last.path}")
+    return ("\n\nSession context:\n" + "\n".join(lines)) if lines else ""
+
+
+def _ambiguity_text(target: str, matches: list[str]) -> str:
+    listed = "\n".join(f"- `{m}`" for m in matches)
+    return (f"There are {len(matches)} files named `{target}`, so I didn't touch any of them. "
+            f"The IDE would otherwise act on the first match. Which one do you mean?\n{listed}")
+
+
+def _unresolved_text(target: str, status: str, detail: str) -> str:
+    if status == "missing":
+        return f"I couldn't find `{target}` in the workspace."
+    if status == "invalid":
+        return f"I can't use that path: {detail}"
+    return f"I couldn't reach the IDE backend to look up `{target}` ({detail}). I didn't change anything."
+
+
+def _check_text(path: str, report: Any, run: runnability.RunnabilityReport) -> str:
+    out = [f"**{path}**"]
+    if report.outcome.value == "ok":
+        if report.valid:
+            out.append("IDE validator: **valid**.")
+        else:
+            errs = "; ".join(f"line {e.get('line')}: {e.get('field')} {e.get('message')}" for e in report.errors[:6])
+            out.append(f"IDE validator: **invalid** — {errs}.")
+    else:
+        out.append(f"IDE validator: not checked ({report.outcome.value}).")
+    if run.verdict is runnability.Verdict.WILL_NOT_RUN:
+        out.append("Runnability: **will not run as written**.")
+    elif run.verdict is runnability.Verdict.AT_RISK:
+        out.append("Runnability: at risk.")
+    elif run.verdict is runnability.Verdict.NO_KNOWN_BLOCKER:
+        out.append("Runnability: no known blocker.")
+    for f in run.findings:
+        out.append(f"- {f.message} Fix: {f.fix}")
+    return "\n".join(out)
+
+
+def _result_text(tool: str, r: dict[str, Any]) -> str:
+    status = r.get("status")
+    if tool == "undo":
+        if status == "undone":
+            return f"Undone: reverted `{r['action']}` on `{r['path']}`."
+        if status == "not_reversible":
+            return f"The last change (`{r['action']}` on `{r['path']}`) can't be undone automatically."
+        return "There's nothing of mine to undo in this session."
+    if status == "cancelled":
+        return f"Cancelled. I left `{r['path']}` untouched."
+    if status == "deleted":
+        return f"Deleted `{r['path']}`. Say `undo` to bring it back."
+    if status == "deleted_folder":
+        return f"Deleted folder `{r['path']}`."
+    if status == "stale":
+        return f"`{r['path']}` changed or disappeared since you confirmed ({r.get('detail')}), so I didn't act."
+    if status in ("written_valid", "written"):
+        return f"Saved `{r['path']}`" + (" — the IDE validator reports it valid." if status == "written_valid" else ".")
+    if status == "rolled_back_invalid":
+        errs = "; ".join(f"{e.get('field')}: {e.get('message')}" for e in r["validator"]["errors"][:5])
+        return f"The IDE validator rejected it ({errs}), so I restored `{r['path']}` to how it was."
+    if status == "nothing_pending":
+        return "There was nothing waiting for confirmation."
+    return f"Result: {status}."
