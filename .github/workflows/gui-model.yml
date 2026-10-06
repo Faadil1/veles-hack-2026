@@ -48,7 +48,7 @@ jobs:
           curl -s localhost:8000/health
       - name: Browser drives the Hyperion panel with a real model
         run: |
-          python -m evaluation.gui_e2e --suite model --out /tmp/gui-model || true
+          python -m evaluation.gui_e2e --suite model --out /tmp/gui-model --video || true
           echo "$ENDPOINT" > /tmp/gui-model/endpoint.txt; echo "${GITHUB_SHA}" > /tmp/gui-model/commit.txt
           tail -50 /tmp/steward.log > /tmp/gui-model/steward-log-tail.txt
           echo "::notice title=gui-model::$ENDPOINT $(python3 -c 'import json;d=json.load(open("/tmp/gui-model/gui-e2e-model.json"));print(d["passed"],"/",d["total"],[(r["sid"],r["passed"],r["seconds"]) for r in d["results"]])')"

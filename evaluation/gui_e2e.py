@@ -166,14 +166,18 @@ async def status_log(page: Page) -> list[str]:
         return []
 
 
-async def run(suite: str, gui: str, backend: str, out: Path, executable: str | None) -> dict[str, Any]:
+async def run(suite: str, gui: str, backend: str, out: Path, executable: str | None,
+              video: bool = False) -> dict[str, Any]:
     out.mkdir(parents=True, exist_ok=True)
     steps = DETERMINISTIC if suite == "deterministic" else DETERMINISTIC[:1] + MODEL
     await reset_workspace(backend)
     results: list[Result] = []
     async with async_playwright() as p:
         browser = await p.chromium.launch(**({"executable_path": executable} if executable else {}))
-        page = await browser.new_page(viewport={"width": 1600, "height": 950})
+        context = await browser.new_context(viewport={"width": 1600, "height": 950},
+                                            **({"record_video_dir": str(out / "video"),
+                                                "record_video_size": {"width": 1600, "height": 950}} if video else {}))
+        page = await context.new_page()
         await page.goto(gui)
         await page.click("button[title='Hyperion Agent']")
         await page.wait_for_selector(".agent-input-row textarea")
@@ -191,6 +195,7 @@ async def run(suite: str, gui: str, backend: str, out: Path, executable: str | N
             await page.screenshot(path=str(out / f"{i:02d}-{step.shot or step.sid}.png"))
             results.append(Result(step.sid, step.text, passed, reason, reply[:1200],
                                   round(time.perf_counter() - started, 1), sorted(files), log))
+        await context.close()  # flushes the video file
         await browser.close()
     report = {"evidence_class": "LIVE GUI + backend (official images in CI) / browser-driven", "suite": suite,
               "passed": sum(r.passed for r in results), "total": len(results),
@@ -206,8 +211,10 @@ def main() -> None:
     parser.add_argument("--backend", default="http://localhost:3001/api")
     parser.add_argument("--out", default="evidence/gui-e2e")
     parser.add_argument("--chromium", default="", help="executable path, when the bundled browser is absent")
+    parser.add_argument("--video", action="store_true", help="record a video of the session (demo material)")
     args = parser.parse_args()
-    report = asyncio.run(run(args.suite, args.gui, args.backend, Path(args.out), args.chromium or None))
+    report = asyncio.run(run(args.suite, args.gui, args.backend, Path(args.out), args.chromium or None,
+                             args.video))
     print(json.dumps({k: report[k] for k in ("suite", "passed", "total")}))
     for r in report["results"]:
         print(f"{r['sid']} {'PASS' if r['passed'] else 'FAIL'} {r['seconds']}s {r['reason']} | {r['reply'][:160]!r}")
