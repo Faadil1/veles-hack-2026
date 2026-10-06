@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import os
 import time
 from dataclasses import dataclass, field
@@ -75,6 +76,129 @@ class AnthropicLLM:
             input_tokens=final.usage.input_tokens, output_tokens=final.usage.output_tokens,
             latency_ms=int((time.perf_counter() - started) * 1000), model=self.model, raw_content=raw,
         )
+
+
+class OpenAICompatibleLLM:
+    """Any OpenAI-compatible /chat/completions endpoint: an organiser-provided model, a local server (Ollama,
+    vLLM, llama.cpp) or a hosted provider. Uses httpx only. Translates the Anthropic-style messages the agent
+    loop keeps (text / tool_use / tool_result blocks) to and from the OpenAI wire format."""
+
+    def __init__(self, base_url: str | None = None, model: str | None = None, api_key: str | None = None,
+                 max_tokens: int = 2048, timeout_s: float = 90.0, transport: Any = None):
+        import httpx
+
+        self.base_url = (base_url or os.environ.get("OPENAI_BASE_URL") or "").rstrip("/")
+        if not self.base_url:
+            raise LLMError("OPENAI_BASE_URL is not set")
+        self.model = model or os.environ.get("STEWARD_MODEL") or ""
+        if not self.model:
+            raise LLMError("STEWARD_MODEL is not set for the OpenAI-compatible provider")
+        key = api_key if api_key is not None else os.environ.get("OPENAI_API_KEY", "")
+        headers = {"Authorization": f"Bearer {key}"} if key else {}
+        self.name = f"openai-compatible:{self.model}@{self.base_url}"
+        self.max_tokens = max_tokens
+        self._client = httpx.AsyncClient(timeout=timeout_s, headers=headers, transport=transport)
+        self._httpx = httpx
+
+    @staticmethod
+    def to_openai_messages(system: str, messages: list[dict[str, Any]]) -> list[dict[str, Any]]:
+        out: list[dict[str, Any]] = [{"role": "system", "content": system}]
+        for msg in messages:
+            content = msg["content"]
+            if isinstance(content, str):
+                out.append({"role": msg["role"], "content": content})
+                continue
+            if msg["role"] == "assistant":
+                text = "".join(b.get("text", "") for b in content if b.get("type") == "text")
+                calls = [{"id": b["id"], "type": "function",
+                          "function": {"name": b["name"], "arguments": json.dumps(b.get("input", {}))}}
+                         for b in content if b.get("type") == "tool_use"]
+                item: dict[str, Any] = {"role": "assistant", "content": text or None}
+                if calls:
+                    item["tool_calls"] = calls
+                out.append(item)
+            else:
+                for b in content:
+                    if b.get("type") == "tool_result":
+                        out.append({"role": "tool", "tool_call_id": b["tool_use_id"], "content": b.get("content", "")})
+                    elif b.get("type") == "text":
+                        out.append({"role": "user", "content": b.get("text", "")})
+        return out
+
+    @staticmethod
+    def to_openai_tools(tools: list[dict[str, Any]]) -> list[dict[str, Any]]:
+        return [{"type": "function", "function": {"name": t["name"], "description": t.get("description", ""),
+                                                  "parameters": t.get("input_schema", {"type": "object"})}}
+                for t in tools]
+
+    async def step(self, system: str, messages: list[dict[str, Any]], tools: list[dict[str, Any]],
+                   on_text: OnText) -> LLMTurn:
+        started = time.perf_counter()
+        body = {"model": self.model, "max_tokens": self.max_tokens, "stream": True,
+                "stream_options": {"include_usage": True},
+                "messages": self.to_openai_messages(system, messages), "tools": self.to_openai_tools(tools)}
+        text_parts: list[str] = []
+        calls: dict[int, dict[str, Any]] = {}
+        usage: dict[str, Any] = {}
+        finish = ""
+        try:
+            async with self._client.stream("POST", f"{self.base_url}/chat/completions", json=body) as resp:
+                if resp.status_code >= 400:
+                    detail = (await resp.aread()).decode(errors="replace")[:300]
+                    raise LLMError(f"HTTP {resp.status_code}: {detail}")
+                async for line in resp.aiter_lines():
+                    if not line.startswith("data:"):
+                        continue
+                    data = line[5:].strip()
+                    if data == "[DONE]":
+                        break
+                    chunk = json.loads(data)
+                    usage = chunk.get("usage") or usage
+                    for choice in chunk.get("choices") or []:
+                        delta = choice.get("delta") or {}
+                        if delta.get("content"):
+                            text_parts.append(delta["content"])
+                            await on_text(delta["content"])
+                        for tc in delta.get("tool_calls") or []:
+                            slot = calls.setdefault(tc.get("index", 0), {"id": "", "name": "", "args": ""})
+                            slot["id"] = tc.get("id") or slot["id"]
+                            fn = tc.get("function") or {}
+                            slot["name"] = fn.get("name") or slot["name"]
+                            slot["args"] += fn.get("arguments") or ""
+                        finish = choice.get("finish_reason") or finish
+        except self._httpx.HTTPError as exc:
+            raise LLMError(f"{type(exc).__name__}: {exc}") from exc
+        except json.JSONDecodeError as exc:
+            raise LLMError(f"malformed stream chunk: {exc}") from exc
+        tool_calls = []
+        for idx in sorted(calls):
+            slot = calls[idx]
+            try:
+                args = json.loads(slot["args"] or "{}")
+            except json.JSONDecodeError:
+                args = {"_unparsed_arguments": slot["args"][:500]}
+            tool_calls.append(ToolCall(slot["id"] or f"call_{idx}", slot["name"], args))
+        text = "".join(text_parts)
+        raw = ([{"type": "text", "text": text}] if text else []) + [
+            {"type": "tool_use", "id": c.id, "name": c.name, "input": c.input} for c in tool_calls]
+        return LLMTurn(text=text, tool_calls=tool_calls, stop_reason=finish or "stop",
+                       input_tokens=int(usage.get("prompt_tokens") or 0),
+                       output_tokens=int(usage.get("completion_tokens") or 0),
+                       latency_ms=int((time.perf_counter() - started) * 1000), model=self.model, raw_content=raw)
+
+
+def build_llm_from_env() -> "LLM | None":
+    """STEWARD_PROVIDER = anthropic | openai_compatible | none. Default: auto (first configured)."""
+    provider = os.environ.get("STEWARD_PROVIDER", "auto").lower()
+    if provider == "none" or os.environ.get("STEWARD_DISABLE_LLM") == "1":
+        return None
+    if provider in ("openai_compatible", "openai") or (provider == "auto" and os.environ.get("OPENAI_BASE_URL")):
+        return OpenAICompatibleLLM()
+    if provider in ("anthropic", "auto") and os.environ.get("ANTHROPIC_API_KEY"):
+        return AnthropicLLM()
+    if provider == "anthropic":
+        raise LLMError("STEWARD_PROVIDER=anthropic but ANTHROPIC_API_KEY is not set")
+    return None
 
 
 class ScriptedLLM:

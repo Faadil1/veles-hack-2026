@@ -9,7 +9,6 @@ is actually called is recorded in receipts.
 from __future__ import annotations
 
 import asyncio
-import json
 import logging
 import os
 from contextlib import asynccontextmanager
@@ -22,7 +21,7 @@ from pydantic import BaseModel, Field
 from .agent import Steward
 from .engine import SafeOps, SessionStore
 from .ide import IdeClient, response_event
-from .llm import LLM, AnthropicLLM, LLMError
+from .llm import LLM, LLMError, build_llm_from_env
 from .retrieval import DocsIndex
 
 log = logging.getLogger("steward")
@@ -35,10 +34,8 @@ class ChatRequest(BaseModel):
 
 
 def build_llm() -> LLM | None:
-    if os.environ.get("STEWARD_DISABLE_LLM") == "1":
-        return None
     try:
-        return AnthropicLLM()
+        return build_llm_from_env()
     except LLMError as exc:
         log.warning("language model disabled: %s", exc)
         return None
