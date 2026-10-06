@@ -105,6 +105,6 @@ async def test_tool_call_printed_as_text_is_parsed_and_hidden():
 
     llm = OpenAICompatibleLLM(base_url="http://fake/v1", model="m", api_key="", transport=httpx.ASGITransport(app=app))
     h = Harness({}, llm=llm)
-    turn = await h.say("make it")
+    turn = await h.say("create the profile in demo/t.yaml")
     assert turn.actions and turn.actions[0]["path"] == "demo/t.yaml"
     assert "<tool_call>" not in turn.text and "Creating it now." in turn.text

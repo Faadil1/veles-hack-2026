@@ -229,3 +229,15 @@ async def test_naming_a_path_never_skips_delete_confirmation():
     h = Harness({"demo/app.yaml": DEVICE_OK}, llm=ScriptedLLM([tool("delete_file", path="demo/app.yaml")]))
     turn = await h.say("delete demo/app.yaml")
     assert turn.actions == [] and "Reply **yes** or **no**" in turn.text
+
+
+def test_context_fits_the_8k_window_by_dropping_oldest_history():
+    from steward.agent import CONTEXT_TOKENS, OUTPUT_TOKENS, SYSTEM_PROMPT, TOOLS_TOKENS, _estimate_tokens, _fit_context
+    history = []
+    for i in range(40):
+        history += [{"role": "user", "content": f"question {i} " + "x" * 600},
+                    {"role": "assistant", "content": f"answer {i} " + "y" * 600}]
+    messages = [*history, {"role": "user", "content": "latest question"}]
+    dropped = _fit_context(SYSTEM_PROMPT, messages)
+    assert dropped > 0 and messages[-1]["content"] == "latest question" and messages[0]["role"] == "user"
+    assert _estimate_tokens(SYSTEM_PROMPT) + _estimate_tokens(messages) + TOOLS_TOKENS + OUTPUT_TOKENS <= CONTEXT_TOKENS

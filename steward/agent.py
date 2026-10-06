@@ -11,17 +11,21 @@ Routing order for each user message:
 from __future__ import annotations
 
 import json
+import os
 import re
 import time
 from typing import Any
 
-from . import runnability, spec, templates
+from . import guardrail, runnability, spec, templates
 from .engine import SafeOps, Session
 from .ide import IdeClient
 from .llm import LLM, LLMError, LLMTurn
 from .retrieval import DocsIndex
 
 MAX_STEPS = 8
+CONTEXT_TOKENS = int(os.environ.get("STEWARD_CONTEXT_TOKENS", "8192"))  # legion1 llama3.1: 8192-token context
+OUTPUT_TOKENS = int(os.environ.get("STEWARD_MAX_OUTPUT_TOKENS", "1536"))
+TOOL_RESULT_CHARS = int(os.environ.get("STEWARD_TOOL_RESULT_CHARS", "4000"))
 
 YES = re.compile(r"^\s*(y|yes|yep|yeah|ok|okay|sure|confirm|confirmed|go ahead|do it|oui|ouais|vas-y|d'accord|"
                  r"confirme|sí|si|vale)\b[\s.!]*$", re.I)
@@ -135,6 +139,11 @@ class Steward:
             if match:
                 await self._check_command(ops, match.group("target"))
                 return
+            verdict = guardrail.classify(text, self.docs, in_conversation=bool(session.history))
+            session.receipt("guardrail", in_scope=verdict.in_scope, reason=verdict.reason)
+            if not verdict.in_scope:
+                await ops.say(guardrail.REFUSAL)
+                return
             if self.llm is None:
                 await self._degraded(ops, text, reason="no language model is configured")
                 return
@@ -198,6 +207,9 @@ class Steward:
         final_text: list[str] = []
         actions_before = len(session.journal)
         for step in range(MAX_STEPS):
+            trimmed = _fit_context(system, messages)
+            if trimmed:
+                session.receipt("context_trim", dropped_messages=trimmed, budget_tokens=CONTEXT_TOKENS)
             try:
                 turn: LLMTurn = await self.llm.step(system, messages, TOOLS, on_text=ops.say)
             except LLMError as exc:
@@ -225,7 +237,7 @@ class Steward:
                               "instruction": "The user has been asked. Do not repeat the question; end your turn."}
                     stop = True
                 results.append({"type": "tool_result", "tool_use_id": call.id,
-                                "content": json.dumps(output, ensure_ascii=False)[:12000]})
+                                "content": _clip_result(output)})
             messages.append({"role": "user", "content": results})
             if stop:
                 break
@@ -330,6 +342,39 @@ class Steward:
 
 
 # -- text helpers -----------------------------------------------------------------------------------
+
+def _estimate_tokens(obj: Any) -> int:
+    return int(len(json.dumps(obj, ensure_ascii=False)) / 3.5)
+
+
+TOOLS_TOKENS = _estimate_tokens(TOOLS)
+
+
+def _fit_context(system: str, messages: list[dict[str, Any]]) -> int:
+    """Drop the oldest history until the request fits the model context. Never drops the current user message or
+    the in-flight tool exchange. Returns how many messages were dropped."""
+    budget = CONTEXT_TOKENS - OUTPUT_TOKENS - TOOLS_TOKENS - 200
+    dropped = 0
+    while _estimate_tokens(system) + _estimate_tokens(messages) > budget and len(messages) > 1:
+        first = messages[0]
+        if first["role"] == "user" and not isinstance(first["content"], str):
+            break  # a tool_result block belongs to the in-flight exchange
+        if any(isinstance(m["content"], list) for m in messages[:2]) and dropped == 0 and len(messages) <= 3:
+            break
+        messages.pop(0)
+        dropped += 1
+        while messages and messages[0]["role"] != "user":  # keep history starting on a user turn
+            messages.pop(0)
+            dropped += 1
+    return dropped
+
+
+def _clip_result(output: dict[str, Any]) -> str:
+    text = json.dumps(output, ensure_ascii=False)
+    if len(text) <= TOOL_RESULT_CHARS:
+        return text
+    return text[:TOOL_RESULT_CHARS] + f'... [truncated {len(text) - TOOL_RESULT_CHARS} chars to fit the model context]'
+
 
 def _context_block(session: Session) -> str:
     lines = []

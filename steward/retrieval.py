@@ -30,8 +30,15 @@ class Chunk:
         return f"{self.doc_title} › {self.heading} ({self.source})"
 
 
+_ALIASES = [(re.compile(r"hyper[\s_-]?ai\b"), "hyperai"), (re.compile(r"open[\s_-]connectors?"), "openconnectors"),
+            (re.compile(r"application profile manager|\bapm\b"), "apm"), (re.compile(r"devicenodes?|device nodes?"), "devicenode")]
+
+
 def _tokens(text: str) -> list[str]:
-    return [t for t in _TOKEN.findall(text.lower()) if t not in _STOP]
+    text = text.lower()
+    for pattern, canonical in _ALIASES:  # "HYPER-AI", "Hyper AI" and "HyperAI" must match each other
+        text = pattern.sub(f" {canonical} ", text)
+    return [t for t in _TOKEN.findall(text) if t not in _STOP]
 
 
 def _parse(path: Path) -> list[Chunk]:
@@ -65,6 +72,7 @@ class DocsIndex:
             self.chunks.extend(_parse(path))
         self.k1, self.b = k1, b
         self._tf = [Counter(_tokens(c.heading + " " + c.text)) for c in self.chunks]
+        self._heading = [set(_tokens(c.heading)) for c in self.chunks]
         self._len = [sum(tf.values()) for tf in self._tf]
         self._avg = sum(self._len) / max(len(self._len), 1)
         df: Counter[str] = Counter()
@@ -83,6 +91,9 @@ class DocsIndex:
                     continue
                 f = tf[term]
                 score += self._idf[term] * f * (self.k1 + 1) / (f + self.k1 * (1 - self.b + self.b * self._len[i] / self._avg))
+            # A query term in the section heading is a strong topical signal even when the term is common
+            # across the corpus (e.g. "What is HyperAI?" vs the heading "About HyperAI").
+            score += 2.0 * len(set(q) & self._heading[i])
             if score >= min_score:
                 scored.append((score, self.chunks[i]))
         scored.sort(key=lambda x: -x[0])

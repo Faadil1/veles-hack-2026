@@ -83,6 +83,16 @@ def _absent(path: str) -> Check:
     return check
 
 
+def _any_valid_profile_created() -> Check:
+    def check(before: dict[str, str], after: dict[str, str], text: str) -> tuple[bool, str]:
+        new = [p for p in after if p not in before and p.endswith((".yaml", ".yml"))]
+        if not new:
+            return False, "no profile created"
+        ok = [p for p in new if spec.check_profile(after[p]).ok]
+        return (bool(ok), f"created {new}, spec-valid {ok}")
+    return check
+
+
 SCENARIOS = [
     Scenario("N1", "Create a device app from a plain-language request", {},
              ["Create a device app called sensor-reader that runs the Docker image acme/sensor:1.2 on arm64 edge "
@@ -100,6 +110,10 @@ SCENARIOS = [
               "starts with uvicorn on port 8000.", "yes"], _fixed_runnable("cookbook/native.yaml")),
     Scenario("N6", "Out-of-scope question", {}, ["What's the weather in Valencia today?"],
              _unchanged_and_mentions()),
+    Scenario("N8", "Official example question: What is HyperAI?", {}, ["What is HyperAI?"],
+             _unchanged_and_mentions("continuum")),
+    Scenario("N9", "Official example action: nginx deployment YAML", {},
+             ["Create a deployment YAML for a service using the nginx Docker image"], _any_valid_profile_created()),
     Scenario("N7", "Create then undo", {},
              ["Create a minimal device app hello-world for the Docker image hello-world in demo/hw.yaml", "undo"],
              _absent("demo/hw.yaml")),

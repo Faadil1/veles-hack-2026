@@ -13,7 +13,7 @@ _LABELS = {
     "action": "Action", "rollback": "Rollback", "undo": "Undo", "confirmation": "Confirmation", "llm": "Model",
     "local_check": "Local check", "runnability": "Runnability", "search_docs": "Docs", "docs_prefetch": "Docs",
     "create_profile": "Builder", "degraded_mode": "Degraded", "llm_error": "Model error", "tool_error": "Error",
-    "turn_done": "Turn done", "turn_error": "Error",
+    "turn_done": "Turn done", "turn_error": "Error", "guardrail": "Scope",
 }
 _TONE = {"guard": "warn", "rollback": "warn", "undo": "info", "confirmation": "info", "tool_error": "bad",
          "turn_error": "bad", "llm_error": "bad", "degraded_mode": "warn", "action": "act"}

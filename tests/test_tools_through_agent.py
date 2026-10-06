@@ -22,7 +22,7 @@ def last_tool_result(llm: ScriptedLLM) -> dict:
     return json.loads(blocks[-1]["content"])
 
 
-async def _run(files, turns, text="go"):
+async def _run(files, turns, text="please do this in my workspace"):
     llm = ScriptedLLM(turns + [LLMTurn(text="ok")])
     h = Harness(files, llm=llm)
     turn = await h.say(text)

@@ -4,7 +4,7 @@ on:
     inputs:
       model:
         description: "Ollama model tag"
-        default: "qwen2.5:3b"
+        default: "llama3.1:8b"
   push:
     branches: [main]
     paths: ["evaluation/scenarios.py", ".github/workflows/live-model.yml"]
@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 90
     env:
-      MODEL: ${{ github.event.inputs.model || 'qwen2.5:3b' }}
+      MODEL: ${{ github.event.inputs.model || 'llama3.1:8b' }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -36,6 +36,7 @@ jobs:
           OPENAI_BASE_URL: http://localhost:11434/v1
           STEWARD_MODEL: ${{ env.MODEL }}
           STEWARD_LLM_TIMEOUT: "300"
+          STEWARD_CONTEXT_TOKENS: "8192"
         run: |
           SAFE=$(echo "$MODEL" | tr ':/' '__')
           python -m evaluation.scenarios --out "evidence/scenarios/${SAFE}-${GITHUB_SHA::7}.json" | tee /tmp/summary.txt
