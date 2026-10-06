@@ -14,7 +14,8 @@ from stub_ide.app import create_app as create_stub
 def _events(body: str) -> list[dict]:
     blocks = [b for b in body.split("\n\n") if b.strip()]
     assert all(b.startswith("data: ") for b in blocks), body
-    return [json.loads(b[len("data: "):]) for b in blocks]
+    assert blocks[-1] == "data: [DONE]", "stream must end with data: [DONE] (starter protocol)"
+    return [json.loads(b[len("data: "):]) for b in blocks[:-1]]
 
 
 async def _client(llm):
@@ -23,8 +24,8 @@ async def _client(llm):
     return app
 
 
-@pytest.mark.parametrize("route", ["/chat", "/", "/api/chat"])
-async def test_sse_stream_shape(route):
+async def test_sse_stream_shape():
+    route = "/chat"
     app = await _client(ScriptedLLM([LLMTurn(text="Hello from Steward.")]))
     async with app.router.lifespan_context(app):
         async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://s") as c:
@@ -64,3 +65,13 @@ async def test_receipts_view_renders_and_escapes():
         r = await c.get("/receipts/v1/view")
     assert r.status_code == 200 and "Steward receipts" in r.text
     assert "<script>x" not in r.text
+
+
+async def test_cors_preflight_allows_the_browser_ide():
+    app = await _client(None)
+    async with app.router.lifespan_context(app), \
+            httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://s") as c:
+        r = await c.options("/chat", headers={"Origin": "http://localhost:5000",
+                                              "Access-Control-Request-Method": "POST",
+                                              "Access-Control-Request-Headers": "content-type"})
+    assert r.status_code == 200 and r.headers.get("access-control-allow-origin") in ("*", "http://localhost:5000")

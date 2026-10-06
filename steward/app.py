@@ -1,9 +1,8 @@
 """HTTP surface of Hyperion Steward.
 
-POST a JSON body {"user_id": "...", "text": "..."} and receive a text/event-stream of `data: {...}` events,
-as specified by the Hyperion agent contract. Because the official starter's route name was not available
-when this was written, the same handler is mounted on the routes a starter is likely to use; the route that
-is actually called is recorded in receipts.
+POST /chat with {"user_id": "...", "text": "..."} and receive a text/event-stream of `data: {...}` events ending
+with `data: [DONE]`, as specified by the official hyperion-starter (port 8000, CORS enabled because the IDE calls
+the agent straight from the browser).
 """
 
 from __future__ import annotations
@@ -16,6 +15,7 @@ from typing import Any
 from collections.abc import AsyncIterator
 
 from fastapi import FastAPI, HTTPException, Request
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
 from pydantic import BaseModel, Field
 
@@ -27,7 +27,7 @@ from .retrieval import DocsIndex
 from .viewer import render
 
 log = logging.getLogger("steward")
-CHAT_ROUTES = ("/", "/chat", "/api/chat", "/agent", "/hyperion", "/query", "/stream", "/v1/chat")
+CHAT_ROUTES = ("/chat",)
 
 
 class ChatRequest(BaseModel):
@@ -45,7 +45,7 @@ def build_llm() -> LLM | None:
 
 def create_app(ide_base_url: str | None = None, llm: LLM | None | str = "auto",
                ide_transport: Any = None) -> FastAPI:
-    base = ide_base_url or os.environ.get("IDE_BACKEND_URL", "http://host.docker.internal:3001/api")
+    base = ide_base_url or os.environ.get("IDE_BACKEND_URL", "http://localhost:3001/api")
     state: dict[str, Any] = {}
 
     @asynccontextmanager
@@ -60,6 +60,8 @@ def create_app(ide_base_url: str | None = None, llm: LLM | None | str = "auto",
         await state["ide"].aclose()
 
     app = FastAPI(title="Hyperion Steward", version="0.1.0", lifespan=lifespan)
+    # The IDE frontend calls the agent from the browser; the starter requires CORS to stay enabled.
+    app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
     app.state.steward_state = state
 
     async def chat(request: Request) -> StreamingResponse:
@@ -96,6 +98,7 @@ def create_app(ide_base_url: str | None = None, llm: LLM | None | str = "auto",
                     break
                 yield item
             await task
+            yield "data: [DONE]\n\n"
 
         return StreamingResponse(stream(), media_type="text/event-stream",
                                  headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
@@ -136,6 +139,13 @@ def _clip(text: str | None, limit: int = 4000) -> str | None:
         return None
     return text if len(text) <= limit else text[:limit] + f"... [{len(text) - limit} more chars]"
 
+
+try:  # same convention as the official starter: secrets come from a local .env when present
+    from dotenv import load_dotenv
+
+    load_dotenv()
+except ImportError:  # pragma: no cover
+    pass
 
 app = create_app()
 

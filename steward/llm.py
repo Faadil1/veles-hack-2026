@@ -222,18 +222,26 @@ def _extract_text_tool_calls(text: str) -> tuple[str, list[ToolCall]]:
     return visible, calls
 
 
+HYPERAI_BASE_URL = "https://legion1.di.uoa.gr/v1"  # organiser LLM server (hyperion-starter main.py)
+HYPERAI_MODEL = "llama3.1"                          # model named in hyperion-starter main.py
+
+
 def build_llm_from_env() -> LLM | None:
-    """STEWARD_PROVIDER = anthropic | openai_compatible | none. Default: auto (first configured)."""
-    provider = os.environ.get("STEWARD_PROVIDER", "auto").lower()
+    """Default: the organiser-provided OpenAI-compatible server, exactly as the official starter configures it
+    (BASE_URL legion1, model llama3.1, key in API_KEY). Overrides:
+      STEWARD_PROVIDER = openai_compatible (default) | anthropic | none
+      OPENAI_BASE_URL / STEWARD_MODEL / API_KEY (or OPENAI_API_KEY) for any OpenAI-compatible server (e.g. Ollama)
+    """
+    provider = os.environ.get("STEWARD_PROVIDER", "openai_compatible").lower()
     if provider == "none" or os.environ.get("STEWARD_DISABLE_LLM") == "1":
         return None
-    if provider in ("openai_compatible", "openai") or (provider == "auto" and os.environ.get("OPENAI_BASE_URL")):
-        return OpenAICompatibleLLM()
-    if provider in ("anthropic", "auto") and os.environ.get("ANTHROPIC_API_KEY"):
-        return AnthropicLLM()
     if provider == "anthropic":
-        raise LLMError("STEWARD_PROVIDER=anthropic but ANTHROPIC_API_KEY is not set")
-    return None
+        if not os.environ.get("ANTHROPIC_API_KEY"):
+            raise LLMError("STEWARD_PROVIDER=anthropic but ANTHROPIC_API_KEY is not set")
+        return AnthropicLLM()
+    key = os.environ.get("API_KEY") or os.environ.get("OPENAI_API_KEY") or ""
+    return OpenAICompatibleLLM(base_url=os.environ.get("OPENAI_BASE_URL") or HYPERAI_BASE_URL,
+                               model=os.environ.get("STEWARD_MODEL") or HYPERAI_MODEL, api_key=key)
 
 
 class ScriptedLLM:

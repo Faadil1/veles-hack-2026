@@ -1,0 +1,19 @@
+[project]
+name = "hyperion-steward"
+version = "0.1.0"
+description = "Hyperion agent for the HYPER-AI IDE that never leaves your workspace worse than it found it"
+readme = "README.md"
+license = "Apache-2.0"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.34",
+    "httpx>=0.28.1",
+    "pydantic>=2.8",
+    "PyYAML>=6.0",
+    "python-dotenv>=1.0",
+    "anthropic>=1.0",
+]
+
+[dependency-groups]
+dev = ["pytest>=8", "pytest-asyncio>=0.24"]
