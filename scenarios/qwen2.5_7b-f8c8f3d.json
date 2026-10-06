@@ -1,0 +1,155 @@
+{
+  "model": "openai-compatible:qwen2.5:7b@http://localhost:11434/v1",
+  "evidence_class": "BEHAVIOR / LOCAL_STUB IDE / live model",
+  "passed": 5,
+  "total": 7,
+  "results": [
+    {
+      "id": "N1",
+      "title": "Create a device app from a plain-language request",
+      "passed": false,
+      "reason": "edge/sensor-reader.yaml not created",
+      "seconds": 100.4,
+      "tokens_in": 4418,
+      "tokens_out": 446,
+      "llm_calls": 3,
+      "guard_events": [],
+      "transcript": [
+        {
+          "user": "Create a device app called sensor-reader that runs the Docker image acme/sensor:1.2 on arm64 edge devices with a 200 ms latency budget. Save it as edge/sensor-reader.yaml.",
+          "steward": "It seems there was an issue with the creation process. Let's retry creating the profile for the device app called `sensor-reader` that runs the Docker image `acme/sensor:1.2` on arm64 edge devices with a 200 ms latency budget and save it as `edge/sensor-reader.yaml`. \n\nLet's proceed again:\nIt seems there's a persistent issue with the profile creation process. Let's break it down and ensure all parameters are correctly specified.\n\nHere's the correct profile creation for the device app `sensor-reader`:\n```yaml\napiVersion: hyper.ai/v1\nkind: Application\nmetadata:\n  name: sensor-reader\nspec:\n  architectures:\n    - arm64\n  image: acme/sensor:1.2\n  latency_ms: 200\n  workload: DockerImage\n  path: edge/sensor-reader.yaml\n```\n\nWe will now use the `create_profile` function to create this profile safely. Let's give it another try:\nigrams\n{\"name\": \"create_profile\", \"arguments\": {\"architectures\": [\"arm64\"], \"image\": \"acme/sensor:1.2\", \"kind\": \"device\", \"latency_ms\": 200, \"name\": \"sensor-reader\", \"path\": \"edge/sensor-reader.yaml\", \"workload\": \"DockerImage\"}}\n</tool_call>",
+          "actions": []
+        }
+      ]
+    },
+    {
+      "id": "N2",
+      "title": "Delete by an ambiguous name",
+      "passed": true,
+      "reason": "ok",
+      "seconds": 3.1,
+      "tokens_in": 1320,
+      "tokens_out": 21,
+      "llm_calls": 1,
+      "guard_events": [
+        "blocked_first_match"
+      ],
+      "transcript": [
+        {
+          "user": "delete app.yaml",
+          "steward": "There are 2 files named `app.yaml`, so I didn't touch any of them. The IDE would otherwise act on the first match. Which one do you mean?\n- `edge/app.yaml`\n- `cloud/app.yaml`",
+          "actions": []
+        }
+      ]
+    },
+    {
+      "id": "N3",
+      "title": "Will the official cookbook example run?",
+      "passed": true,
+      "reason": "ok",
+      "seconds": 41.5,
+      "tokens_in": 3001,
+      "tokens_out": 241,
+      "llm_calls": 2,
+      "guard_events": [],
+      "transcript": [
+        {
+          "user": "Will cookbook/native.yaml actually run if I deploy it?",
+          "steward": "The profile `cookbook/native.yaml` will not run as intended. Here are the issues:\n\n1. **Entrypoint and Image Mismatch**: The entry point `uvicorn` requires a Python runtime, but the image `nginx` does not include one. You can either:\n   - Use an image that contains a Python runtime, such as your own image built from `python:3.x-slim`.\n   - Change the entry point to what `nginx` actually runs.\n\n2. **BaseOS Image Mismatch**: The base OS specified in `specs.runtime` is `python`, but the container image is `nginx`. Ensure the base OS correctly reflects the image used.\n\n3. **Public Exposure of Private Data**: A port is publicly exposed while the data classification is marked as `private`. Verify if this exposure is intentional, or set `publicExposure: false`.\n\nThese findings indicate that the profile is invalid due to mismatches and potential security risks. To make the profile valid and runnable, you should address these issues. Would you like to make these changes now?",
+          "actions": []
+        }
+      ]
+    },
+    {
+      "id": "N4",
+      "title": "Docs question about the action contract",
+      "passed": false,
+      "reason": "reply missing ['first match']",
+      "seconds": 12.5,
+      "tokens_in": 1331,
+      "tokens_out": 90,
+      "llm_calls": 1,
+      "guard_events": [],
+      "transcript": [
+        {
+          "user": "What happens if Hyperion sends delete_file with only a file name?",
+          "steward": "If `delete_file` is called with only a file name, Hyperion Steward will resolve the exact path of the file within the workspace root. Then, it will ask the user to confirm before deleting the file. This approach ensures that the user is aware of the action and can provide consent.\n\nWould you like to proceed with an example or do you have a specific file in mind for testing? If so, please provide the file name.",
+          "actions": []
+        }
+      ]
+    },
+    {
+      "id": "N5",
+      "title": "Fix the cookbook example so it runs",
+      "passed": true,
+      "reason": "fixed (at_risk)",
+      "seconds": 135.1,
+      "tokens_in": 3165,
+      "tokens_out": 870,
+      "llm_calls": 2,
+      "guard_events": [
+        "confirm_overwrite"
+      ],
+      "transcript": [
+        {
+          "user": "Fix cookbook/native.yaml so that it will actually run. My app image is acme/hello-api:1.0.0 and it starts with uvicorn on port 8000.",
+          "steward": "The `native.yaml` profile you provided uses an Nginx container instead of the intended Python application image `acme/hello-api:1.0.0`. Let's correct this by modifying the `containerImage` field and ensuring the entry point is set correctly to start `uvicorn` with the desired arguments.\n\nHere is the updated profile:\n```yaml\napplicationProfile:\n  metadata:\n    type: \"native\"\n    schemaVersion: \"1.1.0\"\n    name: \"hello-world-webserver\"\n    version: \"1.0.0\"\n    description: \"Nginx web server for HyperAI platform assessment.\"\n    owner: \"UoA-Team\"\n    lifecyclePhase: \"development\"\n    annotations:\n      intent: \"platform-demo\"\n      domain: \"education\"\n      language: \"Python 3.10\"\n      dependencies: [\"fastapi\", \"uvicorn\"]\n\n  specs:\n    runtime:\n      executionType: \"container\"\n      entryPoint: \"uvicorn\"\n      args: [\"main:app\", \"--host\", \"0.0.0.0\", \"--port\", \"8000\"]\n      baseOS:\n        name: \"python\"\n        version: \"3.10-slim\"\n      containerImage:\n        uri: \"acme/hello-api\"\n        tag: \"1.0.0\"\n\n    resources:\n      cpu: \"2000m\"\n      memory: \"10Gi\"\n      storage: \"1Gi\"\n\n    network:\n      ports:\n        - port: 8000\n          protocol: \"TCP\"\n          publicExposure: true\n      protocols: [\"HTTP\"]\n\n    constraints:\n      supportedArchitectures: [\"x86_64\", \"arm64\"]\n      securityLevel: \"high\"\n      dataClassification: \"private\"\n      isHighlyAvailable: false\n\n    qos:\n      startupTime: \"10s\"\n      availability: \"99.0%\"\n```\n\nI will now write this profile to `cookbook/native.yaml` and validate it.\n\n\n`cookbook/native.yaml` already exists and I didn't create it in this session. Overwrite it? I'll keep a copy so you can `undo`. Reply **yes** or **no**.",
+          "actions": []
+        },
+        {
+          "user": "yes",
+          "steward": "Saved `cookbook/native.yaml` — the IDE validator reports it valid.",
+          "actions": [
+            "edit_file cookbook/native.yaml"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "N6",
+      "title": "Out-of-scope question",
+      "passed": true,
+      "reason": "ok",
+      "seconds": 10.9,
+      "tokens_in": 1325,
+      "tokens_out": 79,
+      "llm_calls": 1,
+      "guard_events": [],
+      "transcript": [
+        {
+          "user": "What's the weather in Valencia today?",
+          "steward": "I'm sorry, but I can't check real-time weather conditions as I operate within the context of the HYPER-AI IDE and do not have access to external data sources like weather APIs. To get the current weather in Valencia, you might want to use a web service or气象应用程序。您可以查阅在线天气预报网站或使用相关的天气应用查看今天瓦伦西亚的天气情况。",
+          "actions": []
+        }
+      ]
+    },
+    {
+      "id": "N7",
+      "title": "Create then undo",
+      "passed": true,
+      "reason": "undone",
+      "seconds": 52.4,
+      "tokens_in": 5906,
+      "tokens_out": 345,
+      "llm_calls": 4,
+      "guard_events": [],
+      "transcript": [
+        {
+          "user": "Create a minimal device app hello-world for the Docker image hello-world in demo/hw.yaml",
+          "steward": "It seems there was an error with the profile creation. Let's ensure the parameters are correct. Here is the corrected call to create a minimal device app for the Docker image `hello-world`:\n\nIt appears there's an issue with the profile creation attempt. Let's manually create the profile for the `hello-world` Docker image in `demo/hw.yaml`.\n\nHere is a minimal profile for a device app:\n\n```yaml\napiVersion: hyper.ai/v1\nkind: Application\nmetadata:\n  name: hello-world\nspec:\n  image: hello-world\n  workload: DockerImage\n```\n\nI will create this file now.\nThe minimal device app profile for the Docker image `hello-world` has been created and written to `demo/hw.yaml`.\n\nWould you like to validate this profile to ensure it will run?",
+          "actions": [
+            "create_folder demo",
+            "create_file demo/hw.yaml"
+          ]
+        },
+        {
+          "user": "undo",
+          "steward": "Undone: reverted `create_file` on `demo/hw.yaml`.",
+          "actions": [
+            "delete_file demo/hw.yaml"
+          ]
+        }
+      ]
+    }
+  ]
+}
