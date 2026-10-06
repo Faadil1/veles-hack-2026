@@ -1,0 +1,134 @@
+{
+  "evidence_class": "LIVE GUI + backend (official images in CI) / browser-driven",
+  "suite": "model",
+  "passed": 7,
+  "total": 7,
+  "results": [
+    {
+      "sid": "G1",
+      "text": "What's the weather in Valencia today?",
+      "passed": true,
+      "reason": "ok",
+      "reply": "I'm Hyperion, the assistant for the HYPER-AI IDE, so I can only help with HYPER-AI and your workspace: questions about the platform, and creating, checking, fixing or deleting application profiles and files. Try something like “Create a device app for the nginx image” or “What are Open Connectors?”.",
+      "seconds": 4.3,
+      "files": [
+        "cloud/app.yaml",
+        "cookbook/native.yaml",
+        "edge/app.yaml"
+      ],
+      "status_log_tail": [
+        "[INFO 4:24:51 PM] Workspace ready. Waiting for messages."
+      ]
+    },
+    {
+      "sid": "M1",
+      "text": "What is HyperAI?",
+      "passed": true,
+      "reason": "ok",
+      "reply": "HyperAI is an EU-funded Horizon Europe project that aims to redefine data processing by harnessing distributed computing swarms. These are autonomous networks of interconnected nodes that dynamically adapt and optimise resources throughout the computing continuum. The project's broader ambition is to make complex Cloud, Edge and IoT environments easier to manage through intelligent, autonomous technologies.",
+      "seconds": 174.1,
+      "files": [
+        "cloud/app.yaml",
+        "cookbook/native.yaml",
+        "edge/app.yaml"
+      ],
+      "status_log_tail": [
+        "[INFO 4:24:51 PM] Workspace ready. Waiting for messages."
+      ]
+    },
+    {
+      "sid": "M2",
+      "text": "Create a deployment YAML for a service using the nginx Docker image",
+      "passed": true,
+      "reason": "new profiles ['nginx.yaml'], valid ['nginx.yaml']",
+      "reply": "Created nginx.yaml (device profile for the image nginx, port 80) and opened it in the editor. The IDE validator reports it valid. Fields I wasn't told (owner, QoS, resources) use defaults you can see and edit in the file. Say undo to remove it.",
+      "seconds": 4.3,
+      "files": [
+        "cloud/app.yaml",
+        "cookbook/native.yaml",
+        "edge/app.yaml",
+        "nginx.yaml"
+      ],
+      "status_log_tail": [
+        "[INFO 4:24:51 PM] Workspace ready. Waiting for messages.",
+        "[OK 4:27:50 PM] Agent created file: nginx.yaml"
+      ]
+    },
+    {
+      "sid": "M3",
+      "text": "delete app.yaml",
+      "passed": true,
+      "reason": "ok",
+      "reply": "There are 2 files named app.yaml, so I didn't touch any of them. Which one do you mean?\n- cloud/app.yaml\n- edge/app.yaml",
+      "seconds": 3.3,
+      "files": [
+        "cloud/app.yaml",
+        "cookbook/native.yaml",
+        "edge/app.yaml",
+        "nginx.yaml"
+      ],
+      "status_log_tail": [
+        "[INFO 4:24:51 PM] Workspace ready. Waiting for messages.",
+        "[OK 4:27:50 PM] Agent created file: nginx.yaml"
+      ]
+    },
+    {
+      "sid": "M4",
+      "text": "Fix cookbook/native.yaml so that it will actually run. My app image is acme/hello-api:1.0.0 and it starts with uvicorn on port 8000.",
+      "passed": true,
+      "reason": "fixed (at_risk)",
+      "reply": "Updated cookbook/native.yaml (specs.runtime.containerImage.uri = acme/hello-api, specs.runtime.containerImage.tag = 1.0.0). The IDE validator reports it valid. Runnability: no blocker left, some risks.\n- A port is publicly exposed while dataClassification is private.\nSay undo to restore the previous version.",
+      "seconds": 4.3,
+      "files": [
+        "cloud/app.yaml",
+        "cookbook/native.yaml",
+        "edge/app.yaml",
+        "nginx.yaml"
+      ],
+      "status_log_tail": [
+        "[INFO 4:24:51 PM] Workspace ready. Waiting for messages.",
+        "[OK 4:27:50 PM] Agent created file: nginx.yaml",
+        "[OK 4:27:58 PM] Agent rewrote file: cookbook/native.yaml"
+      ]
+    },
+    {
+      "sid": "M5",
+      "text": "Which container image did you just put in that file?",
+      "passed": true,
+      "reason": "ok",
+      "reply": "At that moment, the container image was acme/hello-api:1.0.0.",
+      "seconds": 125.4,
+      "files": [
+        "cloud/app.yaml",
+        "cookbook/native.yaml",
+        "edge/app.yaml",
+        "nginx.yaml"
+      ],
+      "status_log_tail": [
+        "[INFO 4:24:51 PM] Workspace ready. Waiting for messages.",
+        "[OK 4:27:50 PM] Agent created file: nginx.yaml",
+        "[OK 4:27:58 PM] Agent rewrote file: cookbook/native.yaml"
+      ]
+    },
+    {
+      "sid": "M6",
+      "text": "undo",
+      "passed": true,
+      "reason": "native restored",
+      "reply": "Undone: reverted edit_file on cookbook/native.yaml.",
+      "seconds": 3.3,
+      "files": [
+        "cloud/app.yaml",
+        "cookbook/native.yaml",
+        "edge/app.yaml",
+        "nginx.yaml"
+      ],
+      "status_log_tail": [
+        "[INFO 4:24:51 PM] Workspace ready. Waiting for messages.",
+        "[OK 4:27:50 PM] Agent created file: nginx.yaml",
+        "[OK 4:27:58 PM] Agent rewrote file: cookbook/native.yaml",
+        "[OK 4:30:07 PM] Agent rewrote file: cookbook/native.yaml"
+      ]
+    }
+  ]
+}
