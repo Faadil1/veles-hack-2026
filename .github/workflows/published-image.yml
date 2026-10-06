@@ -1,0 +1,70 @@
+name: published-image
+# Judge-path verification of the artifact the organisers will run: a clean pull of faadil12/hyperion:latest from
+# Docker Hub (nothing built here), started like the challenge PDF says, behind the official IDE GUI and backend
+# images, driven by a browser. Suite 1 without a model; suite 2 with llama3.1 8B (Ollama) reached from the container.
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: [ci]
+    types: [completed]
+    branches: [main]
+permissions:
+  contents: write
+concurrency:
+  group: published-image
+  cancel-in-progress: false
+jobs:
+  verify:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      IMAGE: faadil12/hyperion:latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12"}
+      - run: pip install -r requirements-dev.txt playwright==1.55.0 && python -m playwright install --with-deps chromium
+      - name: Clean pull of the published image
+        run: |
+          docker image rm -f "$IMAGE" 2>/dev/null || true
+          docker pull "$IMAGE"
+          mkdir -p /tmp/pub
+          docker image inspect "$IMAGE" --format '{{index .RepoDigests 0}}' > /tmp/pub/digest.txt
+          docker image inspect "$IMAGE" --format '{{index .Config.Labels "org.opencontainers.image.revision"}}' > /tmp/pub/revision.txt
+          docker image inspect "$IMAGE" --format '{{.Created}} {{.Architecture}} {{json .Config.ExposedPorts}}' > /tmp/pub/image.txt
+          echo "::notice title=pulled::$(cat /tmp/pub/digest.txt) revision=$(cat /tmp/pub/revision.txt)"
+      - name: Official IDE images
+        run: |
+          docker run -d --rm -p 3001:3001 -e AUTH_ENABLED=false --name ide-backend donmichael/ide-backend:latest
+          docker run -d --rm -p 5000:80 --name ide-gui donmichael/ide-gui:latest
+          for i in $(seq 1 60); do curl -fs -o /dev/null localhost:3001/api/files && curl -fs -o /dev/null localhost:5000 && break; sleep 1; done
+      - name: Suite 1, published image without a model
+        run: |
+          docker run -d --name hyperion -p 8000:8000 --add-host host.docker.internal:host-gateway -e STEWARD_DISABLE_LLM=1 "$IMAGE"
+          for i in $(seq 1 30); do curl -fs localhost:8000/health && break; sleep 1; done; echo
+          python -m evaluation.gui_e2e --suite deterministic --out /tmp/pub/no-model || true
+          docker rm -f hyperion
+          echo "::notice title=published-no-model::$(python3 -c 'import json;d=json.load(open("/tmp/pub/no-model/gui-e2e-deterministic.json"));print(d["passed"],"/",d["total"])')"
+      - name: Suite 2, published image with llama3.1 8B
+        run: |
+          curl -fsSL https://ollama.com/install.sh | sh
+          sudo systemctl stop ollama 2>/dev/null || true
+          (OLLAMA_HOST=0.0.0.0:11434 ollama serve > /tmp/ollama.log 2>&1 &)
+          for i in $(seq 1 30); do curl -fs localhost:11434/api/tags >/dev/null && break; sleep 1; done
+          ollama pull llama3.1:8b
+          docker run -d --name hyperion -p 8000:8000 --add-host host.docker.internal:host-gateway \
+            -e OPENAI_BASE_URL=http://host.docker.internal:11434/v1 -e STEWARD_MODEL=llama3.1:8b -e API_KEY=ollama \
+            -e STEWARD_LLM_TIMEOUT=300 "$IMAGE"
+          for i in $(seq 1 30); do curl -fs localhost:8000/health && break; sleep 1; done; echo
+          python -m evaluation.gui_e2e --suite model --out /tmp/pub/model || true
+          docker logs hyperion 2>&1 | tail -40 > /tmp/pub/model/container-log-tail.txt
+          echo "::notice title=published-model::$(python3 -c 'import json;d=json.load(open("/tmp/pub/model/gui-e2e-model.json"));print(d["passed"],"/",d["total"],[(r["sid"],r["passed"],r["seconds"]) for r in d["results"]])')"
+      - name: Publish evidence
+        if: always()
+        run: |
+          find /tmp/pub -size +90M -print -delete
+          git config user.name "github-actions[bot]"; git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin ci-evidence && git checkout -B ci-evidence origin/ci-evidence
+          rm -rf published-image && mkdir -p published-image && cp -r /tmp/pub/* published-image/ && git add published-image && git commit -m "published-image $(cat /tmp/pub/revision.txt | cut -c1-7)" || true
+          for i in 1 2 3 4; do git push origin ci-evidence && break; sleep $((i*5)); git fetch origin ci-evidence && git rebase origin/ci-evidence; done

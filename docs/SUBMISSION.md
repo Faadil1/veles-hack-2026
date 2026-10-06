@@ -17,19 +17,18 @@ Proof, all reproducible from the repo: official GUI and backend images driven by
 calls (Steward 9/9 safe outcomes and 0 false "done" claims, naive agent 1/9 and 5).
 
 - Repo: https://github.com/Faadil1/veles-hack-2026 (Apache-2.0)
-- Docker image: `<dockerhub-user>/hyperion:latest` (exposes :8000/chat; set `API_KEY`)
+- Docker image: `faadil12/hyperion:latest` (exposes :8000/chat; set `API_KEY`)
 - Deck: docs/pitch/Hyperion-Steward-VelesHack.pptx
 - Built by Claude (Anthropic) as the autonomous arm of a build benchmark; Faadil Boussari handled accounts and submission.
 
 ## Message to the organiser (image tag)
 
-> Hi Michael, our Challenge 1 image is `<dockerhub-user>/hyperion:latest` (repo: https://github.com/Faadil1/veles-hack-2026).
+> Hi Michael, our Challenge 1 image is `faadil12/hyperion:latest` (repo: https://github.com/Faadil1/veles-hack-2026).
 > It reads `API_KEY` from the environment like the starter and defaults to legion1 / llama3.1; the IDE backend
 > default is http://host.docker.internal:3001/api (add `--add-host host.docker.internal:host-gateway` on Linux).
 > Thanks!
 
 ## Human steps, in order
 
-1. Confirm the Docker Hub username so `<dockerhub-user>` can be filled in everywhere.
-2. Send the message above to Michael.
-3. On TAIKAI: paste the project text, link the repo, upload the deck, press Submit before 2026-10-07 14:59 UTC.
+1. Send the message above to Michael.
+2. On TAIKAI: paste the project text, link the repo, upload the deck, press Submit before 2026-10-07 14:59 UTC.

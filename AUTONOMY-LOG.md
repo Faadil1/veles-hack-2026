@@ -281,3 +281,9 @@ Timezone of record: UTC (local Toronto = UTC-4).
 - **Observed (2e62095, official images, llama3.1:8b Ollama CPU):** 7/7. Action steps (create, ambiguous delete, fix, undo) now take 3 to 5 s instead of minutes. Memory question answered by the model from session history. Caveat recorded, not hidden: "What is HyperAI?" hit the 300 s model timeout on the CPU runner and was answered by the cited documentation fallback; the same step passed with the model in 07a7343. Recording published as an 8x time-lapse (1 MB).
 - **Evidence:** evidence/gui-model/ (copied from ci-evidence:gui-model, commit 2e62095). Docker Hub image pushed at 2e62095 (digest sha256:c2c1d6fc…).
 - **Reversible:** n/a. **Human required:** Docker Hub username for the README, deck and organiser message.
+
+## D-034 — Evaluation image name fixed; verify the published artifact, not the build
+- **Timestamp:** 2026-10-06T16:05Z
+- **Observed:** the human gave the Docker Hub user: the evaluation image is `faadil12/hyperion:latest`.
+- **Decision:** placeholders replaced in README, deck, SUBMISSION, FINAL-HANDOVER, depth review, ledger (historical log entries left as written). Images now carry `org.opencontainers.image.revision` = commit SHA, so the pulled artifact can be bound to a commit. New workflow `published-image` runs after every green `ci` on main: deletes any local copy, pulls `faadil12/hyperion:latest` from Docker Hub, records digest and revision, then runs it as the organiser would (port 8000, host.docker.internal) behind the official GUI and backend images with a browser: suite 1 without a model, suite 2 with llama3.1 8B reached from inside the container.
+- **Reversible:** yes. **Human required:** no.

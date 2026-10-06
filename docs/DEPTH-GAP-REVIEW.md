@@ -1,7 +1,7 @@
 # Post-Vertical-Slice Depth Gap Review
 
 Date: 2026-10-06T16:10Z. First live slice: d6924d9 (official backend image, 6/6). Reviewed against the five official
-criteria and the judge path (organiser runs `<user>/hyperion:latest` with his own `API_KEY`, the official GUI and
+criteria and the judge path (organiser runs `faadil12/hyperion:latest` with his own `API_KEY`, the official GUI and
 backend, and types the example requests).
 
 | Area | Depth now | Gap found | Action | Status |

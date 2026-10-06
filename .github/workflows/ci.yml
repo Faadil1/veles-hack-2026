@@ -102,7 +102,9 @@ jobs:
           tags: |
             ghcr.io/faadil1/hyperion-steward:${{ github.sha }}
             ghcr.io/faadil1/hyperion-steward:latest
-          labels: org.opencontainers.image.source=https://github.com/Faadil1/veles-hack-2026
+          labels: |
+            org.opencontainers.image.source=https://github.com/Faadil1/veles-hack-2026
+            org.opencontainers.image.revision=${{ github.sha }}
       - name: Container smoke test (degraded mode, no secrets)
         run: |
           docker run -d --name steward-smoke -p 8000:8000 -e STEWARD_DISABLE_LLM=1 ghcr.io/faadil1/hyperion-steward:${{ github.sha }} 2>/tmp/run.err \

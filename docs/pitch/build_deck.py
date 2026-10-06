@@ -12,7 +12,7 @@ from pptx.util import Inches, Pt
 
 HERE = Path(__file__).parent
 IMG = HERE / "img"
-DOCKER_IMAGE = sys.argv[1] if len(sys.argv) > 1 else "<dockerhub-user>/hyperion:latest"
+DOCKER_IMAGE = sys.argv[1] if len(sys.argv) > 1 else "faadil12/hyperion:latest"
 REPO = "github.com/Faadil1/veles-hack-2026"
 
 NAVY = RGBColor(0x1F, 0x2A, 0x6B)

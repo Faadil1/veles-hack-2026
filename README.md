@@ -61,7 +61,7 @@ What is real and what is not is kept in [`docs/REALITY-LEDGER.md`](docs/REALITY-
 ```bash
 docker run -p 8000:8000 --add-host host.docker.internal:host-gateway \
   -e API_KEY=<team key> \
-  <dockerhub-user>/hyperion:latest
+  faadil12/hyperion:latest
 ```
 
 Defaults match the starter: model server `https://legion1.di.uoa.gr/v1`, model `llama3.1`, IDE backend

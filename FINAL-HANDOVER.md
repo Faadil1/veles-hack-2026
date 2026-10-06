@@ -8,21 +8,20 @@ Status at 2026-10-06T16:45Z: **SUBMITTABLE, pending human steps.** Deadline 2026
 | Item | Where | State |
 |---|---|---|
 | Product | `steward/`, `main.py`, `Dockerfile` | `/chat` SSE microservice, starter-compatible |
-| Evaluation image | Docker Hub `<dockerhub-user>/hyperion:latest`, pushed by CI on every push to main | First push 2e62095 (sha256:c2c1d6fc…) |
+| Evaluation image | Docker Hub `faadil12/hyperion:latest`, pushed by CI on every push to main | First push 2e62095 (sha256:c2c1d6fc…) |
 | Tests | `tests/` | 100 passing, CI green |
 | Live evidence | `evidence/`, branch `ci-evidence` | Official GUI + backend images, browser-driven, llama3.1 8B: 7/7; validator parity 0/5,536; live slice 6/6 |
-| Deck | `docs/pitch/Hyperion-Steward-VelesHack.pptx` (official template) | Ready; Docker Hub user placeholder |
+| Deck | `docs/pitch/Hyperion-Steward-VelesHack.pptx` (official template) | Ready |
 | Pitch script and Q&A | `docs/pitch/PITCH.md` | Ready |
-| Submission text and organiser message | `docs/SUBMISSION.md` | Ready; Docker Hub user placeholder |
+| Submission text and organiser message | `docs/SUBMISSION.md` | Ready |
 | Decisions | `AUTONOMY-LOG.md` D-000 to D-033 | Current |
 | Truth labels | `docs/REALITY-LEDGER.md` | Current |
 
 ## Human steps (only these)
 
-1. Give the Docker Hub username (to fill `<dockerhub-user>` in README, deck, submission text).
-2. Send the organiser message in `docs/SUBMISSION.md` (image tag).
-3. Submit on TAIKAI before 2026-10-07 14:59 UTC: project text, repo link, deck.
-4. Pitch on 2026-10-08 with `docs/pitch/PITCH.md`.
+1. Send the organiser message in `docs/SUBMISSION.md` (image tag).
+2. Submit on TAIKAI before 2026-10-07 14:59 UTC: project text, repo link, deck.
+3. Pitch on 2026-10-08 with `docs/pitch/PITCH.md`.
 
 ## Known limits (stated in the README and deck)
 
