@@ -1,0 +1,70 @@
+/app
+total 192
+drwxr-xr-x    1 root     root          4096 Sep 11 08:06 .
+drwxr-xr-x    1 root     root          4096 Oct  6 12:50 ..
+drwxrwxr-x    8 root     root          4096 Sep 11 08:06 .git
+-rw-rw-r--    1 root     root            70 Jul 29 11:19 .gitignore
+-rw-rw-r--    1 root     root          1805 Jul 29 11:19 .gitlab-ci.yml
+-rw-rw-r--    1 root     root           206 Jul 29 11:19 Dockerfile
+-rw-rw-r--    1 root     root         11358 Jul 29 11:19 LICENCE
+-rw-rw-r--    1 root     root           541 Jul 29 11:19 README.md
+drwxrwxr-x    3 root     root          4096 Aug  4 06:36 helm-charts
+-rw-rw-r--    1 root     root           662 Aug  4 07:10 justfile
+drwxrwxr-x    2 root     root          4096 Jul 29 11:19 k8s
+drwxrwxr-x    1 root     root         12288 Sep 11 08:06 node_modules
+-rw-rw-r--    1 root     root        102516 Sep 11 07:41 package-lock.json
+-rw-rw-r--    1 root     root           736 Sep 11 07:41 package.json
+drwxrwxr-x    3 root     root          4096 Jul 29 11:19 prisma
+drwxrwxr-x    5 root     root          4096 Sep 11 08:06 src
+drwxrwxr-x    2 root     root          4096 Aug  4 06:33 templates
+{
+  "name": "test2",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@confluentinc/kafka-javascript": "^1.2.0",
+    "@prisma/client": "^5.22.0",
+    "axios": "^1.7.9",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "form-data": "^4.0.0",
+    "jose": "^5.9.6",
+    "kafkajs": "^2.2.4",
+    "prisma": "^5.22.0",
+    "socket.io": "^4.8.1",
+    "socketio": "^1.0.0",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1",
+    "uuid": "^11.1.0",
+    "yaml": "^2.9.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.7"
+  }
+}
+total 192
+drwxr-xr-x    1 root     root          4096 Sep 11 08:06 .
+drwxr-xr-x    1 root     root          4096 Oct  6 12:50 ..
+drwxrwxr-x    8 root     root          4096 Sep 11 08:06 .git
+-rw-rw-r--    1 root     root            70 Jul 29 11:19 .gitignore
+-rw-rw-r--    1 root     root          1805 Jul 29 11:19 .gitlab-ci.yml
+-rw-rw-r--    1 root     root           206 Jul 29 11:19 Dockerfile
+-rw-rw-r--    1 root     root         11358 Jul 29 11:19 LICENCE
+-rw-rw-r--    1 root     root           541 Jul 29 11:19 README.md
+drwxrwxr-x    3 root     root          4096 Aug  4 06:36 helm-charts
+-rw-rw-r--    1 root     root           662 Aug  4 07:10 justfile
+drwxrwxr-x    2 root     root          4096 Jul 29 11:19 k8s
+drwxrwxr-x    1 root     root         12288 Sep 11 08:06 node_modules
+-rw-rw-r--    1 root     root        102516 Sep 11 07:41 package-lock.json
+-rw-rw-r--    1 root     root           736 Sep 11 07:41 package.json
+drwxrwxr-x    3 root     root          4096 Jul 29 11:19 prisma
+drwxrwxr-x    5 root     root          4096 Sep 11 08:06 src
+drwxrwxr-x    2 root     root          4096 Aug  4 06:33 templates

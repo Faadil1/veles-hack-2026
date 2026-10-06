@@ -1,0 +1,60 @@
+## image digests
+[donmichael/ide-backend:latest] sha256:3b2906879ea72dc4ac386745502ec2baa831640a9f0956c2dcf40c9c907ba906 2026-09-11T11:06:40.378352879+03:00
+[donmichael/ide-gui:latest] sha256:a805e9d3acf827e251016c0bbe5f7608062b71c50f66b478ff804d7ba50c7053 2026-09-11T11:06:17.394636326+03:00
+## backend logs
+(node:1) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///app/src/server.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+ File API server running at http://localhost:3001
+ Files root: /app/helm-charts
+ Templates root: /app/templates
+ AUTH_ENABLED=false — Keycloak token verification is DISABLED (dev only)
+## probes
+/api/agent/file?path=nope.yaml -> {"error":"File not found"} [404]
+/api/agent/validation/file?path=nope.yaml -> {"error":"File not found"} [404]
+/api -> <!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Error</title>
+</head>
+<body>
+<pre>Cannot GET /api</pre>
+</body>
+</html>
+ [404]
+/api/health -> <!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Error</title>
+</head>
+<body>
+<pre>Cannot GET /api/health</pre>
+</body>
+</html>
+ [404]
+/api/files -> [{"name":"hello","type":"folder","path":"hello"}] [200]
+/api/workspace -> <!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Error</title>
+</head>
+<body>
+<pre>Cannot GET /api/workspace</pre>
+</body>
+</html>
+ [404]
+/api/tree -> <!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Error</title>
+</head>
+<body>
+<pre>Cannot GET /api/tree</pre>
+</body>
+</html>
+ [404]
