@@ -15,7 +15,7 @@ import re
 import time
 from typing import Any
 
-from . import runnability, spec
+from . import runnability, spec, templates
 from .engine import SafeOps, Session
 from .ide import IdeClient
 from .llm import LLM, LLMError, LLMTurn
@@ -38,7 +38,10 @@ Your promise: you never leave the workspace worse than you found it.
 Rules:
 - For any question about HYPER-AI, the IDE, the DSL or deployment, call search_docs first and answer only from
   the returned passages. Cite sources as [n] using the numbers returned. If the docs do not cover it, say so.
-- To create or change an application profile, call write_profile with the full YAML. It checks the profile
+- To create a NEW profile, prefer create_profile: give the parameters you know (name, workload, image, ports,
+  latency, architectures...) and it builds a complete, spec-correct profile, then writes and validates it.
+  Tell the user which values were defaults so they can change them.
+- To change an existing profile, read_file it, then call write_profile with the full edited YAML. It checks the profile
   locally, writes it, asks the IDE validator, and rolls back automatically if the validator rejects it.
   Never say a profile is valid unless write_profile or validate_file reported valid=true.
 - Before writing, draft complete profiles that satisfy the DSL: Native apps use `applicationProfile:`;
@@ -61,6 +64,29 @@ TOOLS: list[dict[str, Any]] = [
      "input_schema": {"type": "object", "properties": {"path": {"type": "string"}}, "required": ["path"]}},
     {"name": "check_profile", "description": "Check YAML text locally (spec rules + runnability) without writing anything.",
      "input_schema": {"type": "object", "properties": {"yaml": {"type": "string"}}, "required": ["yaml"]}},
+    {"name": "create_profile",
+     "description": "Build a complete new profile from parameters and write it safely. kind=device (Docker image, "
+                    "Android APK or ESP32 firmware on edge devices) or kind=native (container/VM on the continuum).",
+     "input_schema": {"type": "object", "properties": {
+         "path": {"type": "string", "description": "workspace-relative .yaml path"},
+         "kind": {"type": "string", "enum": ["device", "native"]},
+         "name": {"type": "string"},
+         "workload": {"type": "string", "enum": ["DockerImage", "AndroidApk", "esp32Binary"],
+                      "description": "device only"},
+         "image": {"type": "string", "description": "container image, e.g. acme/api:1.2"},
+         "entry_point": {"type": "string", "description": "native only: command the container runs"},
+         "args": {"type": "array", "items": {"type": "string"}},
+         "apk_url": {"type": "string"}, "package_name": {"type": "string"},
+         "binary_url": {"type": "string"}, "chip": {"type": "string"},
+         "device_name": {"type": "string"},
+         "architectures": {"type": "array", "items": {"type": "string"}},
+         "ports": {"type": "array", "items": {"type": "integer"}},
+         "latency_ms": {"type": "number"},
+         "availability": {"type": "number", "description": "device: fraction 0-1; native: percent"},
+         "lifecycle_phase": {"type": "string", "enum": ["development", "testing", "production"]},
+         "description": {"type": "string"},
+         "public": {"type": "boolean", "description": "native only: expose ports publicly"}},
+         "required": ["path", "kind", "name"]}},
     {"name": "write_profile", "description": "Create or update a .yaml application profile safely (local check, write, IDE validation, auto-rollback).",
      "input_schema": {"type": "object", "properties": {"path": {"type": "string"}, "yaml": {"type": "string"}},
                       "required": ["path", "yaml"]}},
@@ -185,6 +211,42 @@ class Steward:
                                 {"role": "assistant", "content": summary or "(no text)"}])
         del session.history[:-24]
 
+
+    async def _create_profile(self, ops: SafeOps, args: dict[str, Any]) -> dict[str, Any]:
+        kind = str(args.get("kind", "")).lower()
+        try:
+            if kind == "device":
+                availability = args.get("availability")
+                yaml_text = templates.build_device_profile(
+                    name=str(args.get("name")), workload=str(args.get("workload") or "DockerImage"),
+                    image=args.get("image"), apk_url=args.get("apk_url"), package_name=args.get("package_name"),
+                    binary_url=args.get("binary_url"), chip=args.get("chip"), device_name=args.get("device_name"),
+                    architectures=args.get("architectures"), ports=args.get("ports"),
+                    latency_ms=float(args.get("latency_ms") or 500),
+                    availability=float(availability) / 100 if availability and float(availability) > 1
+                    else float(availability or 0.9),
+                    lifecycle_phase=str(args.get("lifecycle_phase") or "development"),
+                    description=args.get("description"))
+            elif kind == "native":
+                if not args.get("image"):
+                    return {"status": "needs_input", "missing": ["image"]}
+                yaml_text = templates.build_native_profile(
+                    name=str(args.get("name")), image=str(args.get("image")), entry_point=args.get("entry_point"),
+                    args=args.get("args"), ports=args.get("ports"), public=bool(args.get("public", False)),
+                    architectures=args.get("architectures"), latency_ms=args.get("latency_ms"),
+                    availability_percent=args.get("availability"),
+                    lifecycle_phase=str(args.get("lifecycle_phase") or "development"),
+                    description=args.get("description"))
+            else:
+                return {"status": "needs_input", "missing": ["kind (device|native)"]}
+        except (ValueError, TypeError) as exc:
+            return {"status": "needs_input", "detail": str(exc)}
+        ops.s.receipt("create_profile", kind=kind, path=args.get("path"))
+        result = await ops.write_profile(str(args.get("path", "")), yaml_text)
+        result["generated_yaml"] = yaml_text
+        result["note"] = "Built from parameters; unspecified fields use cookbook-aligned defaults visible in the YAML."
+        return result
+
     async def _run_tool(self, ops: SafeOps, name: str, args: dict[str, Any]) -> dict[str, Any]:
         try:
             if name == "search_docs":
@@ -214,6 +276,8 @@ class Steward:
                         "issues": [i.as_dict() for i in local.issues],
                         "runnability": runnability.assess(text).as_dict(),
                         "note": "Local check only; the IDE validator is authoritative."}
+            if name == "create_profile":
+                return await self._create_profile(ops, args)
             if name == "write_profile":
                 return await ops.write_profile(str(args.get("path", "")), str(args.get("yaml", "")))
             if name == "write_file":
