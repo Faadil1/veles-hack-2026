@@ -10,14 +10,14 @@
       "passed": true,
       "reason": "ok",
       "reply": "I'm Hyperion, the assistant for the HYPER-AI IDE, so I can only help with HYPER-AI and your workspace: questions about the platform, and creating, checking, fixing or deleting application profiles and files. Try something like “Create a device app for the nginx image” or “What are Open Connectors?”.",
-      "seconds": 4.3,
+      "seconds": 4.2,
       "files": [
         "cloud/app.yaml",
         "cookbook/native.yaml",
         "edge/app.yaml"
       ],
       "status_log_tail": [
-        "[INFO 4:49:26 PM] Workspace ready. Waiting for messages."
+        "[INFO 5:02:06 PM] Workspace ready. Waiting for messages."
       ]
     },
     {
@@ -33,7 +33,7 @@
         "edge/app.yaml"
       ],
       "status_log_tail": [
-        "[INFO 4:49:26 PM] Workspace ready. Waiting for messages."
+        "[INFO 5:02:06 PM] Workspace ready. Waiting for messages."
       ]
     },
     {
@@ -49,7 +49,7 @@
         "edge/app.yaml"
       ],
       "status_log_tail": [
-        "[INFO 4:49:26 PM] Workspace ready. Waiting for messages."
+        "[INFO 5:02:06 PM] Workspace ready. Waiting for messages."
       ]
     },
     {
@@ -65,7 +65,7 @@
         "edge/app.yaml"
       ],
       "status_log_tail": [
-        "[INFO 4:49:26 PM] Workspace ready. Waiting for messages."
+        "[INFO 5:02:06 PM] Workspace ready. Waiting for messages."
       ]
     }
   ]
