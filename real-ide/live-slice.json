@@ -35,7 +35,7 @@
       "id": "L1",
       "title": "Create a device profile from parameters (builder, real validator)",
       "passed": true,
-      "seconds": 0.27,
+      "seconds": 0.3,
       "actions": [
         "create_file steward-live/web.yaml"
       ],
@@ -58,7 +58,7 @@
       "id": "L2",
       "title": "Write the official native cookbook example: schema-valid, runnability blocker surfaced",
       "passed": true,
-      "seconds": 0.27,
+      "seconds": 0.28,
       "actions": [
         "create_file steward-live/native.yaml"
       ],
@@ -95,7 +95,7 @@
       "id": "L4",
       "title": "A spec-invalid profile is stopped before it reaches the workspace",
       "passed": true,
-      "seconds": 0.0,
+      "seconds": 0.01,
       "actions": [],
       "steward_said": "ok",
       "result": {
@@ -125,7 +125,7 @@
       "id": "L6",
       "title": "Undo restores the deleted file byte for byte",
       "passed": true,
-      "seconds": 0.25,
+      "seconds": 0.26,
       "actions": [
         "create_file steward-live/web.yaml"
       ],
