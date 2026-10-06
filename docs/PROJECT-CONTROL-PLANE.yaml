@@ -1,0 +1,38 @@
+version: 1.0.0
+project:
+  name: VELES_HACK_2026
+  repository: Faadil1/veles-hack-2026
+  project_type: HACKATHON
+  profile: project-profiles/hackathon.yaml@0.1.15 (faadil-agent-system@61f853a)
+  status: ACTIVE
+routing:
+  current_owner: hackathon_opportunity_intelligence (opportunity stage), executed autonomously by Claude benchmark arm
+  exact_next_gate: TRACK_AND_CONCEPT_QUALIFICATION
+  ambiguity:
+    - official_rules_and_judging_criteria
+    - starter_repos_for_tracks_2_3_4
+  protected_authority_boundary: FINAL_SUBMISSION_AND_IDENTITY_ACTIONS_HUMAN
+activation:
+  lifecycle_manifest: docs/LIFECYCLE-COVERAGE.yaml (create at first material build touch)
+  conditional_gateway_registry: docs/CONDITIONAL-GATEWAY-REGISTRY.yaml
+  product_reality: ACTIVE
+  evidence_graph: ACTIVE
+  reference_intelligence_domains: [PENDING_TRACK_SELECTION]
+  engineering_quality_assurance: N/A (no code yet)
+  pre_launch_ship_assurance: ACTIVE
+state:
+  current_pointer: state/CURRENT.yaml
+  handover_pointer: state/HANDOVER.yaml
+  initialized_or_updated: true
+truth_boundary:
+  observed:
+    - deadline_2026-10-07T21:59Z
+    - four_tracks_and_owners
+    - per_track_prizes
+    - workspace_egress_limits
+  inferred: []
+  unknown:
+    - judging_criteria
+    - deliverables
+    - rules_text
+blockers: []

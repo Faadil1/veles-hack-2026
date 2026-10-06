@@ -1,0 +1,184 @@
+version: 0.1.0
+project: VELES_HACK_2026
+updated_at: 2026-10-06T10:22Z
+canonical_baseline: faadil-agent-system@61f853a461634ca46746c63bbf6ced5fa05f8649 (0.1.57)
+allowed_statuses: [PROVEN, ACTIVE, BLOCKED, PENDING, N/A, UNKNOWN]
+rule: every_registered_or_triggered_gate_is_explicit__nothing_is_silently_omitted
+note: >-
+  Status vocabulary follows the canonical project registries (ryo-chan-2026 precedent). PENDING = triggered later
+  by a known condition. N/A always carries a reason. A gate is never deleted; it changes status.
+
+gateways:
+  CORE_LIFECYCLE:
+    status: ACTIVE
+    sequence: QUALIFY__DECIDE__DESIGN__DELIVER__AUDIT__EXPAND
+    current: QUALIFY
+  JUDGED_BUILD_CYCLE:
+    status: ACTIVE
+    sequence: RUBRIC__PAIN__PROBLEM__NEGATIVE_EVENT__DIFFERENTIATOR__EXECUTION__LIVE_DEPTH__EVIDENCE__STORY__DEMO__Q_AND_A
+
+  SYSTEM_CONTROL_PLANE_BOOTSTRAP:
+    status: PROVEN
+    evidence: docs/PROJECT-CONTROL-PLANE.yaml, state/CURRENT.yaml, state/HANDOVER.yaml
+  CANONICAL_BASELINE_PIN:
+    status: PROVEN
+    evidence: state/CURRENT.yaml canonical_baseline; AUTONOMY-LOG D-003
+    note: central main advanced to c4404a1; delta not adopted (benchmark fairness pin). Classify only if a material transition depends on it.
+  RULES_ELIGIBILITY_SUBMISSION_REQUIREMENTS:
+    status: ACTIVE
+    note: eligibility CONFIRMED (registration by human); rules text, deliverables UNKNOWN (TAIKAI client-rendered). See docs/CHALLENGE-REALITY.md.
+  RUBRIC:
+    status: UNKNOWN
+    note: no judging criteria published on any reachable page; per-track winner/runner-up structure OBSERVED.
+  PAIN:
+    status: PENDING
+    activation_condition: track selection
+  PROBLEM:
+    status: PENDING
+  NEGATIVE_EVENT:
+    status: PENDING
+    note: must be a real, verifiable event, not theoretical risk.
+  DIFFERENTIATOR:
+    status: PENDING
+  EXECUTION:
+    status: BLOCKED
+    note: no concept lock, no PRD_READY
+  LIVE_DEPTH:
+    status: BLOCKED
+  EVIDENCE:
+    status: ACTIVE
+    note: evidence/ folder, Reality Ledger and Evidence Graph to be created at first runtime.
+  STORY:
+    status: BLOCKED
+  DEMO:
+    status: BLOCKED
+  Q_AND_A:
+    status: BLOCKED
+
+  OPPORTUNITY_INTELLIGENCE_HOI:
+    status: ACTIVE
+    note: HOI repo (dc030e5) to be read before Concept Lock.
+  AUTHORIZATION_CHIEF_OF_STAFF:
+    status: ACTIVE
+    note: benchmark ROUND-1 records SELECTED_AND_REGISTERED by human; Chief of Staff read only as routed.
+  PRE_BUILD_REALITY_GATE:
+    status: ACTIVE
+  TRACK_FEASIBILITY_FROM_WORKSPACE:
+    status: ACTIVE
+    note: workspace egress limits (D-004) make tracks needing organiser-hosted infra unverifiable from here.
+  PROTOTYPE_KILLER_SIMPLER_ALTERNATIVE:
+    status: ACTIVE
+  COMPETITIVE_NOVELTY_KILL_GATE:
+    status: ACTIVE
+  INTERNAL_PORTFOLIO_COLLISION:
+    status: PENDING
+    note: check only if the locked concept resembles a prior Faadil build; prior repos not preloaded.
+  EXTERNAL_CURRENT_COLLISION:
+    status: PENDING
+  DEEP_PROBLEM_INTELLIGENCE:
+    status: ACTIVE
+  WINNING_INTELLIGENCE_V2:
+    status: ACTIVE
+    trigger_reason: AI-era commodity exposure is material (at least one track is an LLM assistant).
+  AI_COMMODITY_TEST:
+    status: ACTIVE
+  CREATIVE_DIVERGENCE:
+    status: PENDING
+  CAUSAL_MECHANISM_ASSURANCE:
+    status: UNKNOWN
+    note: triggers if the differentiator relies on a guard/validator/arbiter/auction mechanism; decided at Concept Lock.
+  REFERENCE_INTELLIGENCE:
+    status: PENDING
+    note: lookup when architecture domain is known.
+  OSSIUM_OSS_DISCOVERY:
+    status: PENDING
+
+  SPONSOR_NATIVE_ADVANTAGE:
+    status: PENDING
+  SPONSOR_REMOVAL_TEST:
+    status: BLOCKED
+    note: requires locked architecture
+  TECHNICAL_REALITY_CHECK:
+    status: PENDING
+    note: runs right after Concept Lock against the actual starter/API contracts.
+  TRUTH_BOUNDARY:
+    status: ACTIVE
+  NEGATIVE_PATH:
+    status: PENDING
+  EVIDENCE_INTEGRITY:
+    status: ACTIVE
+  CLAIM_RUNTIME_EVIDENCE_GRAPH:
+    status: PENDING
+    activation_condition: first live claim
+  RUNTIME_COMMIT_BINDING:
+    status: BLOCKED
+    note: no runtime yet
+  DETERMINISTIC_DEMO:
+    status: PENDING
+  FAILURE_RECOVERY:
+    status: PENDING
+  EXTERNAL_DEPENDENCY_FAILURE:
+    status: PENDING
+  REAL_USER_OPERATOR_LOOP:
+    status: PENDING
+  EXTERNAL_USER_OPERATOR_EVIDENCE:
+    status: PENDING
+  TIME_TO_FIRST_VALUE:
+    status: PENDING
+  OPERATIONAL_ECONOMICS:
+    status: PENDING
+    note: material if an LLM API is in the core loop.
+  SHARED_PRODUCT_CORE:
+    status: PENDING
+  REALITY_LEDGER:
+    status: ACTIVE
+  OBSERVABILITY_RECEIPTS:
+    status: PENDING
+  JUDGE_OPERATOR_SELF_SERVE:
+    status: PENDING
+  SETUP_REPRODUCIBILITY:
+    status: PENDING
+  CLEAN_ROOM_CORE_PATH:
+    status: PENDING
+  POST_VERTICAL_SLICE_DEPTH_GAP_REVIEW:
+    status: N/A
+    reason: no first live vertical slice yet
+  PRODUCT_EXPLOITATION_LOOP:
+    status: PENDING
+    activation_condition: first_live_vertical_slice
+  ACTION_DEPTH_SELECTION:
+    status: PENDING
+  LIVING_PRD_PBPD:
+    status: PENDING
+    activation_condition: concept lock; PBPD repo ff035d8 PRD standard/template
+  SPEC_KIT:
+    status: PENDING
+    note: conditional; activate only if spec/convergence protocol adds material value.
+  ENGINEERING_QUALITY_ASSURANCE:
+    status: N/A
+    reason: no code yet; becomes ACTIVE at first material code
+  TRACE_DESIGN_ASSURANCE:
+    status: PENDING
+    activation_condition: evaluator-facing interface exists
+  JUDGE_MEDIA_GENERATION:
+    status: UNKNOWN
+    note: depends on whether a demo video is required (rules UNKNOWN). Plan for a video regardless.
+  DEPLOYMENT_POLICY:
+    status: ACTIVE
+    note: no provider CLI reachable; deploy route to be chosen (GitHub Pages/Actions or Artifact).
+  SUBMISSION_EXECUTION_ASSURANCE:
+    status: ACTIVE
+    submission_status: NOT_STARTED
+    official_deadline: 2026-10-07T21:59Z
+    event_specific_safety_margin: 3h (boundary 2026-10-07T19:00Z)
+    safety_margin_basis: >-
+      TAIKAI form + possible video upload/processing + human-only final submit + platform not inspectable
+      from workspace (form fields UNKNOWN) + overnight timezone gap for the human (Toronto).
+  FINAL_CANONICAL_ASSURANCE:
+    status: PENDING
+    activation_condition: BUILD_CANDIDATE_READY; Project Finisher b5ea200
+  PROTECTED_SUBMISSION:
+    status: PENDING
+    owner: human
+  POST_MORTEM:
+    status: PENDING
