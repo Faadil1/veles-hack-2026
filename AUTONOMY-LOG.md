@@ -191,3 +191,11 @@ Timezone of record: UTC (local Toronto = UTC-4).
 - **Evidence:** ci-evidence:scenarios/qwen2.5_3b-66b1d2f.json, qwen2.5_7b-f8c8f3d.json; fix commit d063e1d; tests 46 passing.
 - **Lesson:** a passing unit test of a component is not evidence the agent can use it. Every tool needs at least one test through the agent loop.
 - **Reversible:** yes. **Human required:** no.
+
+## D-022 — Third live-model round and a human-boundary refinement (PRD v0.2)
+- **Timestamp:** 2026-10-06T11:19Z
+- **Observed (code d063e1d):** qwen2.5:3b 5/7 (N1, N4 now pass; N3 flipped to fail: variance at 3B), qwen2.5:7b 6/7. N5 failed on both: the model asked "would you like me to…?", the user said yes, then Steward's overwrite guard asked again; the scenario ended before the write. No damage in any run.
+- **Options:** (a) leave double confirmation; (b) drop the overwrite confirmation; (c) treat an exact path named in the request as consent for overwriting that file, keep the restore point, keep deletions and bare names confirmed; plus tell the model to act rather than ask.
+- **Decision:** (c). PRD bumped to v0.2 (material human-boundary change, per PBPD standard §12). Tests cover explicit path, bare name, and delete.
+- **Evidence:** ci-evidence:scenarios/qwen2.5_3b-d063e1d.json, qwen2.5_7b-d063e1d.json; tests 57 passing; ablation unchanged (C 7/7, A/B 1/7).
+- **Reversible:** yes. **Human required:** no.

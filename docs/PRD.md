@@ -1,6 +1,6 @@
 # Hyperion Steward — Product Requirements Document
 
-Version: `0.1`
+Version: `0.2`
 Status: `PRD_VALIDATED_WITH_OPEN_DEPENDENCIES` (see §19)
 Project ID: `veles_hack_2026`
 Date: `2026-10-06`
@@ -92,7 +92,7 @@ Tacit knowledge / exceptions:
 
 ## 5C. Human boundary / production gap / moat
 
-- **Judgment points:** ambiguous file target (409) → user chooses; deleting anything → confirm; overwriting a file Steward did not create in this session → confirm; saving a profile that still fails validation → only as a draft path, never over an existing file.
+- **Judgment points:** ambiguous file target (409) → user chooses; deleting anything → confirm; overwriting a file Steward did not create in this session → confirm, **unless the user named that exact path in the current request** (explicit consent; restore point still kept, `undo` still works); a profile that fails the IDE validator is rolled back, never left over an existing file.
 - **Protected actions:** deploying a workflow stays in the IDE UI (Deploy/Start buttons); Steward never deploys.
 - **Production gap:** single-instance in-memory sessions; no auth beyond the IDE's user_id; no multi-user concurrency guarantees; validated only against the documented contract until the live IDE run.
 - **Moat / learning hypothesis:** the runnability rule set and the failure catalogue grow from real validator responses and deploy outcomes. Model access is not the moat.
@@ -149,7 +149,7 @@ user (IDE panel): "Create a device app that runs my image ghcr.io/acme/sensor:1.
 |---|---|---|---|
 | SHOULD-01 | Workspace audit command: validate all profiles and summarise | Depth | Test on seeded workspace |
 | SHOULD-02 | Per-session receipt log (actions, validator calls, guard decisions, tokens, latency, cost) exposed on a read-only endpoint | Observability, economics | Receipt endpoint test |
-| SHOULD-03 | Confirm before overwriting files not created in this session | Safety | Test |
+| SHOULD-03 | Confirm before overwriting files not created in this session, unless the exact path was named in the request (v0.2) | Safety without double confirmation | tests/test_behaviour.py (explicit path, bare name, delete) |
 
 ### MAY
 
@@ -271,3 +271,4 @@ PBPD ceiling: `BUILD_CANDIDATE_READY` or `BUILD_CANDIDATE_READY_WITH_LIMITATIONS
 | Version | Date | Change | Authority / reason | Impact |
 |---|---|---|---|---|
 | 0.1 | 2026-10-06 | Initial | Concept lock D-008 | — |
+| 0.2 | 2026-10-06 | Human boundary: naming the exact path in a change request counts as consent to overwrite that file; deletions always confirm | Live-model scenario N5 showed double confirmation (model asked, then Steward asked again); D-022 | SHOULD-03 refined; I4 invariant text updated |

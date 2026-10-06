@@ -205,3 +205,27 @@ def test_receipt_accepts_a_field_named_kind():
     s = Session("x")
     item = s.receipt("event", kind="device")
     assert item["kind"] == "event"
+
+
+async def test_naming_the_exact_path_is_consent_to_overwrite_with_restore_point():
+    changed = DEVICE_OK.replace("name: hello-world\n  annotations", "name: renamed\n  annotations")
+    h = Harness({"demo/app.yaml": DEVICE_OK},
+                llm=ScriptedLLM([tool("write_profile", path="demo/app.yaml", yaml=changed), say("Updated.")]))
+    turn = await h.say("rename the app in demo/app.yaml to renamed")
+    assert [a["action"] for a in turn.actions] == ["edit_file"] and h.ws.files["demo/app.yaml"] == changed
+    undo = await h.say("undo")
+    assert undo.actions[0]["action"] == "edit_file" and h.ws.files["demo/app.yaml"] == DEVICE_OK
+
+
+async def test_bare_name_is_not_consent_to_overwrite():
+    changed = DEVICE_OK.replace("name: hello-world\n  annotations", "name: renamed\n  annotations")
+    h = Harness({"demo/app.yaml": DEVICE_OK},
+                llm=ScriptedLLM([tool("write_profile", path="demo/app.yaml", yaml=changed)]))
+    turn = await h.say("rename the app in app.yaml")
+    assert turn.actions == [] and "Reply **yes** or **no**" in turn.text
+
+
+async def test_naming_a_path_never_skips_delete_confirmation():
+    h = Harness({"demo/app.yaml": DEVICE_OK}, llm=ScriptedLLM([tool("delete_file", path="demo/app.yaml")]))
+    turn = await h.say("delete demo/app.yaml")
+    assert turn.actions == [] and "Reply **yes** or **no**" in turn.text

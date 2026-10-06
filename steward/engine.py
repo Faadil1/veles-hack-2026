@@ -4,7 +4,8 @@ Invariants enforced here, independent of any LLM output:
   I1  No edit/delete is emitted against a name that the IDE reports as ambiguous (409).
   I2  Every edit/delete records the exact prior content first, so `undo` can restore it.
   I3  A profile never overwrites an existing file unless the result is validator-clean; failed writes roll back.
-  I4  Destructive actions (delete, overwrite of a file Steward did not create) need explicit user confirmation.
+  I4  Destructive actions need explicit user consent: deletions always ask; overwriting a file Steward did not
+      create asks unless the user named that exact path in the current request.
   I5  If a required check cannot run (backend unreachable), no action is emitted.
 """
 
@@ -116,6 +117,9 @@ class SafeOps:
         self.ide = ide
         self.s = session
         self.emit = emit
+        # Paths the user named explicitly in the current message. Asking to change a file by its exact path is
+        # consent to overwrite that file (a restore point is still kept). Deletions always ask.
+        self.explicit_targets: set[str] = set()
         self.validate_retries = validate_retries
         self.validate_delay_s = validate_delay_s
 
@@ -203,10 +207,13 @@ class SafeOps:
         if before is not None and before == content:
             return {"status": "unchanged", "path": target}
         if before is not None and target not in self.s.created_paths and not confirmed_overwrite:
-            self.s.pending = Pending("overwrite", target, f"overwrite `{target}`", content=content, before=before)
-            self.s.receipt("guard", rule="I4", decision="confirm_overwrite", path=target)
-            return {"status": "needs_confirmation", "path": target,
-                    "reason": "file exists and was not created by Steward in this session"}
+            if target in self.explicit_targets:
+                self.s.receipt("guard", rule="I4", decision="overwrite_consented_by_explicit_path", path=target)
+            else:
+                self.s.pending = Pending("overwrite", target, f"overwrite `{target}`", content=content, before=before)
+                self.s.receipt("guard", rule="I4", decision="confirm_overwrite", path=target)
+                return {"status": "needs_confirmation", "path": target,
+                        "reason": "file exists and was not created by Steward in this session"}
 
         action = "edit_file" if before is not None else "create_file"
         await self._act(action, target, content, before)
@@ -250,7 +257,8 @@ class SafeOps:
                     "matches": existing.matches, "reason": existing.detail}
         target = existing.path or path
         before = existing.content if existing.status == "resolved" else None
-        if before is not None and target not in self.s.created_paths and not confirmed_overwrite:
+        if before is not None and target not in self.s.created_paths and not confirmed_overwrite \
+                and target not in self.explicit_targets:
             self.s.pending = Pending("overwrite", target, f"overwrite `{target}`", content=content, before=before)
             return {"status": "needs_confirmation", "path": target}
         await self._act("edit_file" if before is not None else "create_file", target, content, before)

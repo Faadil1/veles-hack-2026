@@ -51,6 +51,8 @@ Rules:
 - Report runnability findings honestly: a schema-valid profile can still fail to run.
 - To change an existing file, read_file it first. Use full paths once you know them.
 - Paths are relative to the workspace root. Never use absolute paths or "..".
+- When the user asks you to create or change something, do it now with your tools. Do not ask "would you like
+  me to...?" first. Steward itself asks the user whenever a confirmation is needed.
 - You cannot deploy or start workflows; tell the user to use the IDE's Deploy and Start buttons.
 - Be brief. Plain sentences, light markdown. Do not narrate tool mechanics.
 """
@@ -113,6 +115,7 @@ class Steward:
     async def handle(self, session: Session, text: str, ops: SafeOps) -> None:
         started = time.perf_counter()
         session.receipt("user", text=text[:500])
+        ops.explicit_targets = set(re.findall(r"[\w.-]+(?:/[\w.-]+)+\.ya?ml|[\w.-]+(?:/[\w.-]+)+\.\w+", text))
         try:
             if session.pending is not None:
                 if YES.match(text):
