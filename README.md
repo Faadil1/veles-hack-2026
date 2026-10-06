@@ -51,8 +51,8 @@ something the IDE will reject.
 | Local profile checks agree exactly with the IDE validator | [`evidence/validator-parity/PARITY.json`](evidence/validator-parity/PARITY.json): 5,536 documents, 0 disagreements. CI job `real-ide` repeats it with the code inside the official image. | LOCAL; CI: LIVE image |
 | End-to-end against the real backend: create, ambiguity 409, invalid profile stopped, delete with confirmation, undo | [`evidence/live-slice/`](evidence/live-slice/): 6/6 steps, every change verified by read-back, undo restored identical bytes. GUI behaviour replicated from its source. | LOCAL backend source; CI: LIVE image; GUI PARTIAL |
 | Safety layer is what makes the difference | [`evidence/ablation/ABLATION.md`](evidence/ablation/ABLATION.md): 9 scenarios, identical tool calls. Acceptable outcomes: naive 1/9, validator-only 1/9, Steward 9/9. False success claims: 5, 5, 0. Invalid files left: 2, 2, 0. | TECHNICAL, stub mirroring the shipped IDE |
-| A real language model drives the stack from plain language | [`evaluation/scenarios.py`](evaluation/scenarios.py) on open models in CI (no personal key); reports on the `ci-evidence` branch | BEHAVIOR, stub IDE |
-| Runs on the organisers' model server (legion1, llama3.1) | Defaults point there; needs the team key | PENDING the team key |
+| In the official IDE, with a real model, from a browser | [`evidence/gui-model/`](evidence/gui-model/): official GUI and backend images, llama3.1 8B, Chromium typing into the Hyperion panel: 7/7 (one answer came from the cited docs fallback after a CPU-runner timeout; see the README there). Recording included. | LIVE images in CI; model on Ollama |
+| Runs on the organisers' model server (legion1, llama3.1) | Defaults point there; the organiser runs the image with his own key | Not measured before submission |
 
 What is real and what is not is kept in [`docs/REALITY-LEDGER.md`](docs/REALITY-LEDGER.md).
 

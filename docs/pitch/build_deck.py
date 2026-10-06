@@ -143,7 +143,7 @@ s2 = prs.slides[1]
 body2 = [ph for ph in s2.placeholders if ph.placeholder_format.idx == 1][0]
 bullets(body2, [("GitHub repo:", REPO),
                 ("Docker image:", f"{DOCKER_IMAGE}  (exposes :8000/chat)"),
-                ("Run:", f"docker run -p 8000:8000 --add-host host.docker.internal:host-gateway -e API_KEY=<team key> "
+                ("Run:", f"docker run -p 8000:8000 --add-host host.docker.internal:host-gateway -e API_KEY=<key> "
                          f"{DOCKER_IMAGE}"),
                 ("Licence:", "Apache-2.0, as in the official hyperion-starter"),
                 ("Evidence:", "CI reports on the ci-evidence branch (official IDE images, digests recorded)")], size=14)
@@ -267,7 +267,10 @@ text(s7, 6.95, 1.3, 2.65, 3.5, [
      ("the cookbook native example is valid but will not run (uvicorn in an nginx image).", {})],
     [("Ambiguous name: ", {"bold": True, "color": NAVY}), ("lists both files and asks.", {})],
     [("Create, fix, undo: ", {"bold": True, "color": NAVY}),
-     ("each change is read back before Steward says it happened.", {})]], size=12, name="demo-notes")
+     ("each change is read back before Steward says it happened.", {})],
+    [("Shown: ", {"bold": True, "color": NAVY}),
+     ("the official create example, file opened in the editor. CI run with llama3.1 8B, 7/7.", {"color": MUTED})]],
+     size=12, name="demo-notes")
 s7.notes_slide.notes_text_frame.text = "Live demo in the official IDE (or this recording from CI)."
 
 # 8 Criteria
@@ -304,11 +307,11 @@ text(s9, 0.65, 1.45, 4.0, 3.2, [
     "Validator parity with the real code (CI, official image)",
     "Create, 409 ambiguity, invalid profile stopped, delete, undo against the official backend image",
     "The official GUI in a browser: guardrail, check, ambiguity",
-    "Open models (qwen2.5 3B/7B) driving the full stack in CI"], size=12, name="proven-text")
+    "llama3.1 8B (the model family the organisers serve) in the official GUI, CI"], size=12, name="proven-text")
 box(s9, 5.15, 1.3, 4.4, 2.9, name="not-yet")
 text(s9, 5.35, 1.45, 4.0, 3.2, [
     [("Not yet", {"bold": True, "color": BAD, "size": 16})],
-    "Runs on the organisers' server (legion1): needs the team key",
+    "Answer quality on the organisers' server (legion1) not measured before submission",
     "Runnability findings are rules, not a deployment on HYPER-AI",
     "Steward cannot deploy; the IDE's Deploy button does",
     "Built during the hackathon by an autonomous agent; every claim is labelled in the repo"], size=12, name="not-yet-text")
