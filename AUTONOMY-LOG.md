@@ -62,3 +62,37 @@ Timezone of record: UTC (local Toronto = UTC-4).
 - **Decision:** Seed repo with AUTONOMY-LOG, state/CURRENT.yaml, state/HANDOVER.yaml, docs/CHALLENGE-REALITY.md, docs/GATEWAY-REGISTRY.yaml before any product code. Work on `main` with small commits during research; branch per material build step once code exists.
 - **Justification:** Canon continuity protocol (update after every material step; handover after milestones). Branch ceremony during pure research adds cost without assurance.
 - **Reversible:** yes. **Human required:** no.
+
+---
+
+## D-007 — Track selection: Challenge 1 (Hyperion / HYPER-AI)
+- **Timestamp:** 2026-10-06T10:40Z
+- **Observed:** Track 1 has a fully documented public contract (SSE schema, 5 actions, read/validate endpoints, DSL specs). Track 2 read path undocumented and Tangle unreachable. Track 3 needs organiser clusters (unreachable) and Java/Eclipse IDE. Track 4 has no discoverable contract.
+- **Options:** T1, T2, T3, T4.
+- **Decision:** T1. Kill T3, T4 (technical reality); T2 kept as fallback #1.
+- **Justification:** Only track where the sponsor mechanism can be load-bearing *and* specified from primary evidence today. Prize identical across tracks.
+- **Evidence:** docs/CONCEPT-SELECTION.md §1; ide-tutorial.hyperai.di.uoa.gr pages.
+- **Expected consequence:** crowded track → differentiation must come from platform-native mechanisms, not chat polish.
+- **Reversible:** yes until first live run (fallback T2). **Human required:** no.
+
+## D-008 — Concept lock (provisional): "never leaves the workspace worse"
+- **Timestamp:** 2026-10-06T10:45Z
+- **Observed:** contract hazards — first-match destructive actions, whole-file `edit_file`, cookbook example schema/runtime inconsistency, validator oracle available.
+- **Options:** L1 generic chat agent; L2 validated author; L3 safe hands; L4 auditor; L5 runnability verdict.
+- **Decision:** converge L2 + L3 + L5 (L4 folded in). L1 kept as ablation control.
+- **Justification:** AI Commodity Test HIGH for L1; L2/L3/L5 rely on observed platform-native mechanisms. Causal Mechanism Assurance triggered; ablation A/B/C planned.
+- **Evidence:** docs/CONCEPT-SELECTION.md §3–5.
+- **Reversible:** yes; re-verify at Technical Reality Check (first live IDE run). **Human required:** no.
+
+## D-009 — CI as live execution environment
+- **Timestamp:** 2026-10-06T10:50Z
+- **Observed:** GitHub Actions run 37448187481 succeeded on this repo. Job log download redirects to blob storage, which this workspace cannot reach.
+- **Decision:** Use Actions for live checks needing secrets/egress; surface results via check-run annotations (readable through api.github.com). Keep the LLM key as a repo Actions secret, never in chat.
+- **Boundary:** I will NOT use CI to clone Eclipse GitLab, because my fetch tools were refused by robots.txt and routing around that is out of bounds. The starter must come through the human.
+- **Reversible:** yes. **Human required:** see D-010.
+
+## D-010 — Bundled human checkpoint
+- **Timestamp:** 2026-10-06T10:52Z
+- **Decision:** One message, three non-delegable items: (1) starter download (robots-refused source; human can open it), (2) LLM API key as GitHub secret (secret), (3) TAIKAI rules/judging text (account-gated, client-rendered).
+- **Product decision requested:** none.
+- **Human required:** YES.
