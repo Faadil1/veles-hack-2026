@@ -1,6 +1,6 @@
 # Independent read-only cross-check of the Final Canonical Assurance receipt
 
-Date: 2026-10-06T16:55Z. Performed by a separate agent instance with no write access and no role in production,
+Date: 2026-10-06T16:45Z. Performed by a separate agent instance with no write access and no role in production,
 reading the repository and the `ci-evidence` branch only.
 
 | Item | Result |
