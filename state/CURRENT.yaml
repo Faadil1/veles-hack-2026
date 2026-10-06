@@ -25,10 +25,10 @@ project:
     tests_local: 97 passing
     ablation: "C 9/9, A 1/9, B 1/9; false success claims 0/5/5"
   open_unknowns:
-    - how API_KEY reaches the evaluation container (question drafted for the human)
+    - none on key provisioning: organiser injects API_KEY at evaluation (D-030)
     - Steward quality on legion1 llama3.1 (needs team key)
   blockers:
-    - HUMAN_REQUIRED HYPERAI_API_KEY, DOCKERHUB_USERNAME, DOCKERHUB_TOKEN as repo secrets
+    - HUMAN_REQUIRED DOCKERHUB_USERNAME, DOCKERHUB_TOKEN as repo secrets (HYPERAI_API_KEY optional, D-030)
   exact_next_gate: POST_VERTICAL_SLICE_DEPTH_GAP_REVIEW
   exact_next_action: >-
     Read gui-model-e2e results, fix model-path defects, update deck demo screenshot, depth gap review,

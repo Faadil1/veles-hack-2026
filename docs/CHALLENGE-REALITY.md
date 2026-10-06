@@ -42,7 +42,7 @@ Internal submission freeze: **2026-10-07 11:59 UTC** (3 h before deadline). Corr
 | Submission: repo link + brief README on TAIKAI; template deck | OBSERVED | VelesHack_ProjectSubmissionTemplate.pptx (Project name, GitHub repo, Summary, Highlights). |
 | Pitch | OBSERVED | 6 minutes, live, free format; independent jury. |
 | Evaluation (Challenge 1) | OBSERVED | Organisers run `<dockerhub-user>/hyperion:latest` and test against 5 criteria: (1) /chat microservice answering HYPER-AI questions and turning NL into IDE actions, e.g. "What is HyperAI?" and "Create a deployment YAML for a service using the nginx Docker image" (writes the file and opens it in the editor); (2) guardrails reject irrelevant queries ("What is the weather today?"); (3) RAG on HYPER-AI docs; (4) memory within a session; (5) optional human-in-the-loop confirmation for delete/overwrite. |
-| How the evaluation container gets its model key | UNKNOWN | Starter reads `API_KEY` from env (`.env` excluded from the image). Mitigation: deterministic intent fallback (D-028). Question for the organisers is a human action. |
+| How the evaluation container gets its model key | OBSERVED | The organiser runs the image with his own key in `API_KEY` (Discord answer, D-030). Deterministic fallback kept as a safety net (D-028). |
 | Prizes | OBSERVED | Per track 1st and 2nd. |
 | AI-use rules | UNKNOWN | Disclosure in README regardless. |
 

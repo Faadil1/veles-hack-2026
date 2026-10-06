@@ -11,7 +11,6 @@ handover:
     - README.md
   exact_next_gate: POST_VERTICAL_SLICE_DEPTH_GAP_REVIEW
   human_checkpoints_open:
-    - repo secrets HYPERAI_API_KEY, DOCKERHUB_USERNAME, DOCKERHUB_TOKEN
-    - ask organisers how API_KEY is provided at evaluation (message drafted)
+    - repo secrets DOCKERHUB_USERNAME, DOCKERHUB_TOKEN (HYPERAI_API_KEY optional)
     - final submit on TAIKAI and image tag to the organiser
   conditional_dependencies: []

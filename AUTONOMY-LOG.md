@@ -252,3 +252,10 @@ Timezone of record: UTC (local Toronto = UTC-4).
 - **Decision:** strip emphasis marks and backticks at the single exit point; system prompt asks for plain text. CI job `gui-e2e` runs the official GUI and backend images with Chromium typing into the Hyperion panel: 4/4 deterministic steps. Workflow `gui-model-e2e` runs the same with llama3.1 8B (or legion1 once the key exists).
 - **Evidence:** ci-evidence:gui-e2e/ (images sha256:a805e9d…, sha256:3b29068…).
 - **Reversible:** yes. **Human required:** no.
+
+## D-030 — Evaluation key provisioning resolved by the organiser
+- **Timestamp:** 2026-10-06T13:25Z
+- **Observed:** on Discord #challenge1_hyper-ai, Michael (organiser) answered the human's question: "I will use my key". The evaluation container receives the organiser's key, consistent with the starter's `API_KEY` variable.
+- **Consequence:** no key is ever baked into the image (unchanged). The team key `HYPERAI_API_KEY` is no longer needed for evaluation; it remains useful only to test on legion1 from CI before the freeze (optional). Docker Hub credentials remain HUMAN_REQUIRED (account-owner action). The deterministic intent fallback (D-028) stays as a safety net, not the main path.
+- **Evidence:** screenshot of the Discord thread provided by the human (2026-10-06 09:18 local).
+- **Reversible:** n/a. **Human required:** Docker Hub secrets; optional team key.
