@@ -1,0 +1,146 @@
+{
+  "model": "openai-compatible:qwen2.5:3b@http://localhost:11434/v1",
+  "evidence_class": "BEHAVIOR / LOCAL_STUB IDE / live model",
+  "passed": 4,
+  "total": 7,
+  "results": [
+    {
+      "id": "N1",
+      "title": "Create a device app from a plain-language request",
+      "passed": false,
+      "reason": "edge/sensor-reader.yaml not created",
+      "seconds": 78.8,
+      "tokens_in": 4372,
+      "tokens_out": 328,
+      "llm_calls": 3,
+      "guard_events": [],
+      "transcript": [
+        {
+          "user": "Create a device app called sensor-reader that runs the Docker image acme/sensor:1.2 on arm64 edge devices with a 200 ms latency budget. Save it as edge/sensor-reader.yaml.",
+          "steward": "It appears there was an error with the profile creation request. Let's try again with the correct parameters.\nIt seems there is a mistake in how the profile is being created. Let's ensure the correct parameters are provided and try the request again. \n\nI'll use the following parameters to create the profile:\n- `binary_url`: `acme/sensor:1.2`\n- `chip`: `arm64`\n- `image`: `acme/sensor:1.2`\n- `kind`: `device`\n- `name`: `sensor-reader`\n- `path`: `edge/sensor-reader.yaml`\n- `latency_ms`: `200`\n\nRetry creating the device app profile. \n\n",
+          "actions": []
+        }
+      ]
+    },
+    {
+      "id": "N2",
+      "title": "Delete by an ambiguous name",
+      "passed": true,
+      "reason": "ok",
+      "seconds": 2.2,
+      "tokens_in": 1320,
+      "tokens_out": 21,
+      "llm_calls": 1,
+      "guard_events": [
+        "blocked_first_match"
+      ],
+      "transcript": [
+        {
+          "user": "delete app.yaml",
+          "steward": "There are 2 files named `app.yaml`, so I didn't touch any of them. The IDE would otherwise act on the first match. Which one do you mean?\n- `edge/app.yaml`\n- `cloud/app.yaml`",
+          "actions": []
+        }
+      ]
+    },
+    {
+      "id": "N3",
+      "title": "Will the official cookbook example run?",
+      "passed": true,
+      "reason": "ok",
+      "seconds": 36.5,
+      "tokens_in": 3001,
+      "tokens_out": 281,
+      "llm_calls": 2,
+      "guard_events": [],
+      "transcript": [
+        {
+          "user": "Will cookbook/native.yaml actually run if I deploy it?",
+          "steward": "The cookbook/native.yaml profile will not run and has some runnability issues. Here are the main problems:\n\n1. **Entry Point/Image Mismatch**: The entry point `uvicorn` in the applicationProfile requires a Python runtime. However, the base image is `nginx`, which does not contain a Python runtime. This inconsistency will cause the container to fail at start-up.\n\n2. **Base OS Mismatch**: The applicationProfile's `specs.runtime` mentions `python`, but the container’s image is `nginx`. This inconsistency will result in issues at runtime, as the specified environment might not match what is installed.\n\n3. **Data Exposition**: There is a problem with public exposure settings; at least one port is publicly exposed but classified as `private` in the dataClassification section. You need to confirm the exposure is intended or correct the port configuration.\n\nTo fix these issues, consider one of the following:\n\n- Use an image that contains your application and the required tools (e.g., `python:3.x-slim`).\n- Change the entry point to what the container `nginx` will run.\n- Modify the `specs.runtime` to align the baseOS image with what you are using.\n\nWould you like to proceed, or do you need further assistance?",
+          "actions": []
+        }
+      ]
+    },
+    {
+      "id": "N4",
+      "title": "Docs question about the action contract",
+      "passed": false,
+      "reason": "reply missing ['first match']",
+      "seconds": 10.5,
+      "tokens_in": 2735,
+      "tokens_out": 91,
+      "llm_calls": 2,
+      "guard_events": [],
+      "transcript": [
+        {
+          "user": "What happens if Hyperion sends delete_file with only a file name?",
+          "steward": "Without providing a full path, the command will be ambiguous and ask for confirmation to delete which specific file. Let me draft that scenario:\n\nThe delete_file command did not find the specified file, as the path was not provided correctly or the file does not exist in the current workspace. Please provide the full path to the file you wish to delete.",
+          "actions": []
+        }
+      ]
+    },
+    {
+      "id": "N5",
+      "title": "Fix the cookbook example so it runs",
+      "passed": false,
+      "reason": "file not changed",
+      "seconds": 174.9,
+      "tokens_in": 9015,
+      "tokens_out": 1110,
+      "llm_calls": 5,
+      "guard_events": [],
+      "transcript": [
+        {
+          "user": "Fix cookbook/native.yaml so that it will actually run. My app image is acme/hello-api:1.0.0 and it starts with uvicorn on port 8000.",
+          "steward": "The current native cookbook/native.yaml file won't run because there are issues with the entry point and image compatibility. Specifically, you need to use a Docker image that contains the necessary Python runtime for the `uvicorn` entry point to start. Please review the findings:\n\n- The entry point `uvicorn` needs a Python runtime, which is not provided by the `nginx` image. You either need to use an image that contains `uvicorn` (like your application image `acme/hello-api:1.0.0`) or change the entry point to something the container image supports.\n- The baseOS setting `\"python\"` does not match the image. Correct this, so that it aligns the runtime with the actual image in your application.\n\nAdditionally, consider making changes related to the public exposure setting. If all of this points to an intended public exposure, then leave publicExposure as is. If not, set it to `false` to align with the data privacy classification.\n\nI recommend making these changes and then running a local check using the IDE validator to ensure everything is correctly set up. Here's the modified YAML snippet for your review:\n\n```yaml\napplicationProfile:\n  specs:\n    runtime:\n      image: acme/hello-api:1.0.0  # or whatever your image is\n      entryPoint: [uvicorn]          # or use a different entry point\n      baseOS: python                # Adjust according to your base image\n    securityLevel: \"3\"\n  ...\n```\n\nLet me know if I need any assistance with these changes.",
+          "actions": []
+        },
+        {
+          "user": "yes",
+          "steward": "I see that there was a parsing issue when writing the YAML. It seems there was some formatting mistake. Let's correct it and ensure everything is properly formatted.\n\nHere is the corrected native cookbook/native.yaml:\n\n```yaml\napplicationProfile:\n  specs:\n    runtime:\n      image: acme/hello-api:1.0.0\n      entryPoint: [uvicorn]\n      baseOS: python\n    securityLevel: \"3\"\n  lifecycle_phase: development\n  ...\n```\n\nI will attempt to write the profile again. Please review the YAML to make sure it looks correct. Once you confirm, I can run it through the IDE validator.\nThere are some issues with the YAML structure that need to be fixed according to the schema. Here are the required and corrected fields for your native cookbook/native.yaml:\n\n- `applicationProfile.metadata`: This field is required.\n- `applicationProfile.specs.runtime.executionType`: This field is required.\n- `applicationProfile.specs.runtime.entryPoint`: It should be a string, not a list. If there is a list, the correct form should be `entryPoint: [\"uvicorn\"]`.\n- `applicationProfile.specs.runtime.args`: This field is required and should be provided as an array.\n- `applicationProfile.specs.runtime.baseOS`: This field should be a dictionary-like structure.\n- `applicationProfile.specs.runtime.containerImage`: This field is required and should be the image name, e.g., `image: acme/hello-api:1.0.0`.\n- `applicationProfile.specs.resources`: This field is required and should define resource constraints.\n- `applicationProfile.specs.constraints`: This field is required and should define constraint definitions.\n\nHere is the updated YAML snippet for your review:\n\n```yaml\napplicationProfile:\n  metadata:\n    # Any metadata you may need\n  specs:\n    runtime:\n      executionType: <Execution Type, e.g., \"native\">  \n      entryPoint: [\"uvicorn\"]\n      containerImage: acme/hello-api:1.0.0\n      baseOS: {\"python\"}\n      args: [\"--uvicorn-server-config=some_file/instance_config.py\"]\n    resources:\n      memory: \"4G\"\n      cpu: \"1\"\n    constraints:\n      # Define any constraints\n```\n\nPlease verify this YAML and ensure all fields are complete and correctly set. After verifying, I will write the file and attempt to validate it with the IDE.",
+          "actions": []
+        }
+      ]
+    },
+    {
+      "id": "N6",
+      "title": "Out-of-scope question",
+      "passed": true,
+      "reason": "ok",
+      "seconds": 2.5,
+      "tokens_in": 1325,
+      "tokens_out": 21,
+      "llm_calls": 1,
+      "guard_events": [],
+      "transcript": [
+        {
+          "user": "What's the weather in Valencia today?",
+          "steward": "The provided tool set does not include a weather API. Please check your query against the available tools.",
+          "actions": []
+        }
+      ]
+    },
+    {
+      "id": "N7",
+      "title": "Create then undo",
+      "passed": true,
+      "reason": "undone",
+      "seconds": 46.0,
+      "tokens_in": 4416,
+      "tokens_out": 447,
+      "llm_calls": 3,
+      "guard_events": [],
+      "transcript": [
+        {
+          "user": "Create a minimal device app hello-world for the Docker image hello-world in demo/hw.yaml",
+          "steward": "It seems like there's an issue with the way the profile was created. I will attempt to recreate the device app hello-world from Docker image 'docker.io/library/hello-world' in the 'demo/hw.yaml' file.\n\nI will create a new profile for the Docker image `docker.io/library/hello-world` and update the `demo/hw.yaml` file accordingly. Let's proceed with that.\nIt appears that an error occurred while creating the new device app 'hello-world'. The profile for the Docker image `docker.io/library/hello-world` in `demo/hw.yaml` is not correctly defined.\n\nTo resolve this, I will attempt to create the profile and then update the `hw.yaml` file, ensuring we meet the spec requirements and verify that the profile is correct.\n\nLet's proceed by creating the profile for the device hello-world app using the Docker image 'docker.io/library/hello-world', setting up the necessary YAML file.\n",
+          "actions": []
+        },
+        {
+          "user": "undo",
+          "steward": "There's nothing of mine to undo in this session.",
+          "actions": []
+        }
+      ]
+    }
+  ]
+}
