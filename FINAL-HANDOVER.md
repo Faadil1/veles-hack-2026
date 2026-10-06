@@ -8,13 +8,14 @@ Status at 2026-10-06T15:54Z: **SUBMITTABLE, pending human steps.** Deadline 2026
 | Item | Where | State |
 |---|---|---|
 | Product | `steward/`, `main.py`, `Dockerfile` | `/chat` SSE microservice, starter-compatible |
-| Evaluation image | Docker Hub `faadil12/hyperion:latest`, pushed by CI on every push to main | First push 2e62095 (sha256:c2c1d6fc…) |
-| Tests | `tests/` | 100 passing, CI green |
-| Live evidence | `evidence/`, branch `ci-evidence` | Official GUI + backend images, browser-driven, llama3.1 8B: 7/7; validator parity 0/5,536; live slice 6/6 |
+| Evaluation image | Docker Hub `faadil12/hyperion:latest` | sha256:438f8bfa…, runtime revision d00df7b; clean pull verified 4/4 (no model) and 7/7 (llama3.1 8B); kept stable until the runtime changes |
+| Tests | `tests/` | 103 passing, CI green |
+| Live evidence | `evidence/`, branch `ci-evidence` | Official GUI + backend images, browser-driven; k=3 with llama3.1 8B 21/21 on d00df7b; validator parity 0/5,536; live slice 6/6 |
+| Final Canonical Assurance | `docs/assurance/FINAL-CANONICAL-ASSURANCE-RECEIPT.yaml` | SUBMISSION_READY, Finisher validator b5ea200 PASS; independent cross-check in `docs/assurance/INDEPENDENT-CHECK.md` |
 | Deck | `docs/pitch/Hyperion-Steward-VelesHack.pptx` (official template) | Ready |
 | Pitch script and Q&A | `docs/pitch/PITCH.md` | Ready |
 | Submission text and organiser message | `docs/SUBMISSION.md` | Ready |
-| Decisions | `AUTONOMY-LOG.md` D-000 to D-033 | Current |
+| Decisions | `AUTONOMY-LOG.md` D-000 to D-038 | Current |
 | Truth labels | `docs/REALITY-LEDGER.md` | Current |
 
 ## Human steps (only these)
@@ -24,6 +25,9 @@ Status at 2026-10-06T15:54Z: **SUBMITTABLE, pending human steps.** Deadline 2026
 3. Pitch on 2026-10-08 with `docs/pitch/PITCH.md`.
 
 ## Known limits (stated in the README and deck)
+
+- Any change to Dockerfile, requirements.txt or steward/ invalidates the assurance receipt: re-run k=3, published-image and the receipt.
+- Memory answers from the 8B model can include untrue asides (1 of 3 runs); no workspace effect.
 
 - Answer quality on the organiser's legion1 server not measured before submission (he injects his own key).
 - Runnability findings are rules, not a deployment on HYPER-AI.

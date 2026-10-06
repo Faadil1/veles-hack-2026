@@ -14,7 +14,8 @@ undo for every change.
 
 Proof, all reproducible from the repo: official GUI and backend images driven by a browser in CI with llama3.1 8B
 (7/7); live slice against the official backend image (6/6, undo restores identical bytes); ablation with identical tool
-calls (Steward 9/9 safe outcomes and 0 false "done" claims, naive agent 1/9 and 5).
+calls on a stub that mirrors the shipped IDE (Steward 9/9 safe outcomes and 0 false "done" claims, naive agent 1/9
+and 5).
 
 - Repo: https://github.com/Faadil1/veles-hack-2026 (Apache-2.0)
 - Docker image: `faadil12/hyperion:latest` (exposes :8000/chat; set `API_KEY`)

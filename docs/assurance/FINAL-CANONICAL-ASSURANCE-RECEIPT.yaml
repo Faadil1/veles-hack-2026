@@ -300,6 +300,8 @@ limitations:
 - The GUI creates a new user_id per page load, so session memory resets on reload.
 - This assurance was executed by the same autonomous agent that built the candidate (benchmark arm), using the Project Finisher
   contract and validator at b5ea200; an independent read-only cross-check is recorded in docs/assurance/INDEPENDENT-CHECK.md.
+- 'Memory case M5: 3/3 by the declared grader, 2/3 under strict manual truth review (one untrue aside, ACCEPTED_RISK, no workspace
+  effect); still meets the declared 2-of-3 rule.'
 blockers: []
 terminal_verdict: SUBMISSION_READY
 terminal_promotion_allowed: true

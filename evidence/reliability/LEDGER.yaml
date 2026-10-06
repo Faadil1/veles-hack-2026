@@ -94,6 +94,12 @@ coverage:
     docs_fallback_runs: 0
     baseline_passes: 2/3
     failures: []
+    manual_truth_review: 'Independent read-only review (docs/assurance/INDEPENDENT-CHECK.md): run-3 named acme/hello-api
+      correctly but added an untrue aside (''I must have gotten my web servers mixed up earlier''; called uvicorn
+      an image). Strict truth: 2 clean of 3, still meeting the declared 2-of-3 rule. Classified ACCEPTED_RISK: model-text
+      confabulation on an 8B CPU model, no workspace effect; the substring grader cannot detect it (limitation recorded,
+      not loosened).'
+    strict_truth_passes: 2
   - case_id: M6-undo
     criticality: HIGH
     k: 3

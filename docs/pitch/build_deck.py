@@ -174,8 +174,8 @@ body4 = [ph for ph in s4.placeholders if ph.placeholder_format.idx == 1][0]
 body4._element.getparent().remove(body4._element)
 stats = [
     ("0", "disagreements with the IDE's own validator, over 5,536 test profiles", NAVY),
-    ("9/9", "safety scenarios handled correctly. Naive agent: 1/9", GOOD),
-    ("0", "false \"done\" claims. Naive agent: 5", GOOD),
+    ("9/9", "safety scenarios handled correctly (same tool calls, stub mirroring the IDE). Naive agent: 1/9", GOOD),
+    ("0", "false \"done\" claims in the same scenarios. Naive agent: 5", GOOD),
     ("6/6", "live steps against the official backend image, every change verified by read-back", NAVY),
 ]
 for i, (big, label, color) in enumerate(stats):
