@@ -1,6 +1,6 @@
 # Hyperion Steward — Product Requirements Document
 
-Version: `0.2`
+Version: `0.3`
 Status: `PRD_VALIDATED_WITH_OPEN_DEPENDENCIES` (see §19)
 Project ID: `veles_hack_2026`
 Date: `2026-10-06`
@@ -27,13 +27,14 @@ Hyperion Steward is the Hyperion agentic microservice for the HYPER-AI IDE (Vele
 
 ## 4. Problem / evidence
 
-Problem: application profiles are long, strictly typed YAML documents with many required, unit-bearing fields. Getting them right is error-prone, and the IDE's agent action contract makes destructive mistakes easy.
+Problem: application profiles are long, strictly typed YAML documents with many required, unit-bearing fields. Getting them right is error-prone, and the shipped IDE executes agent actions fire-and-forget, so an agent cannot know whether what it said it did actually happened (v0.3, D-026).
 
 | Evidence | Class |
 |---|---|
 | Device App spec requires ~25 fields across `spec.app`, `network`, `qos`, `constraints`, `sensors`, many with value/unit objects and enums. | FACT (ide-tutorial `/dsl/devices/`) |
 | Native App spec requires ~15 fields with typed strings ("2000m", "10Gi"). | FACT (ide-tutorial `/dsl/native-apps/`) |
-| `delete_file`, `edit_file`, `delete_folder` act on the **first match** of a bare name. `read_file` on an ambiguous name returns 409 with all matches. | FACT (ide-tutorial `/hyperion-agent/`) |
+| The tutorial says `delete_file`/`edit_file`/`delete_folder` act on the first match of a bare name; the **shipped GUI** instead resolves exact path or unique suffix and silently does nothing on ambiguity. `read_file` on an ambiguous name returns 409 with all matches. | FACT (tutorial text) superseded by OBSERVED shipped code (donmichael/ide-gui:latest, D-026) |
+| The GUI dispatches each streamed action without awaiting the previous one and never reports results to the agent; `create_file` on an existing path fails silently (status log only). | OBSERVED (GUI bundle, backend server.js) |
 | `edit_file` replaces the whole file; there is no undo action. | FACT (same page) |
 | The official Native "Hello World" cookbook example sets `securityLevel: "high"` while the spec defines it as a string "1–3", and pairs `containerImage: nginx` with `entryPoint: uvicorn main:app`. | FACT for the document content (ide-tutorial `/cookbook/`); the runtime failure of that pairing is INFERENCE (nginx images ship no Python/uvicorn). |
 | Users actually lose files or ship broken profiles because of this. | UNVERIFIED (no user data available). |
@@ -55,7 +56,7 @@ Frequency / recurrence: every new workload needs a profile; edits recur on each 
 |---|---|---|
 | Time | Iterating validator errors by hand | INFERENCE |
 | Cost | Failed deployment cycles on the continuum | INFERENCE |
-| Risk | Wrong-file overwrite/delete by first-match resolution | FACT (contract) / impact INFERENCE |
+| Risk | Agent reports changes that never happened (ambiguous name, existing file, closed IDE tab) | OBSERVED mechanism; ablation: naive 5 false claims in 9 scenarios |
 | Quality | Schema-valid but non-runnable profiles reach deploy | FACT (cookbook example) / impact INFERENCE |
 
 Real workflow:
@@ -71,7 +72,7 @@ developer
 ```
 
 Tacit knowledge / exceptions:
-- Known rules: name-only paths resolve to first match; `path` relative to workspace root, never absolute or `..`; Docker-hosted agent must call `host.docker.internal:3001`.
+- Known rules (shipped code): name-only paths resolve to the exact path or a unique suffix, ambiguity is a silent no-op; `path` relative to workspace root, never absolute or `..`; Docker-hosted agent must call `host.docker.internal:3001`.
 - Exceptions: `device_name` omitted means scheduler picks; Android needs a registered device name.
 - Unknown: whether the validator also checks semantic consistency; how the IDE sequences streamed actions vs. backend file visibility (race risk). To discover at first live run.
 
@@ -120,7 +121,7 @@ user (IDE panel): "Create a device app that runs my image ghcr.io/acme/sensor:1.
 
 - **Start:** workspace with two files named `app.yaml` in different folders, plus a copy of the official cookbook native example.
 - **Action:** user says "delete app.yaml", then "fix the hello-world profile".
-- **Observable change:** Steward refuses the first-match delete and lists both paths (from the IDE's own 409); fixes the cookbook profile (securityLevel, entrypoint/image mismatch) and the IDE validator confirms it; "undo" restores the original.
+- **Observable change:** Steward lists both paths and touches nothing (from the IDE's own 409); fixes the cookbook profile (image/entry-point mismatch) with a field edit that is read back and confirmed by the IDE validator; "undo" restores the original bytes.
 - **Proof:** IDE validator responses and the Steward receipt log for the session.
 - **Time budget:** < 90 s.
 - **Reset path:** seed script recreates the starting workspace.
@@ -135,10 +136,12 @@ user (IDE panel): "Create a device app that runs my image ghcr.io/acme/sensor:1.
 | MUST-02 | Support all 5 actions: create/delete folder, create/edit/delete file | Challenge | Tests per action |
 | MUST-03 | Per-user session memory keyed by `user_id` | Challenge | Multi-turn test (pronoun resolution "undo that", "rename it") |
 | MUST-04 | Answer HYPER-AI questions from the official docs with source citations; decline when not covered | Challenge (RAG) + truth | Q&A eval set with expected sources |
-| MUST-05 | Ambiguity guard: before any name-based edit/delete, resolve via `read_file`; on 409 ask the user and never emit a first-match action | Contract hazard | Ablation scenario A vs C |
+| MUST-05 | Ambiguity guard: before any name-based edit/delete, resolve via `read_file`; on 409 ask the user and send only full paths | Silent no-op in the shipped GUI | Ablation S1/S2; live slice L3 |
+| MUST-05b | Read-back verification: after every action, read the workspace back through the backend; claim success only when seen; validate only after the change is visible; report unconfirmed changes as such (v0.3) | Fire-and-forget GUI | tests/test_real_ide_semantics.py; ablation false-claim metric; GUI e2e |
+| MUST-05c | Deterministic route for unambiguous action requests (create for an image, fix with stated facts, delete, create folder); field-level `edit_profile` for model edits (v0.3) | 8B model hesitated or invented YAML (D-031) | tests/test_intents.py; GUI e2e M2/M4 |
 | MUST-06 | Restore points: read current content before `edit_file`/`delete_file`; `undo` re-creates it | No undo in contract | Undo tests incl. after delete |
 | MUST-07 | Validator loop: after writing a profile, call `validate_file`; repair with bounded attempts; report errors with line numbers if still invalid | Load-bearing sponsor oracle | Live run against IDE backend |
-| MUST-08 | Local spec check (native + device) before writing, so obviously invalid YAML never reaches the workspace | Avoid write-then-fix churn | Unit tests on spec rules |
+| MUST-08 | Local check with an exact port of the IDE validator before writing (v0.3) | Never write a profile the IDE rejects for a schema reason | Validator parity 0/5,536 vs the official image's code |
 | MUST-09 | Runnability verdict for generated/inspected profiles (rules beyond schema) | Differentiator | Rule unit tests incl. cookbook case |
 | MUST-10 | Explicit failure behaviour: backend unreachable, LLM error/timeout → stream a clear message, emit no action | Failure safety | Fault-injection tests |
 | MUST-11 | Runs as a Docker container using `host.docker.internal:3001` by default; configurable base URL | Contract | Container build in CI |
@@ -272,3 +275,4 @@ PBPD ceiling: `BUILD_CANDIDATE_READY` or `BUILD_CANDIDATE_READY_WITH_LIMITATIONS
 |---|---|---|---|---|
 | 0.1 | 2026-10-06 | Initial | Concept lock D-008 | — |
 | 0.2 | 2026-10-06 | Human boundary: naming the exact path in a change request counts as consent to overwrite that file; deletions always confirm | Live-model scenario N5 showed double confirmation (model asked, then Steward asked again); D-022 | SHOULD-03 refined; I4 invariant text updated |
+| 0.3 | 2026-10-06 | Problem re-framed on observed fire-and-forget actions (first-match claim withdrawn); read-back verification; validator port; deterministic action route and `edit_profile` | Shipped GUI/backend code read (D-024 to D-026); 8B failures in the official GUI (D-031) | MUST-05 reworded; MUST-05b, MUST-05c added; MUST-08 upgraded |
