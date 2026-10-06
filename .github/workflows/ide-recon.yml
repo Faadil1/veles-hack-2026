@@ -1,0 +1,44 @@
+name: ide-recon
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: [".github/workflows/ide-recon.yml"]
+permissions:
+  contents: write
+jobs:
+  recon:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Start the official IDE backend and GUI
+        run: |
+          docker run -d --rm -p 3001:3001 -e AUTH_ENABLED=false --name ide-backend donmichael/ide-backend:latest
+          docker run -d --rm -p 5000:80 --name ide-gui donmichael/ide-gui:latest
+          for i in $(seq 1 60); do curl -s -o /dev/null localhost:3001/api/agent/file?path=x && break; sleep 1; done
+      - name: Collect evidence
+        run: |
+          mkdir -p /tmp/recon
+          {
+            echo "## image digests"; docker image inspect donmichael/ide-backend:latest donmichael/ide-gui:latest --format '{{.RepoTags}} {{.Id}} {{.Created}}'
+            echo "## backend logs"; docker logs ide-backend 2>&1 | tail -40
+            echo "## probes"
+            for u in "/api/agent/file?path=nope.yaml" "/api/agent/validation/file?path=nope.yaml" "/api" "/api/health" "/api/files" "/api/workspace" "/api/tree"; do
+              printf "%s -> " "$u"; curl -s -m 5 -w " [%{http_code}]" "localhost:3001$u" | head -c 400; echo; done
+          } > /tmp/recon/probes.txt 2>&1
+          docker exec ide-backend sh -c 'pwd; ls -la; cat package.json 2>/dev/null; ls -la /app 2>/dev/null' > /tmp/recon/backend-fs.txt 2>&1 || true
+          docker exec ide-backend sh -c 'grep -rn --include=*.js --include=*.ts -E "(router|app)\.(get|post|put|patch|delete)\(" / 2>/dev/null | grep -v node_modules | head -200' > /tmp/recon/backend-routes.txt 2>&1 || true
+          docker exec ide-backend sh -c 'grep -rln --include=*.js --include=*.ts -E "agent/file|validation/file|ambiguous|Ambiguous" / 2>/dev/null | grep -v node_modules | head -20' > /tmp/recon/backend-agent-files.txt 2>&1 || true
+          for f in $(cat /tmp/recon/backend-agent-files.txt | head -6); do echo "=== $f"; docker exec ide-backend sh -c "cat '$f'" | head -400; done > /tmp/recon/backend-agent-src.txt 2>&1 || true
+          docker exec ide-gui sh -c 'ls -R /usr/share/nginx/html | head -60; cat /etc/nginx/conf.d/*.conf' > /tmp/recon/gui-fs.txt 2>&1 || true
+          docker exec ide-gui sh -c 'grep -o -E "\"(create_file|edit_file|delete_file|create_folder|delete_folder)\"[^;]{0,300}" -r /usr/share/nginx/html | head -40' > /tmp/recon/gui-actions.txt 2>&1 || true
+          docker exec ide-gui sh -c 'grep -o -E "(localhost|host)[^\"]{0,40}:8000[^\"]{0,60}|/chat[^\"]{0,40}|api/[a-zA-Z/]{3,40}" -r /usr/share/nginx/html | sort | uniq -c | sort -rn | head -80' > /tmp/recon/gui-urls.txt 2>&1 || true
+          ls -la /tmp/recon; echo "::notice title=recon::$(head -c 600 /tmp/recon/probes.txt | tr '\n' ' ')"
+      - name: Publish to ci-evidence
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"; git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin ci-evidence && git checkout -B ci-evidence origin/ci-evidence
+          mkdir -p recon && cp /tmp/recon/* recon/ && git add recon && git commit -m "ide recon ${GITHUB_SHA::7}" || true
+          for i in 1 2 3 4; do git push origin ci-evidence && break; sleep $((i*5)); git fetch origin ci-evidence && git rebase origin/ci-evidence; done
