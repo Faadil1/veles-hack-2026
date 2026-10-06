@@ -34,11 +34,16 @@ jobs:
           docker exec ide-gui sh -c 'ls -R /usr/share/nginx/html | head -60; cat /etc/nginx/conf.d/*.conf' > /tmp/recon/gui-fs.txt 2>&1 || true
           docker exec ide-gui sh -c 'grep -o -E "\"(create_file|edit_file|delete_file|create_folder|delete_folder)\"[^;]{0,300}" -r /usr/share/nginx/html | head -40' > /tmp/recon/gui-actions.txt 2>&1 || true
           docker exec ide-gui sh -c 'grep -o -E "(localhost|host)[^\"]{0,40}:8000[^\"]{0,60}|/chat[^\"]{0,40}|api/[a-zA-Z/]{3,40}" -r /usr/share/nginx/html | sort | uniq -c | sort -rn | head -80' > /tmp/recon/gui-urls.txt 2>&1 || true
-          ls -la /tmp/recon; echo "::notice title=recon::$(head -c 600 /tmp/recon/probes.txt | tr '\n' ' ')"
+          docker cp ide-backend:/app/src /tmp/recon/backend-src || true
+          docker cp ide-backend:/app/README.md /tmp/recon/backend-README.md || true
+          docker cp ide-backend:/app/templates /tmp/recon/backend-templates || true
+          docker exec ide-backend sh -c 'find /app/helm-charts | head -100' > /tmp/recon/backend-helm-tree.txt 2>&1 || true
+          mkdir -p /tmp/recon/gui && docker cp ide-gui:/usr/share/nginx/html/assets /tmp/recon/gui/ || true
+          ls -laR /tmp/recon | head -80; echo "::notice title=recon::$(head -c 600 /tmp/recon/probes.txt | tr '\n' ' ')"
       - name: Publish to ci-evidence
         if: always()
         run: |
           git config user.name "github-actions[bot]"; git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git fetch origin ci-evidence && git checkout -B ci-evidence origin/ci-evidence
-          mkdir -p recon && cp /tmp/recon/* recon/ && git add recon && git commit -m "ide recon ${GITHUB_SHA::7}" || true
+          rm -rf recon && mkdir -p recon && cp -r /tmp/recon/* recon/ && git add recon && git commit -m "ide recon ${GITHUB_SHA::7}" || true
           for i in 1 2 3 4; do git push origin ci-evidence && break; sleep $((i*5)); git fetch origin ci-evidence && git rebase origin/ci-evidence; done
