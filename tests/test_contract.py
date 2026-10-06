@@ -3,7 +3,6 @@
 import json
 
 import httpx
-import pytest
 
 from steward.app import create_app
 from steward.llm import LLMTurn, ScriptedLLM

@@ -53,6 +53,7 @@ Rules:
 - When a tool returns status "ambiguous", list the matching paths and ask which one. Never guess.
 - When a tool returns "needs_confirmation", ask the user a clear yes/no question and stop.
 - Report runnability findings honestly: a schema-valid profile can still fail to run.
+- If a tool result has effect "not_seen", the IDE has not applied the change yet: say so, never claim it is done.
 - To change an existing file, read_file it first. Use full paths once you know them.
 - Paths are relative to the workspace root. Never use absolute paths or "..".
 - When the user asks you to create or change something, do it now with your tools. Do not ask "would you like
@@ -408,7 +409,7 @@ def _guard_message(args: dict[str, Any], output: dict[str, Any]) -> str:
 def _ambiguity_text(target: str, matches: list[str]) -> str:
     listed = "\n".join(f"- `{m}`" for m in matches)
     return (f"There are {len(matches)} files named `{target}`, so I didn't touch any of them. "
-            f"The IDE would otherwise act on the first match. Which one do you mean?\n{listed}")
+            f"Which one do you mean?\n{listed}")
 
 
 def _unresolved_text(target: str, status: str, detail: str) -> str:
@@ -417,6 +418,13 @@ def _unresolved_text(target: str, status: str, detail: str) -> str:
     if status == "invalid":
         return f"I can't use that path: {detail}"
     return f"I couldn't reach the IDE backend to look up `{target}` ({detail}). I didn't change anything."
+
+
+def _unconfirmed_text(r: dict[str, Any]) -> str:
+    what = {"deleted": "the delete of", "deleted_folder": "the folder delete of", "undone": "the undo of",
+            "sent_unverified": "the change to"}.get(str(r.get("status")), "the change to")
+    return (f"I sent {what} `{r.get('path')}` to the IDE, but it hasn't shown up in the workspace yet, so I can't "
+            "confirm it happened. Is the IDE open in your browser? Check the file tree, or ask me to check again.")
 
 
 def _check_text(path: str, report: Any, run: runnability.RunnabilityReport) -> str:
@@ -442,6 +450,8 @@ def _check_text(path: str, report: Any, run: runnability.RunnabilityReport) -> s
 
 def _result_text(tool: str, r: dict[str, Any]) -> str:
     status = r.get("status")
+    if r.get("effect") in ("not_seen", "unobservable") or status == "sent_unverified":
+        return _unconfirmed_text(r)
     if tool == "undo":
         if status == "undone":
             return f"Undone: reverted `{r['action']}` on `{r['path']}`."

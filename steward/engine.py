@@ -48,6 +48,7 @@ class JournalEntry:
     after: str | None
     reversible: bool = True
     undone: bool = False
+    effect: str = "none"  # verified | not_seen | unobservable
     at: str = field(default_factory=_now)
 
 
@@ -113,7 +114,8 @@ class SafeOps:
     """The only code path that emits IDE actions."""
 
     def __init__(self, ide: IdeClient, session: Session, emit: Emit,
-                 validate_retries: int = 6, validate_delay_s: float = 0.4):
+                 validate_retries: int = 6, validate_delay_s: float = 0.4,
+                 effect_timeout_s: float = 6.0, effect_poll_s: float = 0.25):
         self.ide = ide
         self.s = session
         self.emit = emit
@@ -122,6 +124,12 @@ class SafeOps:
         self.explicit_targets: set[str] = set()
         self.validate_retries = validate_retries
         self.validate_delay_s = validate_delay_s
+        # The IDE frontend executes streamed actions fire-and-forget and never reports back. Steward reads the
+        # workspace back through the backend after every action, so it only claims what it has seen, and the next
+        # action on the same path is not emitted before the previous one landed (the GUI does not serialise them).
+        self.effect_timeout_s = effect_timeout_s
+        self.effect_poll_s = effect_poll_s
+        self.last_effect = "none"
 
     # -- reads ------------------------------------------------------------------------------------
 
@@ -174,7 +182,44 @@ class SafeOps:
         if action == "create_file":
             self.s.created_paths.add(path)
         self.s.remember_path(path)
+        self.last_effect = await self._verify_effect(action, path, content)
+        if entry is not None:
+            entry.effect = self.last_effect
         return entry
+
+    async def _effect_seen(self, action: str, path: str, content: str | None) -> bool | None:
+        """True when the action is visible in the workspace, False when not yet, None when unobservable."""
+        if action in ("create_file", "edit_file", "delete_file"):
+            res = await self.ide.read_file(path)
+            if res.outcome is Outcome.UNREACHABLE:
+                return None
+            if action == "delete_file":
+                return res.outcome is Outcome.NOT_FOUND
+            return res.outcome is Outcome.OK and res.path == path and res.content == (content or "")
+        exists = await self.ide.folder_exists(path)
+        if not isinstance(exists, bool):
+            return None
+        return exists if action == "create_folder" else not exists
+
+    async def _verify_effect(self, action: str, path: str, content: str | None) -> str:
+        loop = asyncio.get_running_loop()
+        deadline = loop.time() + self.effect_timeout_s
+        polls = 0
+        while True:
+            polls += 1
+            seen = await self._effect_seen(action, path, content)
+            if seen is None:
+                status = "unobservable"
+                break
+            if seen:
+                status = "verified"
+                break
+            if loop.time() >= deadline:
+                status = "not_seen"
+                break
+            await asyncio.sleep(self.effect_poll_s)
+        self.s.receipt("effect", action=action, path=path, status=status, polls=polls)
+        return status
 
     # -- profile writes ---------------------------------------------------------------------------
 
@@ -217,11 +262,18 @@ class SafeOps:
 
         action = "edit_file" if before is not None else "create_file"
         await self._act(action, target, content, before)
-        report = await self.validate(target, wait_for_file=True)
         result: dict[str, Any] = {
-            "path": target, "action": action, "validator": _validation_summary(report),
+            "path": target, "action": action, "effect": self.last_effect, "local_validator": "valid",
             "runnability": run.as_dict(), "local_warnings": [i.as_dict() for i in local.issues],
         }
+        if self.last_effect != "verified":
+            # Validating now would read the old file (or nothing). The local check is a proven port of the IDE
+            # validator, so validity is known; what is unknown is whether the IDE applied the change.
+            result["validator"] = {"outcome": "skipped", "valid": None, "detail": "change not visible in the IDE"}
+            result["status"] = "sent_unverified"
+            return result
+        report = await self.validate(target, wait_for_file=True)
+        result["validator"] = _validation_summary(report)
         if report.outcome is Outcome.OK and report.valid:
             result["status"] = "written_valid"
             return result
@@ -303,10 +355,10 @@ class SafeOps:
             if res.status != "resolved":
                 return {"status": "stale", "path": pending.path, "detail": res.status}
             await self._act("delete_file", res.path, None, res.content)
-            return {"status": "deleted", "path": res.path}
+            return {"status": "deleted", "path": res.path, "effect": self.last_effect}
         if pending.kind == "delete_folder":
             await self._act("delete_folder", pending.path, None, None, reversible=False)
-            return {"status": "deleted_folder", "path": pending.path, "reversible": False}
+            return {"status": "deleted_folder", "path": pending.path, "reversible": False, "effect": self.last_effect}
         if pending.kind == "overwrite" and pending.content is not None:
             if pending.path.endswith((".yaml", ".yml")) and spec.detect_kind(spec.parse_profile(pending.content)[0]) \
                     is not spec.ProfileKind.UNKNOWN:
@@ -333,7 +385,8 @@ class SafeOps:
                 return {"status": "not_reversible", "action": entry.action, "path": entry.path}
             entry.undone = True
             self.s.receipt("undo", journal_id=entry.entry_id, action=entry.action, path=entry.path)
-            return {"status": "undone", "action": entry.action, "path": entry.path, "journal_id": entry.entry_id}
+            return {"status": "undone", "action": entry.action, "path": entry.path, "journal_id": entry.entry_id,
+                    "effect": self.last_effect}
         return {"status": "nothing_to_undo"}
 
 

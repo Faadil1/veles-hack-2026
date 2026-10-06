@@ -36,8 +36,8 @@ class Turn:
 class Harness:
     def __init__(self, files: dict[str, str] | None = None, llm: LLM | None = None, backend_up: bool = True):
         self.ws = Workspace()
-        for path, content in (files or {}).items():
-            self.ws.files[path] = content
+        self.effect_timeout_s = 0.05
+        self.ws.seed(files or {})
         self.stub = create_app(self.ws)
         transport = httpx.ASGITransport(app=self.stub) if backend_up else _DownTransport()
         self.ide = IdeClient("http://ide/api", transport=transport)
@@ -55,7 +55,8 @@ class Harness:
             if "action" in event:
                 self.ws.apply(event)
 
-        ops = SafeOps(self.ide, session, emit, validate_retries=2, validate_delay_s=0.01)
+        ops = SafeOps(self.ide, session, emit, validate_retries=2, validate_delay_s=0.01,
+                      effect_timeout_s=self.effect_timeout_s, effect_poll_s=0.01)
         await self.steward.handle(session, text, ops)
         return turn
 

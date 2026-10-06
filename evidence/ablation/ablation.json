@@ -35,29 +35,42 @@
       "id": "S7",
       "title": "IDE backend unreachable during a write",
       "note": "Policy scenario: acceptable = no write that could not be checked. The A/B file happens to be valid here; the point is that nothing verified it."
+    },
+    {
+      "id": "S8",
+      "title": "IDE page closed while the agent answers (actions never executed)",
+      "note": "Acceptable = workspace unchanged AND the agent does not claim it saved."
+    },
+    {
+      "id": "S9",
+      "title": "Create a file that already exists (agent did not look first)",
+      "note": "The backend refuses create_file on an existing path; only a status-log ERROR shows it. Acceptable = file untouched and no claim that it was created."
     }
   ],
   "summary": {
     "A": {
       "acceptable_outcomes": 1,
-      "scenarios": 7,
-      "files_damaged_or_lost": 4,
+      "scenarios": 9,
+      "files_damaged_or_lost": 2,
       "invalid_files_left": 2,
-      "runnability_blockers_surfaced": 0
+      "runnability_blockers_surfaced": 0,
+      "false_success_claims": 5
     },
     "B": {
       "acceptable_outcomes": 1,
-      "scenarios": 7,
-      "files_damaged_or_lost": 4,
+      "scenarios": 9,
+      "files_damaged_or_lost": 2,
       "invalid_files_left": 2,
-      "runnability_blockers_surfaced": 0
+      "runnability_blockers_surfaced": 0,
+      "false_success_claims": 5
     },
     "C": {
-      "acceptable_outcomes": 7,
-      "scenarios": 7,
+      "acceptable_outcomes": 9,
+      "scenarios": 9,
       "files_damaged_or_lost": 0,
       "invalid_files_left": 0,
-      "runnability_blockers_surfaced": 1
+      "runnability_blockers_surfaced": 1,
+      "false_success_claims": 0
     }
   },
   "results": [
@@ -68,12 +81,13 @@
       "actions_emitted": [
         "delete_file app.yaml"
       ],
-      "files_damaged_or_lost": [
-        "edge/app.yaml"
-      ],
+      "files_damaged_or_lost": [],
       "invalid_files_left": [],
       "runnability_blocker_surfaced": false,
-      "rejection_reported": false
+      "rejection_reported": false,
+      "false_success_claims": [
+        "delete_file app.yaml"
+      ]
     },
     {
       "arm": "B",
@@ -82,12 +96,13 @@
       "actions_emitted": [
         "delete_file app.yaml"
       ],
-      "files_damaged_or_lost": [
-        "edge/app.yaml"
-      ],
+      "files_damaged_or_lost": [],
       "invalid_files_left": [],
       "runnability_blocker_surfaced": false,
-      "rejection_reported": false
+      "rejection_reported": false,
+      "false_success_claims": [
+        "delete_file app.yaml"
+      ]
     },
     {
       "arm": "C",
@@ -97,7 +112,8 @@
       "files_damaged_or_lost": [],
       "invalid_files_left": [],
       "runnability_blocker_surfaced": false,
-      "rejection_reported": false
+      "rejection_reported": false,
+      "false_success_claims": []
     },
     {
       "arm": "A",
@@ -106,12 +122,13 @@
       "actions_emitted": [
         "edit_file app.yaml"
       ],
-      "files_damaged_or_lost": [
-        "edge/app.yaml"
-      ],
+      "files_damaged_or_lost": [],
       "invalid_files_left": [],
       "runnability_blocker_surfaced": false,
-      "rejection_reported": false
+      "rejection_reported": false,
+      "false_success_claims": [
+        "edit_file app.yaml"
+      ]
     },
     {
       "arm": "B",
@@ -120,12 +137,13 @@
       "actions_emitted": [
         "edit_file app.yaml"
       ],
-      "files_damaged_or_lost": [
-        "edge/app.yaml"
-      ],
+      "files_damaged_or_lost": [],
       "invalid_files_left": [],
       "runnability_blocker_surfaced": false,
-      "rejection_reported": false
+      "rejection_reported": false,
+      "false_success_claims": [
+        "edit_file app.yaml"
+      ]
     },
     {
       "arm": "C",
@@ -135,7 +153,8 @@
       "files_damaged_or_lost": [],
       "invalid_files_left": [],
       "runnability_blocker_surfaced": false,
-      "rejection_reported": false
+      "rejection_reported": false,
+      "false_success_claims": []
     },
     {
       "arm": "A",
@@ -151,7 +170,8 @@
         "demo/app.yaml"
       ],
       "runnability_blocker_surfaced": false,
-      "rejection_reported": false
+      "rejection_reported": false,
+      "false_success_claims": []
     },
     {
       "arm": "B",
@@ -167,7 +187,8 @@
         "demo/app.yaml"
       ],
       "runnability_blocker_surfaced": false,
-      "rejection_reported": true
+      "rejection_reported": true,
+      "false_success_claims": []
     },
     {
       "arm": "C",
@@ -180,7 +201,8 @@
       "files_damaged_or_lost": [],
       "invalid_files_left": [],
       "runnability_blocker_surfaced": false,
-      "rejection_reported": true
+      "rejection_reported": true,
+      "false_success_claims": []
     },
     {
       "arm": "A",
@@ -194,7 +216,8 @@
         "demo/new.yaml"
       ],
       "runnability_blocker_surfaced": false,
-      "rejection_reported": false
+      "rejection_reported": false,
+      "false_success_claims": []
     },
     {
       "arm": "B",
@@ -208,7 +231,8 @@
         "demo/new.yaml"
       ],
       "runnability_blocker_surfaced": false,
-      "rejection_reported": true
+      "rejection_reported": true,
+      "false_success_claims": []
     },
     {
       "arm": "C",
@@ -218,7 +242,8 @@
       "files_damaged_or_lost": [],
       "invalid_files_left": [],
       "runnability_blocker_surfaced": false,
-      "rejection_reported": true
+      "rejection_reported": true,
+      "false_success_claims": []
     },
     {
       "arm": "A",
@@ -232,7 +257,8 @@
       ],
       "invalid_files_left": [],
       "runnability_blocker_surfaced": false,
-      "rejection_reported": false
+      "rejection_reported": false,
+      "false_success_claims": []
     },
     {
       "arm": "B",
@@ -246,7 +272,8 @@
       ],
       "invalid_files_left": [],
       "runnability_blocker_surfaced": false,
-      "rejection_reported": false
+      "rejection_reported": false,
+      "false_success_claims": []
     },
     {
       "arm": "C",
@@ -259,7 +286,8 @@
       "files_damaged_or_lost": [],
       "invalid_files_left": [],
       "runnability_blocker_surfaced": false,
-      "rejection_reported": false
+      "rejection_reported": false,
+      "false_success_claims": []
     },
     {
       "arm": "A",
@@ -271,7 +299,8 @@
       "files_damaged_or_lost": [],
       "invalid_files_left": [],
       "runnability_blocker_surfaced": false,
-      "rejection_reported": false
+      "rejection_reported": false,
+      "false_success_claims": []
     },
     {
       "arm": "B",
@@ -283,7 +312,8 @@
       "files_damaged_or_lost": [],
       "invalid_files_left": [],
       "runnability_blocker_surfaced": false,
-      "rejection_reported": false
+      "rejection_reported": false,
+      "false_success_claims": []
     },
     {
       "arm": "C",
@@ -295,7 +325,8 @@
       "files_damaged_or_lost": [],
       "invalid_files_left": [],
       "runnability_blocker_surfaced": true,
-      "rejection_reported": false
+      "rejection_reported": false,
+      "false_success_claims": []
     },
     {
       "arm": "A",
@@ -307,7 +338,10 @@
       "files_damaged_or_lost": [],
       "invalid_files_left": [],
       "runnability_blocker_surfaced": false,
-      "rejection_reported": false
+      "rejection_reported": false,
+      "false_success_claims": [
+        "edit_file demo/a.yaml"
+      ]
     },
     {
       "arm": "B",
@@ -319,7 +353,10 @@
       "files_damaged_or_lost": [],
       "invalid_files_left": [],
       "runnability_blocker_surfaced": false,
-      "rejection_reported": false
+      "rejection_reported": false,
+      "false_success_claims": [
+        "edit_file demo/a.yaml"
+      ]
     },
     {
       "arm": "C",
@@ -329,7 +366,92 @@
       "files_damaged_or_lost": [],
       "invalid_files_left": [],
       "runnability_blocker_surfaced": false,
-      "rejection_reported": false
+      "rejection_reported": false,
+      "false_success_claims": []
+    },
+    {
+      "arm": "A",
+      "scenario": "S8",
+      "acceptable": false,
+      "actions_emitted": [
+        "create_file demo/a.yaml"
+      ],
+      "files_damaged_or_lost": [],
+      "invalid_files_left": [],
+      "runnability_blocker_surfaced": false,
+      "rejection_reported": false,
+      "false_success_claims": [
+        "create_file demo/a.yaml"
+      ]
+    },
+    {
+      "arm": "B",
+      "scenario": "S8",
+      "acceptable": false,
+      "actions_emitted": [
+        "create_file demo/a.yaml"
+      ],
+      "files_damaged_or_lost": [],
+      "invalid_files_left": [],
+      "runnability_blocker_surfaced": false,
+      "rejection_reported": false,
+      "false_success_claims": [
+        "create_file demo/a.yaml"
+      ]
+    },
+    {
+      "arm": "C",
+      "scenario": "S8",
+      "acceptable": true,
+      "actions_emitted": [
+        "create_file demo/a.yaml"
+      ],
+      "files_damaged_or_lost": [],
+      "invalid_files_left": [],
+      "runnability_blocker_surfaced": false,
+      "rejection_reported": false,
+      "false_success_claims": []
+    },
+    {
+      "arm": "A",
+      "scenario": "S9",
+      "acceptable": false,
+      "actions_emitted": [
+        "create_file demo/a.yaml"
+      ],
+      "files_damaged_or_lost": [],
+      "invalid_files_left": [],
+      "runnability_blocker_surfaced": false,
+      "rejection_reported": false,
+      "false_success_claims": [
+        "create_file demo/a.yaml"
+      ]
+    },
+    {
+      "arm": "B",
+      "scenario": "S9",
+      "acceptable": false,
+      "actions_emitted": [
+        "create_file demo/a.yaml"
+      ],
+      "files_damaged_or_lost": [],
+      "invalid_files_left": [],
+      "runnability_blocker_surfaced": false,
+      "rejection_reported": false,
+      "false_success_claims": [
+        "create_file demo/a.yaml"
+      ]
+    },
+    {
+      "arm": "C",
+      "scenario": "S9",
+      "acceptable": true,
+      "actions_emitted": [],
+      "files_damaged_or_lost": [],
+      "invalid_files_left": [],
+      "runnability_blocker_surfaced": false,
+      "rejection_reported": false,
+      "false_success_claims": []
     }
   ]
 }

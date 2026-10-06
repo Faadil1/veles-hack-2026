@@ -12,10 +12,10 @@ def test_official_device_example_passes_local_spec():
     assert report.kind is spec.ProfileKind.DEVICE and report.ok
 
 
-def test_official_native_example_is_schema_ok_but_flags_security_level_wording():
+def test_official_native_example_is_valid_for_the_ide_validator():
+    # The real backend validator accepts any string for securityLevel ("high" in the cookbook), so do we.
     report = spec.check_profile(NATIVE)
-    assert report.ok  # docs disagree on securityLevel wording, so it is a warning, not an error
-    assert any(i.field.endswith("securityLevel") and i.severity is spec.Severity.WARNING for i in report.issues)
+    assert report.ok and not any(i.field.endswith("securityLevel") for i in report.issues)
 
 
 def test_official_native_example_will_not_run():

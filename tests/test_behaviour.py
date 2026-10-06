@@ -5,7 +5,6 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-import pytest
 
 from steward.llm import LLMError, LLMTurn, ScriptedLLM, ToolCall
 from tests.harness import Harness

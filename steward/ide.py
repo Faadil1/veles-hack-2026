@@ -1,8 +1,10 @@
 """Client for the HYPER-AI IDE backend agent endpoints, and the SSE event contract.
 
-Contract source: https://ide-tutorial.hyperai.di.uoa.gr/hyperion-agent/ (read 2026-10-06).
+Contract source: https://ide-tutorial.hyperai.di.uoa.gr/hyperion-agent/ (read 2026-10-06), confirmed against the
+shipped backend source (donmichael/ide-backend:latest, server.js) by CI recon.
   GET {base}/agent/file?path=<path|name>            200 {path, content} | 404 | 409 {matches}
   GET {base}/agent/validation/file?path=<path|name>  200 report | 404 | 409 {matches}
+  GET {base}/files?path=<folder>                     200 [{name, type: file|folder, path}] ([] when missing)
 Every call returns an explicit outcome; network failures are values, never exceptions that could let
 the agent proceed as if a check had passed.
 """
@@ -114,6 +116,25 @@ class IdeClient:
         if resp.status_code == 409:
             return FileResult(Outcome.AMBIGUOUS, matches=_matches(body), detail=body.get("error", ""), latency_ms=ms)
         return FileResult(Outcome.ERROR, detail=f"HTTP {resp.status_code}: {resp.text[:200]}", latency_ms=ms)
+
+    async def list_dir(self, path: str) -> tuple[Outcome, list[dict[str, Any]]]:
+        resp, _err, _ms = await self._get("/files", path)
+        if resp is None:
+            return Outcome.UNREACHABLE, []
+        if resp.status_code != 200:
+            return Outcome.ERROR, []
+        try:
+            value = resp.json()
+        except ValueError:
+            return Outcome.ERROR, []
+        return Outcome.OK, [v for v in value if isinstance(v, dict)] if isinstance(value, list) else []
+
+    async def folder_exists(self, path: str) -> Outcome | bool:
+        parent, _, name = path.rpartition("/")
+        outcome, entries = await self.list_dir(parent)
+        if outcome is not Outcome.OK:
+            return outcome
+        return any(e.get("name") == name and e.get("type") == "folder" for e in entries)
 
     async def validate_file(self, path: str) -> ValidationResult:
         resp, err, ms = await self._get("/agent/validation/file", path)

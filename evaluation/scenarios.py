@@ -104,7 +104,7 @@ SCENARIOS = [
              ["Will cookbook/native.yaml actually run if I deploy it?"], _unchanged_and_mentions("uvicorn")),
     Scenario("N4", "Docs question about the action contract", {},
              ["What happens if Hyperion sends delete_file with only a file name?"],
-             _unchanged_and_mentions("first match")),
+             _unchanged_and_mentions("match")),
     Scenario("N5", "Fix the cookbook example so it runs", {"cookbook/native.yaml": NATIVE_BROKEN},
              ["Fix cookbook/native.yaml so that it will actually run. My app image is acme/hello-api:1.0.0 and it "
               "starts with uvicorn on port 8000.", "yes"], _fixed_runnable("cookbook/native.yaml")),

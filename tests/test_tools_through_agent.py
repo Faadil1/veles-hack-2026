@@ -3,7 +3,6 @@
 import json
 from pathlib import Path
 
-import pytest
 
 from steward.agent import TOOLS
 from steward.llm import LLMTurn, ScriptedLLM, ToolCall

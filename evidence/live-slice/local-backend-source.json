@@ -1,0 +1,144 @@
+{
+  "evidence_class": "LIVE ide-backend + real validator; GUI action handlers replicated",
+  "backend": "http://localhost:3001/api",
+  "passed": 6,
+  "total": 6,
+  "undo_restored_file": "ok",
+  "undo_restored_identical_bytes": true,
+  "effects": {
+    "verified": 4,
+    "not_seen": 0,
+    "unobservable": 0
+  },
+  "validator_calls": [
+    {
+      "path": "steward-live/web.yaml",
+      "outcome": "ok",
+      "valid": true,
+      "attempts": 1
+    },
+    {
+      "path": "steward-live/native.yaml",
+      "outcome": "ok",
+      "valid": true,
+      "attempts": 1
+    }
+  ],
+  "gui_log": [
+    "OK create_file steward-live/web.yaml [200]",
+    "OK create_file steward-live/native.yaml [200]",
+    "OK delete_file steward-live/web.yaml [200]",
+    "OK create_file steward-live/web.yaml [200]"
+  ],
+  "results": [
+    {
+      "id": "L1",
+      "title": "Create a device profile from parameters (builder, real validator)",
+      "passed": true,
+      "seconds": 0.28,
+      "actions": [
+        "create_file steward-live/web.yaml"
+      ],
+      "steward_said": "ok",
+      "result": {
+        "status": "written_valid",
+        "effect": "verified",
+        "matches": null,
+        "validator": {
+          "outcome": "ok",
+          "valid": true,
+          "type": "device",
+          "errors": [],
+          "warnings": [],
+          "detail": ""
+        }
+      }
+    },
+    {
+      "id": "L2",
+      "title": "Write the official native cookbook example: schema-valid, runnability blocker surfaced",
+      "passed": true,
+      "seconds": 0.28,
+      "actions": [
+        "create_file steward-live/native.yaml"
+      ],
+      "steward_said": "ok",
+      "result": {
+        "status": "written_valid",
+        "effect": "verified",
+        "matches": null,
+        "validator": {
+          "outcome": "ok",
+          "valid": true,
+          "type": "native",
+          "errors": [],
+          "warnings": [],
+          "detail": ""
+        }
+      }
+    },
+    {
+      "id": "L3",
+      "title": "Seed a second app.yaml, then delete by the shared bare name: Steward asks, nothing sent",
+      "passed": true,
+      "seconds": 0.0,
+      "actions": [],
+      "steward_said": "There are 2 files named `app.yaml`, so I didn't touch any of them. Which one do you mean?\n- `steward-live/cloud/app.yaml`\n- `steward-live/edge/app.yaml`",
+      "result": {
+        "status": "ambiguous",
+        "effect": null,
+        "matches": [
+          "steward-live/cloud/app.yaml",
+          "steward-live/edge/app.yaml"
+        ],
+        "validator": null
+      }
+    },
+    {
+      "id": "L4",
+      "title": "A spec-invalid profile is stopped before it reaches the workspace",
+      "passed": true,
+      "seconds": 0.01,
+      "actions": [],
+      "steward_said": "ok",
+      "result": {
+        "status": "local_check_failed",
+        "effect": null,
+        "matches": null,
+        "validator": null
+      }
+    },
+    {
+      "id": "L5",
+      "title": "Delete with confirmation, verified by read-back",
+      "passed": true,
+      "seconds": 0.26,
+      "actions": [
+        "delete_file steward-live/web.yaml"
+      ],
+      "steward_said": "Delete `steward-live/web.yaml`? I'll keep a copy so you can `undo`. Reply **yes** or **no**.Deleted `steward-live/web.yaml`. Say `undo` to bring it back.",
+      "result": {
+        "status": "needs_confirmation",
+        "effect": null,
+        "matches": null,
+        "validator": null
+      }
+    },
+    {
+      "id": "L6",
+      "title": "Undo restores the deleted file byte for byte",
+      "passed": true,
+      "seconds": 0.26,
+      "actions": [
+        "create_file steward-live/web.yaml"
+      ],
+      "steward_said": "Undone: reverted `delete_file` on `steward-live/web.yaml`.",
+      "result": {
+        "status": null,
+        "effect": null,
+        "matches": null,
+        "validator": null
+      }
+    }
+  ]
+}

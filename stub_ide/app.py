@@ -1,13 +1,21 @@
 """LOCAL_STUB of the HYPER-AI IDE, for tests and offline demos only.
 
-Reproduces the documented agent contract (ide-tutorial.hyperai.di.uoa.gr/hyperion-agent/):
-  - GET /api/agent/file            200 {path, content} | 404 | 409 {error, matches}
-  - GET /api/agent/validation/file 200 {path, type, valid, errors, warnings} | 404 | 409
-  - Name-only targets for delete_file / edit_file / delete_folder resolve to the FIRST match (documented hazard).
-The validator here is Steward's own local spec checker. It is NOT the HYPER-AI validator; anything proven only
-against this stub is LOCAL_STUB evidence.
+Mirrors the shipped IDE, read from the official images by CI recon (evidence/recon):
+  backend donmichael/ide-backend:latest (server.js, validation/*.js)
+  - GET /api/agent/file             direct path first; a bare name (no "/") is searched by file name:
+                                    200 {path, content} | 404 | 409 {error, matches}
+  - GET /api/agent/validation/file  same lookup, then the backend validator (here: steward.hyperai_schema, a port
+                                    proven equal to the JavaScript validator by evaluation/validator_parity.py)
+  - POST /api/file/create fails with 400 when the file exists; POST /api/folder/create fails when the folder exists.
+  GUI donmichael/ide-gui:latest (assets/index-*.js)
+  - Each streamed action is dispatched without waiting for the previous one; the agent is never told the outcome.
+  - edit_file / delete_file / delete_folder resolve the target as: exact path, else the UNIQUE entry whose path ends
+    with "/<name>". Zero or several matches: nothing happens, a WARN appears in the IDE status log only.
+    (The published tutorial says "first match"; the shipped GUI does not do that.)
+  - create_file on an existing path: the backend refuses, the GUI logs an ERROR, nothing changes.
 
-Extra endpoints prefixed /__stub/ emulate the IDE frontend executing streamed actions, and let tests seed state.
+Extra endpoints prefixed /__stub/ let tests seed state. `drop_actions=True` simulates a GUI that is not open,
+so actions are never applied.
 """
 
 from __future__ import annotations
@@ -18,7 +26,11 @@ from fastapi import FastAPI, Query
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
-from steward import spec
+from steward import hyperai_schema
+
+
+def _clean(path: str) -> str:
+    return str(path or "").strip().strip("/")
 
 
 class Workspace:
@@ -26,43 +38,78 @@ class Workspace:
         self.files: dict[str, str] = {}
         self.folders: set[str] = set()
         self.applied: list[dict[str, Any]] = []
+        self.status_log: list[str] = []  # what the IDE status bar would show; the agent never sees it
         self.forced_invalid: dict[str, str] = {}  # path -> error message, to exercise validator rejection
+        self.drop_actions = False
 
+    def seed(self, files: dict[str, str]) -> None:
+        for path, content in files.items():
+            self.files[path] = content
+            self._add_parents(path)
+
+    # backend lookupAgentFile
     def matches(self, name_or_path: str) -> list[str]:
+        if name_or_path in self.files:
+            return [name_or_path]
         if "/" in name_or_path:
-            return [name_or_path] if name_or_path in self.files else []
-        return [p for p in self.files if p.rsplit("/", 1)[-1] == name_or_path]
+            return []
+        return sorted(p for p in self.files if p.rsplit("/", 1)[-1] == name_or_path)
 
-    def first_match(self, name_or_path: str) -> str | None:
-        found = self.matches(name_or_path)
-        return found[0] if found else None
+    # GUI fa(): exact path, else unique suffix match
+    def _gui_resolve(self, name: str, kind: str) -> tuple[str | None, list[str]]:
+        pool = self.files.keys() if kind == "file" else self.folders
+        if name in pool:
+            return name, [name]
+        found = sorted(p for p in pool if p.endswith("/" + name))
+        return (found[0] if len(found) == 1 else None), found
+
+    def _add_parents(self, path: str) -> None:
+        parts = path.split("/")[:-1]
+        for i in range(1, len(parts) + 1):
+            self.folders.add("/".join(parts[:i]))
 
     def apply(self, event: dict[str, Any]) -> dict[str, Any]:
-        """Mimic the IDE frontend. Name-only targets use the first match, exactly as documented."""
-        action, path = event.get("action"), event.get("path", "")
-        outcome: dict[str, Any] = {"action": action, "requested": path}
-        if action == "create_folder":
-            self.folders.add(path)
-        elif action == "delete_folder":
-            target = path if ("/" in path or path in self.folders) else next(
-                (f for f in self.folders if f.rsplit("/", 1)[-1] == path), path)
-            self.folders = {f for f in self.folders if f != target and not f.startswith(target + "/")}
-            self.files = {p: c for p, c in self.files.items() if not p.startswith(target + "/")}
-            outcome["resolved"] = target
-        elif action == "create_file":
-            self.files[path] = event.get("content", "")
-            if "/" in path:
-                self.folders.add(path.rsplit("/", 1)[0])
-        elif action == "edit_file":
-            target = self.first_match(path) or path
-            self.files[target] = event.get("content", "")
-            outcome["resolved"] = target
-        elif action == "delete_file":
-            target = self.first_match(path)
-            if target:
-                del self.files[target]
-            outcome["resolved"] = target
+        """Execute one action the way the shipped GUI does."""
+        action, path = event.get("action"), _clean(event.get("path", ""))
+        outcome: dict[str, Any] = {"action": action, "requested": path, "applied": False}
         self.applied.append(outcome)
+        if self.drop_actions:
+            outcome["status"] = "dropped (GUI not open)"
+            return outcome
+        if not path:
+            self.status_log.append(f"WARN Agent: {action} without a path - ignored.")
+            return outcome
+        if action == "create_folder":
+            if path in self.folders:
+                self.status_log.append("ERROR Agent action 'create_folder' failed: Folder already exists")
+                return outcome
+            self.folders.add(path)
+            self._add_parents(path + "/x")
+        elif action == "create_file":
+            if path in self.files:
+                self.status_log.append("ERROR Agent action 'create_file' failed: File already exists")
+                return outcome
+            self.files[path] = str(event.get("content") or "")
+            self._add_parents(path)
+        elif action in ("edit_file", "delete_file", "delete_folder"):
+            kind = "folder" if action == "delete_folder" else "file"
+            target, found = self._gui_resolve(path, kind)
+            outcome["resolved"] = target
+            if not target:
+                why = "not found" if not found else f"matches {len(found)} {kind}s ({', '.join(found)})"
+                self.status_log.append(f"WARN Agent: {kind} '{path}' {why} - nothing changed.")
+                return outcome
+            if action == "edit_file":
+                self.files[target] = str(event.get("content") or "")
+            elif action == "delete_file":
+                del self.files[target]
+            else:
+                self.folders = {f for f in self.folders if f != target and not f.startswith(target + "/")}
+                self.files = {p: c for p, c in self.files.items() if not p.startswith(target + "/")}
+        else:
+            self.status_log.append(f"WARN Agent sent unsupported action '{action}' - ignored.")
+            return outcome
+        outcome["applied"] = True
         return outcome
 
 
@@ -91,16 +138,27 @@ def create_app(workspace: Workspace | None = None) -> FastAPI:
         code, body = _lookup(path)
         if code != 200:
             return JSONResponse(body, status_code=code)
-        report = spec.check_profile(ws.files[body["path"]])
-        errors = [{"line": 1, "column": 1, "field": i.field, "message": i.message} for i in report.errors]
+        report = hyperai_schema.validate_profile(ws.files[body["path"]])
+        errors = [{"line": 1, "column": 1, "field": e.path, "message": e.message} for e in report.errors]
         if body["path"] in ws.forced_invalid:
             errors.append({"line": 1, "column": 1, "field": "<stub>", "message": ws.forced_invalid[body["path"]]})
-        if report.parse_error:
-            errors.insert(0, {"line": 1, "column": 1, "field": "<yaml>", "message": report.parse_error})
-        warnings = [{"line": 1, "column": 1, "field": i.field, "message": i.message}
-                    for i in report.issues if i.severity is spec.Severity.WARNING]
-        return JSONResponse({"path": body["path"], "type": report.kind.value, "valid": not errors,
+        warnings = [{"line": 1, "column": 1, "field": w.path, "message": w.message} for w in report.warnings]
+        return JSONResponse({"path": body["path"], "type": report.type, "valid": not errors,
                              "errors": errors, "warnings": warnings, "stub": True})
+
+    @app.get("/api/files")
+    def list_files(path: str = "") -> JSONResponse:
+        base = _clean(path)
+        prefix = base + "/" if base else ""
+        names: dict[str, str] = {}
+        for p in ws.files:
+            if p.startswith(prefix):
+                head = p[len(prefix):].split("/", 1)
+                names.setdefault(head[0], "file" if len(head) == 1 else "folder")
+        for f in ws.folders:
+            if f.startswith(prefix) and f != base:
+                names.setdefault(f[len(prefix):].split("/", 1)[0], "folder")
+        return JSONResponse([{"name": n, "type": t, "path": prefix + n} for n, t in sorted(names.items())])
 
     class Seed(BaseModel):
         files: dict[str, str] = {}
@@ -112,8 +170,7 @@ def create_app(workspace: Workspace | None = None) -> FastAPI:
         ws.applied.clear()
         for path, content in payload.files.items():
             ws.files[path] = content
-            if "/" in path:
-                ws.folders.add(path.rsplit("/", 1)[0])
+            ws._add_parents(path)
         return {"files": list(ws.files)}
 
     @app.post("/__stub/apply")
