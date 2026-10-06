@@ -1,0 +1,53 @@
+name: live-model-scenarios
+on:
+  workflow_dispatch:
+    inputs:
+      model:
+        description: "Ollama model tag"
+        default: "qwen2.5:3b"
+  push:
+    branches: [main]
+    paths: ["evaluation/scenarios.py", ".github/workflows/live-model.yml"]
+permissions:
+  contents: write
+concurrency:
+  group: live-model
+  cancel-in-progress: true
+jobs:
+  scenarios:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      MODEL: ${{ github.event.inputs.model || 'qwen2.5:3b' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12"}
+      - run: pip install -r requirements-dev.txt
+      - name: Start Ollama with an open model (no personal API key)
+        run: |
+          curl -fsSL https://ollama.com/install.sh | sh
+          (ollama serve > /tmp/ollama.log 2>&1 &)
+          for i in $(seq 1 30); do curl -fs localhost:11434/api/tags && break; sleep 1; done
+          ollama pull "$MODEL"
+      - name: Run natural-language scenarios through Steward
+        env:
+          STEWARD_PROVIDER: openai_compatible
+          OPENAI_BASE_URL: http://localhost:11434/v1
+          STEWARD_MODEL: ${{ env.MODEL }}
+        run: |
+          SAFE=$(echo "$MODEL" | tr ':/' '__')
+          python -m evaluation.scenarios --out "evidence/scenarios/${SAFE}-${GITHUB_SHA::7}.json" | tee /tmp/summary.txt
+          echo "::notice title=scenarios::$(tr '\n' ' | ' < /tmp/summary.txt | head -c 900)"
+      - name: Publish report to ci-evidence branch
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          mkdir -p /tmp/out && cp evidence/scenarios/*.json /tmp/out/ 2>/dev/null || true
+          git fetch origin ci-evidence || true
+          git checkout -B ci-evidence origin/ci-evidence 2>/dev/null || git checkout --orphan ci-evidence
+          git rm -rq --cached . 2>/dev/null || true
+          mkdir -p scenarios && cp /tmp/out/*.json scenarios/ 2>/dev/null || true
+          git add scenarios && git commit -m "scenario report ${GITHUB_SHA::7} ${MODEL}" || echo "nothing to commit"
+          git push origin ci-evidence
