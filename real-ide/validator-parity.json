@@ -1,7 +1,0 @@
-{
-  "evidence_class": "BEHAVIOR / real backend validator source vs Python port",
-  "documents": 5536,
-  "js_invalid": 4625,
-  "disagreements": 0,
-  "diffs": []
-}
