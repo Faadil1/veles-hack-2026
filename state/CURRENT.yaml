@@ -8,12 +8,12 @@ project:
     version: 0.1.57-submission-execution-assurance-promoted
     commit: 61f853a461634ca46746c63bbf6ced5fa05f8649
     benchmark_overlay_commit: 9b1db87
-  updated_at: 2026-10-06T13:40Z
+  updated_at: 2026-10-06T16:45Z
   lifecycle_stage: DELIVER (post vertical slice, depth)
   judged_build_stage: LIVE DEPTH / EVIDENCE / STORY
   track: CHALLENGE_1_HYPERION_HYPER_AI
   concept: HYPERION_STEWARD (locked; re-framed D-026 around observed fire-and-forget actions)
-  submission_execution_state: PACKAGE_IN_PROGRESS
+  submission_execution_state: PACKAGE_READY_PENDING_HUMAN
   deadline_utc: 2026-10-07T14:59Z
   safety_boundary_utc: 2026-10-07T11:59Z  # internal freeze, 3h margin
   pitches_utc: 2026-10-08T07:30Z
@@ -21,15 +21,16 @@ project:
     first_live_slice_proven: true  # official backend image in CI, live slice 6/6 (d6924d9)
     validator_parity: "0 disagreements / 5,536 docs (official image code)"
     gui_e2e_deterministic: "4/4 official GUI + backend images, browser-driven"
-    gui_e2e_model: "running (llama3.1:8b via Ollama)"
-    tests_local: 97 passing
+    gui_e2e_model: "7/7 official GUI + llama3.1:8b (2e62095); M1 via docs fallback after CPU timeout"
+    dockerhub_image: "pushed by CI (2e62095 sha256:c2c1d6fc...); username pending"
+    tests_local: 100 passing
     ablation: "C 9/9, A 1/9, B 1/9; false success claims 0/5/5"
   open_unknowns:
     - none on key provisioning: organiser injects API_KEY at evaluation (D-030)
     - Steward quality on legion1 llama3.1 (needs team key)
   blockers:
-    - HUMAN_REQUIRED DOCKERHUB_USERNAME, DOCKERHUB_TOKEN as repo secrets (HYPERAI_API_KEY optional, D-030)
-  exact_next_gate: POST_VERTICAL_SLICE_DEPTH_GAP_REVIEW
+    - HUMAN_REQUIRED Docker Hub username (for docs), organiser message, TAIKAI submit
+  exact_next_gate: FINAL_CANONICAL_ASSURANCE_AT_FREEZE
   exact_next_action: >-
-    Read gui-model-e2e results, fix model-path defects, update deck demo screenshot, depth gap review,
-    clean-room verification, Final Canonical Assurance, FINAL-HANDOVER.md before the freeze.
+    Fill the Docker Hub username, rebuild the deck, re-run gui-model on the freeze commit, Final Canonical
+    Assurance, update FINAL-HANDOVER.md, freeze at 2026-10-07T11:59Z.
