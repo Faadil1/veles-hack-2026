@@ -1,0 +1,21 @@
+/usr/share/nginx/html:
+50x.html
+assets
+favicon.svg
+index.html
+
+/usr/share/nginx/html/assets:
+index-C6_D24YQ.css
+index-RTP-3qes.js
+server {
+  listen 80;
+  server_name _;
+
+  root /usr/share/nginx/html;
+  index index.html;
+
+  location / {
+    # BrowserRouter client-side routes should resolve to index.html.
+    try_files $uri $uri/ /index.html;
+  }
+}

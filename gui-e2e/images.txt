@@ -1,0 +1,2 @@
+[donmichael/ide-gui:latest] sha256:a805e9d3acf827e251016c0bbe5f7608062b71c50f66b478ff804d7ba50c7053
+[donmichael/ide-backend:latest] sha256:3b2906879ea72dc4ac386745502ec2baa831640a9f0956c2dcf40c9c907ba906

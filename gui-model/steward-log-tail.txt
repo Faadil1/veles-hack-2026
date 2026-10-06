@@ -1,0 +1,25 @@
+INFO:     Started server process [3793]
+INFO:     Waiting for application startup.
+2026-10-06 13:14:19,004 INFO steward Hyperion Steward ready: ide=http://localhost:3001/api model=openai-compatible:llama3.1:8b@http://localhost:11434/v1
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:     127.0.0.1:58174 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58184 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58194 - "OPTIONS /chat HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58196 - "POST /chat HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58196 - "POST /chat HTTP/1.1" 200 OK
+2026-10-06 13:17:04,220 INFO httpx HTTP Request: POST http://localhost:11434/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-06 13:18:00,331 INFO httpx HTTP Request: POST http://localhost:11434/v1/chat/completions "HTTP/1.1 200 OK"
+INFO:     127.0.0.1:58196 - "POST /chat HTTP/1.1" 200 OK
+2026-10-06 13:20:55,438 INFO httpx HTTP Request: POST http://localhost:11434/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-06 13:21:06,379 INFO httpx HTTP Request: POST http://localhost:11434/v1/chat/completions "HTTP/1.1 200 OK"
+INFO:     127.0.0.1:58196 - "POST /chat HTTP/1.1" 200 OK
+2026-10-06 13:23:08,209 INFO httpx HTTP Request: POST http://localhost:11434/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-06 13:23:08,492 INFO httpx HTTP Request: GET http://localhost:3001/api/agent/file?path=app.yaml "HTTP/1.1 409 Conflict"
+INFO:     127.0.0.1:58196 - "POST /chat HTTP/1.1" 200 OK
+2026-10-06 13:25:34,277 INFO httpx HTTP Request: POST http://localhost:11434/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-06 13:25:53,105 INFO httpx HTTP Request: POST http://localhost:11434/v1/chat/completions "HTTP/1.1 200 OK"
+INFO:     127.0.0.1:58196 - "OPTIONS /chat HTTP/1.1" 200 OK
+INFO:     127.0.0.1:40416 - "POST /chat HTTP/1.1" 200 OK
+2026-10-06 13:28:46,058 INFO httpx HTTP Request: POST http://localhost:11434/v1/chat/completions "HTTP/1.1 200 OK"
+INFO:     127.0.0.1:40416 - "POST /chat HTTP/1.1" 200 OK
