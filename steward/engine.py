@@ -332,7 +332,7 @@ class SafeOps:
         except PathError as exc:
             return {"status": "rejected", "reason": str(exc)}
         await self._act("create_folder", path, None, None)
-        return {"status": "created", "path": path}
+        return {"status": "created", "path": path, "effect": self.last_effect}
 
     async def request_delete_folder(self, path: str) -> dict[str, Any]:
         try:

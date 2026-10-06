@@ -16,7 +16,7 @@ import re
 import time
 from typing import Any
 
-from . import guardrail, runnability, spec, templates
+from . import intents, guardrail, runnability, spec, templates
 from .engine import SafeOps, Session
 from .ide import IdeClient
 from .llm import LLM, LLMError, LLMTurn
@@ -172,6 +172,11 @@ class Steward:
 
     async def _degraded(self, ops: SafeOps, text: str, reason: str) -> None:
         ops.s.receipt("degraded_mode", reason=reason)
+        intent = intents.parse(text)
+        if intent is not None:
+            ops.s.receipt("intent_fallback", intent=intent.kind, args={k: v for k, v in intent.args.items()})
+            await self._run_intent(ops, intent)
+            return
         hits = self.docs.search(text, k=2)
         if hits:
             parts = [f"My language model is unavailable right now ({reason}), so here is the closest part of the "
@@ -180,11 +185,29 @@ class Steward:
                 excerpt = chunk.text.strip().replace("\n", " ")
                 parts.append(f"[{i}] **{chunk.heading}**: {excerpt[:600]}\n\n")
             parts.append("Sources: " + "; ".join(f"[{i}] {c.citation}" for i, (_, c) in enumerate(hits, 1)))
-            parts.append("\n\nI can still `undo`, and `check <file>.yaml`. I won't write files until the model is back.")
+            parts.append("\n\n" + _DEGRADED_CAN_DO)
             await ops.say("".join(parts))
         else:
-            await ops.say(f"My language model is unavailable right now ({reason}). I can still `undo` my last change "
-                          "or `check <file>.yaml`. I won't write or delete anything in this state.")
+            await ops.say(f"My language model is unavailable right now ({reason}). " + _DEGRADED_CAN_DO)
+
+    async def _run_intent(self, ops: SafeOps, intent: intents.Intent) -> None:
+        if intent.kind == "create_profile":
+            result = await self._create_profile(ops, intent.args)
+            await ops.say(_created_text(intent.args, result))
+        elif intent.kind == "delete":
+            result = await ops.request_delete(intent.args["path"])
+            message = _guard_message(intent.args, result)
+            if not message:
+                message = _unresolved_text(intent.args["path"], str(result.get("status")), str(result.get("reason", "")))
+            await ops.say(message)
+        elif intent.kind == "create_folder":
+            result = await ops.create_folder(intent.args["path"])
+            if result.get("status") != "created":
+                await ops.say(f"I can't use that path: {result.get('reason')}")
+            elif result.get("effect") != "verified":
+                await ops.say(_unconfirmed_text({"status": "sent_unverified", "path": result["path"]}))
+            else:
+                await ops.say(f"Created folder {result['path']}. Say undo to remove it.")
 
     # -- model-driven path ------------------------------------------------------------------------
 
@@ -419,6 +442,34 @@ def _unresolved_text(target: str, status: str, detail: str) -> str:
     if status == "invalid":
         return f"I can't use that path: {detail}"
     return f"I couldn't reach the IDE backend to look up `{target}` ({detail}). I didn't change anything."
+
+
+_DEGRADED_CAN_DO = ("Without the model I can still create a profile from a simple request (for example: create a "
+                    "deployment YAML for the nginx Docker image), delete a file with your confirmation, create a "
+                    "folder, check <file>.yaml, and undo my last change.")
+
+
+def _created_text(args: dict[str, Any], r: dict[str, Any]) -> str:
+    status = r.get("status")
+    path = r.get("path") or args.get("path")
+    if status in ("needs_confirmation", "ambiguous"):
+        return _guard_message(args, r)
+    if status == "sent_unverified" or r.get("effect") in ("not_seen", "unobservable"):
+        return _unconfirmed_text({"status": "sent_unverified", "path": path})
+    if status == "written_valid":
+        bits = [f"{args.get('kind', 'device')} profile for the image {args.get('image')}"]
+        if args.get("ports"):
+            bits.append(f"port {', '.join(str(p) for p in args['ports'])}")
+        verdict = (r.get("runnability") or {}).get("verdict")
+        tail = " Runnability: will not run as written; ask me to check it." if verdict == "will_not_run" else ""
+        return (f"Created {path} ({', '.join(bits)}) and opened it in the editor. The IDE validator reports it valid. "
+                "Fields I wasn't told (owner, QoS, resources) use defaults you can see and edit in the file. "
+                f"Say undo to remove it.{tail}")
+    if status == "rolled_back_invalid":
+        return _result_text("write_profile", r)
+    if status == "blocked":
+        return f"I couldn't reach the IDE backend, so I didn't create {path}."
+    return f"I couldn't create {path} ({status})."
 
 
 def _unconfirmed_text(r: dict[str, Any]) -> str:
