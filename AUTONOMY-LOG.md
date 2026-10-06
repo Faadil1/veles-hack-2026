@@ -199,3 +199,41 @@ Timezone of record: UTC (local Toronto = UTC-4).
 - **Decision:** (c). PRD bumped to v0.2 (material human-boundary change, per PBPD standard §12). Tests cover explicit path, bare name, and delete.
 - **Evidence:** ci-evidence:scenarios/qwen2.5_3b-d063e1d.json, qwen2.5_7b-d063e1d.json; tests 57 passing; ablation unchanged (C 7/7, A/B 1/7).
 - **Reversible:** yes. **Human required:** no.
+
+## D-023 — Official starter received: align to the organiser contract
+- **Timestamp:** 2026-10-06T12:51Z
+- **Observed:** the human checkpoint delivered the starter ZIP, the Challenge 1 PDF, the official docx set and the TAIKAI rules/FAQ. Contract: `POST /chat {user_id, text}`, SSE `data: {"response"}` plus action events, optional `data: [DONE]`, CORS required (the GUI calls `http://localhost:8000/chat` from the browser), LLM server `legion1.di.uoa.gr/v1` (OpenAI-compatible, `llama3.1`, 8k context) with the per-team key in `API_KEY`, evaluation image `<dockerhub-user>/hyperion:latest`. Licence: Apache-2.0 (starter LICENCE).
+- **Decision:** single `/chat` route, `[DONE]` terminator, CORS, organiser defaults for the model, `.env`/`main.py`/compose like the starter, 8192-token context budget, official docs ingested into retrieval, deterministic topical guardrail (criterion 2) before any model call.
+- **Evidence:** commits a89fc88, 9109624; tests/test_contract.py, tests/test_guardrail.py.
+- **Reversible:** yes. **Human required:** no.
+
+## D-024 — Read the shipped IDE instead of trusting its documentation
+- **Timestamp:** 2026-10-06T12:51Z
+- **Observed:** the tutorial describes the IDE, but the judges run the images `donmichael/ide-backend:latest` and `donmichael/ide-gui:latest`. A CI recon job ran both and copied the backend source (server.js, validation/*.js) and the GUI bundle to `ci-evidence:recon/`.
+- **Decision:** treat the shipped code as the contract, the tutorial as secondary.
+- **Evidence:** ci-evidence:recon/ (ide-recon 7e5f45f). Assumption A-02 (409 on ambiguous names) confirmed in server.js `lookupAgentFile`.
+- **Reversible:** yes. **Human required:** no.
+
+## D-025 — Port the backend validator exactly and prove parity
+- **Timestamp:** 2026-10-06T13:00Z
+- **Problem:** `steward/spec.py` approximated the DSL from the tutorial pages. Several rules differed from the real validator (YAML 1.2 semantics: `yes`/`no` are strings and unquoted `1.1` is a number; `securityLevel` accepts any string; native `trustScore` is a string 1-5; `ports` only required once an entry exists; unknown fields are warnings).
+- **Options:** (a) patch the approximation; (b) port the rule tables and engine line for line and test against the JavaScript original.
+- **Decision:** (b). `steward/hyperai_schema.py` (Core 1.2 YAML loader, duplicate keys rejected, rule tables, implied ancestors, unknown-field warnings, workload block rule). `spec.check_profile` now delegates to it. Differential harness `evaluation/validator_parity.py`: 5,536 documents (cookbook, every builder output, every field deleted/retyped/out of range, YAML edge cases), **0 disagreements** with the backend's own validator run under Node. All four builders produce profiles the real validator accepts with no warnings.
+- **Evidence:** evidence/validator-parity/PARITY.json (LOCAL, backend source under Node); CI job `real-ide` repeats it against the code inside the official image.
+- **Consequence:** a profile Steward writes is never rejected by the IDE for a schema reason; the rollback path remains for anything else.
+- **Reversible:** yes. **Human required:** no.
+
+## D-026 — The shipped GUI contradicts the tutorial; correct our claims, find the real hazards
+- **Timestamp:** 2026-10-06T13:03Z
+- **Observed (GUI bundle index-RTP-3qes.js):** (1) for edit/delete the GUI uses the exact path, else the unique file ending in `/<name>`; zero or several matches is a no-op with a WARN in the status log. The tutorial's "first match" does not happen. (2) Actions are dispatched without `await`: fire-and-forget, concurrent, and the outcome never reaches the agent. (3) `create_file` on an existing path fails (backend 400). (4) The GUI also supports `write_yaml_to_editor` (not in the starter contract; unused).
+- **Consequence for the product story:** our claim "a bare-name delete hits the first match" is false for the shipped IDE and is withdrawn everywhere. The real hazard is different and worse for users: an agent that cannot see the outcome reports "done" when nothing happened (ambiguous name, existing file, IDE tab closed).
+- **Decision:** (1) after every action Steward reads the workspace back through the backend (`/agent/file`, `/files`) and only claims what it saw; the validator runs only after the change is visible (otherwise it would validate the old file); an unseen change is reported as unconfirmed. (2) LOCAL_STUB rewritten to mirror the shipped GUI and backend. (3) Ablation re-run with a "false success claims" metric: naive 1/9 acceptable and 5 false claims, validator-only 1/9 and 5, Steward 9/9 and 0. (4) Docs corpus gains an "observed behaviour" page so answers match the real IDE.
+- **Live check (LOCAL, backend source):** live slice 6/6, 4/4 effects verified by read-back, real 409 observed, undo restored identical bytes.
+- **Evidence:** tests/test_real_ide_semantics.py; evidence/ablation/ABLATION.md; evidence/live-slice/local-backend-source.json; commit d6924d9.
+- **Reversible:** yes. **Human required:** no.
+
+## D-027 — Key and Docker Hub become proven human dependencies
+- **Timestamp:** 2026-10-06T13:01Z
+- **Observed:** D-016's three conditions now hold: (1) the hackathon provides the model (legion1) and it suits the chosen path; (2) that path needs the per-team key; (3) the secret lives only in the container env `API_KEY` (never in the image) and, for CI live runs, in the repo secret `HYPERAI_API_KEY`. The evaluation image must be pushed to the team's Docker Hub account (account-owner action).
+- **Decision:** HUMAN_REQUIRED request sent for `HYPERAI_API_KEY`, `DOCKERHUB_USERNAME`, `DOCKERHUB_TOKEN` as repo secrets. CI step pushes `<user>/hyperion:latest` and a SHA tag when the secrets exist and warns otherwise. Work continues without blocking.
+- **Reversible:** yes. **Human required:** yes (secrets; later, sending the image tag to the organiser and the final submit).

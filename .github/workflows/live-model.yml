@@ -12,7 +12,7 @@ permissions:
   contents: write
 concurrency:
   group: live-model-${{ github.event.inputs.model || 'default' }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 jobs:
   scenarios:
     runs-on: ubuntu-latest

@@ -1,97 +1,115 @@
 # Hyperion Steward
 
-**The Hyperion agent for the HYPER-AI IDE that never leaves your workspace worse than it found it.**
+**A Hyperion agent for the HYPER-AI IDE that only tells you something happened once it has seen it happen.**
 
-Veles Hack 2026, Challenge 1 (HYPER-AI: *Hyperion, an LLM-powered agentic assistant*).
+Veles Hack 2026, Challenge 1 (HYPER-AI: *Hyperion, an LLM-powered agentic assistant*). Drop-in replacement for the
+official `hyperion-starter`: same `POST /chat` contract, same `API_KEY`, same default model server.
 
-Ask it questions about HYPER-AI, or ask it to create, fix, or delete application profiles. It does the work through the IDE's own action stream, and it refuses the three mistakes the IDE contract makes easy:
+## The problem we found in the shipped IDE
 
-| What can go wrong with a naive agent | What Steward does |
+We read the code of the IDE the judges run (`donmichael/ide-gui:latest`, `donmichael/ide-backend:latest`), not
+only its tutorial. Three facts shape everything Steward does:
+
+1. **Actions are fire-and-forget.** The GUI starts each streamed action and never tells the agent the result. When
+   an action fails, the only trace is a line in the IDE status log.
+2. **Plenty of actions fail silently.** A bare file name shared by two files does nothing (the tutorial says "first
+   match"; the shipped GUI refuses). `create_file` on an existing path does nothing. If the IDE tab is closed,
+   nothing runs at all.
+3. **Nothing checks a profile unless someone asks.** The validator exists (`/api/agent/validation/file`), but a
+   profile with `isHighlyAvailable: no` (a string under YAML 1.2) or an unquoted `schemaVersion: 1.1` is saved as is.
+
+So a straightforward agent says "Deleted app.yaml" or "Created your profile" when nothing happened, or saves
+something the IDE will reject.
+
+## What Steward does
+
+| Situation | Steward |
 |---|---|
-| `delete_file app.yaml` hits the **first** `app.yaml` in the workspace, not necessarily the one you meant. | Looks the name up first. If the IDE reports it as ambiguous (409), it lists every match and asks. It never sends a first-match action. |
-| `edit_file` replaces the whole file and there is no undo action. | Reads the file before every edit or delete and keeps a restore point. `undo` puts it back exactly. |
-| A profile can pass the schema and still never run. The official cookbook's native example starts `uvicorn` inside an `nginx` image. | Checks runnability beyond the schema (image vs entry point, listen port vs exposed ports, workload vs architecture, and more) and says so. |
+| Any change to the workspace | Sends the action, then **reads the workspace back** through the IDE backend. It says "done" only when it saw the change; otherwise it says it could not confirm it. The next action on that file waits for the previous one to land. |
+| Writing a profile | Checks it first with an **exact port of the IDE's own validator** (0 disagreements with the original on 5,536 test documents), writes it, waits until the file is visible, then asks the IDE validator. If the IDE still rejects it, the file is rolled back. |
+| A name that matches several files | Looks it up first (the backend answers 409) and asks which one, listing every path. |
+| Overwrite, delete | Keeps a restore point. Deletions ask first. `undo` restores the exact bytes. |
+| A profile that is valid but will not run | Says so: the official cookbook's native example starts `uvicorn` inside an `nginx` image. Steward checks the image against the entry point, the listen port against the exposed ports, the workload against the architecture, and more. |
+| New profiles from plain language | The model extracts parameters; a deterministic builder emits the full profile, so the model never hand-writes 40 typed fields. Every builder output passes the real validator with no warnings. |
+| Questions about HYPER-AI | Answers from the official documents (tutorial, cookbook, D3.3/D4.2/D4.3 deliverables), with citations. |
+| Questions about anything else | Declined politely before any model call, so off-topic requests cost no tokens. |
 
-Every profile it writes is checked by the IDE's own validator. If the validator rejects it, Steward rolls the file back to what it was.
+## Evaluation criteria, and where each is proven
 
-## Proof so far
+| Criterion (Challenge 1) | How Steward meets it | Evidence |
+|---|---|---|
+| Working `/chat` microservice in Docker, answers HYPER-AI questions and turns language into IDE actions | `POST /chat`, SSE `response` and `action` events, `data: [DONE]`, CORS for the browser GUI | `tests/test_contract.py`; CI builds the image, smoke-tests it, and runs it **against the official backend image** (`check <file>.yaml` answered by the real validator) |
+| Guardrails reject irrelevant queries | Deterministic topical guard before the model | `tests/test_guardrail.py`; scenario N6 |
+| RAG grounded in HYPER-AI docs | BM25 over the official document set, HYPER-AI spelling normalised, cited `[n]` | `steward/docs/`, scenario N8 ("What is HyperAI?") |
+| Session memory | Per-`user_id` history and journal, bounded to the 8k context of the provided model | `tests/test_behaviour.py` |
+| Optional: human confirmation for delete/overwrite | Built in, plus restore points and undo | `tests/test_tools_through_agent.py`, ablation S1 to S5 |
+
+## Proof
 
 | Claim | Evidence | Class |
 |---|---|---|
-| Guard + journal prevent damage that naive and validator-only agents cause | [`evidence/ablation/ABLATION.md`](evidence/ablation/ABLATION.md): 7 scenarios, same tool calls. Acceptable outcomes: naive 1/7, validator-only 1/7, Steward 7/7. Files damaged or lost: 4, 4, 0. | TECHNICAL, on a contract-faithful stub IDE |
-| Safety invariants hold on error paths (backend down, model down, path traversal, declined confirmation) | [`tests/`](tests) (40 tests, run in CI on every push) | TECHNICAL |
-| A real language model drives the full stack from plain language | [`evaluation/scenarios.py`](evaluation/scenarios.py), run in CI on an open local model with no personal API key; reports on the `ci-evidence` branch | BEHAVIOR, on the stub IDE |
-| Works inside the real HYPER-AI IDE | Not yet verified | PENDING |
+| Local profile checks agree exactly with the IDE validator | [`evidence/validator-parity/PARITY.json`](evidence/validator-parity/PARITY.json): 5,536 documents, 0 disagreements. CI job `real-ide` repeats it with the code inside the official image. | LOCAL; CI: LIVE image |
+| End-to-end against the real backend: create, ambiguity 409, invalid profile stopped, delete with confirmation, undo | [`evidence/live-slice/`](evidence/live-slice/): 6/6 steps, every change verified by read-back, undo restored identical bytes. GUI behaviour replicated from its source. | LOCAL backend source; CI: LIVE image; GUI PARTIAL |
+| Safety layer is what makes the difference | [`evidence/ablation/ABLATION.md`](evidence/ablation/ABLATION.md): 9 scenarios, identical tool calls. Acceptable outcomes: naive 1/9, validator-only 1/9, Steward 9/9. False success claims: 5, 5, 0. Invalid files left: 2, 2, 0. | TECHNICAL, stub mirroring the shipped IDE |
+| A real language model drives the stack from plain language | [`evaluation/scenarios.py`](evaluation/scenarios.py) on open models in CI (no personal key); reports on the `ci-evidence` branch | BEHAVIOR, stub IDE |
+| Runs on the organisers' model server (legion1, llama3.1) | Defaults point there; needs the team key | PENDING the team key |
 
-What is real today, and what is not, is kept in [`docs/REALITY-LEDGER.md`](docs/REALITY-LEDGER.md).
+What is real and what is not is kept in [`docs/REALITY-LEDGER.md`](docs/REALITY-LEDGER.md).
 
 ## Run it
 
 ```bash
-docker run -p 8000:8000 \
-  -e IDE_BACKEND_URL=http://host.docker.internal:3001/api \
-  -e STEWARD_PROVIDER=openai_compatible \
-  -e OPENAI_BASE_URL=http://host.docker.internal:11434/v1 \
-  -e STEWARD_MODEL=qwen2.5:7b \
-  ghcr.io/faadil1/hyperion-steward:latest
+docker run -p 8000:8000 --add-host host.docker.internal:host-gateway \
+  -e API_KEY=<team key> \
+  <dockerhub-user>/hyperion:latest
 ```
 
-Model provider, chosen by environment:
+Defaults match the starter: model server `https://legion1.di.uoa.gr/v1`, model `llama3.1`, IDE backend
+`http://host.docker.internal:3001/api`. Or `docker compose up` with a `.env` holding `API_KEY=`.
 
-| `STEWARD_PROVIDER` | Needs |
-|---|---|
-| `openai_compatible` | `OPENAI_BASE_URL`, `STEWARD_MODEL`, optional `OPENAI_API_KEY`. Works with an organiser-provided endpoint, Ollama, vLLM, llama.cpp or a hosted API. |
-| `anthropic` | `ANTHROPIC_API_KEY`, optional `STEWARD_MODEL` |
-| `none` | Nothing. Steward still answers from the docs, runs `check <file>.yaml` and `undo`, and refuses to write. |
+| Variable | Default | Purpose |
+|---|---|---|
+| `API_KEY` | empty | Team key for the organisers' model server |
+| `OPENAI_BASE_URL`, `STEWARD_MODEL` | legion1, `llama3.1` | Any OpenAI-compatible server (Ollama, vLLM...) |
+| `STEWARD_PROVIDER` | `openai_compatible` | `anthropic` (needs `ANTHROPIC_API_KEY`) or `none` |
+| `IDE_BACKEND_URL` | `http://host.docker.internal:3001/api` in Docker | Where the IDE backend is |
 
-Without Docker:
+With no reachable model, Steward still answers from the docs, runs `check <file>.yaml` and `undo`, and refuses to
+write. Without Docker: `pip install -r requirements.txt && python main.py`.
 
-```bash
-pip install -r requirements.txt
-IDE_BACKEND_URL=http://localhost:3001/api python -m steward.app
-```
-
-### The contract it speaks
-
-`POST /chat` (also accepted on `/`) with `{"user_id": "...", "text": "..."}` returns `text/event-stream`:
-
-```
-data: {"response": "Creating edge/sensor-reader.yaml. "}
-data: {"action": "create_file", "path": "edge/sensor-reader.yaml", "content": "apiVersion: hyper.ai/v1\n..."}
-data: {"response": "The IDE validator reports it valid. Say undo to remove it."}
-```
-
-It reads and validates through the IDE backend (`GET /api/agent/file`, `GET /api/agent/validation/file`). Per-user memory is keyed by `user_id`. `GET /receipts/<user_id>` shows every lookup, guard decision, action, validator call, model call (tokens, latency) and restore point for a session.
+`GET /receipts/<user_id>/view` shows a session's timeline: lookups, guard decisions, actions, read-back results,
+validator calls, model calls with tokens and latency, restore points.
 
 ## Try these in the Hyperion panel
 
-- `Create a device app called sensor-reader that runs acme/sensor:1.2 on arm64 edge devices with a 200 ms latency budget, in edge/sensor-reader.yaml`
-- `delete app.yaml` (with two `app.yaml` files in the workspace)
-- `check native.yaml` (with the cookbook native example)
-- `Fix it so it runs`, then `undo`
-- `What does delete_file do if I only give a file name?`
+- `Create a deployment YAML for a service using the nginx Docker image`
+- `What is HyperAI?`
+- `check cookbook/native.yaml` with the cookbook native example, then `Fix it so it runs`, then `undo`
+- `delete app.yaml` with two `app.yaml` files in the workspace
+- `What's the weather in Valencia?`
 
 ## How it is built
 
 ```
-IDE panel ──SSE──> app.py ──> agent.py (model + tools) ──> engine.py SafeOps ──> IDE actions
-                                   │                          │   guard, confirmation, restore points,
-                                   │                          │   validator loop, rollback
-                                   ├── retrieval.py           ├── spec.py         (local DSL checks)
-                                   │   (official docs, cited) ├── runnability.py  (will it actually run)
-                                   └── llm.py                 └── templates.py    (parameters to full profile)
-                                       (Anthropic / OpenAI-compatible / none)
+IDE panel --SSE--> app.py --> agent.py (guardrail, model, tools) --> engine.py SafeOps --> IDE actions
+                                 |                                     | lookup, confirmation, restore points,
+                                 |                                     | read-back verification, validator, rollback
+                                 +-- retrieval.py (official docs)      +-- hyperai_schema.py (port of the IDE validator)
+                                 +-- guardrail.py (topic scope)        +-- runnability.py   (will it actually run)
+                                 +-- llm.py (OpenAI-compatible,        +-- templates.py     (parameters to profile)
+                                     Anthropic, none)
 ```
 
-The model handles language. Everything that can damage the workspace goes through `SafeOps`, which enforces its invariants whatever the model says.
+The model handles language. Everything that touches the workspace goes through `SafeOps`, whatever the model says.
 
 ## Project records
 
-[PRD](docs/PRD.md) · [Concept selection](docs/CONCEPT-SELECTION.md) · [Autonomy log](AUTONOMY-LOG.md) · [Gateway registry](docs/CONDITIONAL-GATEWAY-REGISTRY.yaml) · [Challenge reality](docs/CHALLENGE-REALITY.md)
+[PRD](docs/PRD.md) · [Autonomy log](AUTONOMY-LOG.md) · [Reality ledger](docs/REALITY-LEDGER.md) · [Challenge reality](docs/CHALLENGE-REALITY.md) · [Gateway registry](docs/CONDITIONAL-GATEWAY-REGISTRY.yaml)
 
 ## AI use disclosure
 
-This entry was built by Claude (Anthropic) as the autonomous arm of a build benchmark run by Faadil Boussari, who acted only on identity, account and submission steps. Steward itself can run on any OpenAI-compatible model or on Anthropic's API.
+Built by Claude (Anthropic) as the autonomous arm of a build benchmark run by Faadil Boussari, who acted only on
+identity, account and submission steps. Steward runs on the organisers' model by default.
 
 ## License
 
