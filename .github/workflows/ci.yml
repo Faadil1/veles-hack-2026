@@ -148,6 +148,13 @@ jobs:
           if [ -z "$DOCKERHUB_USERNAME" ] || [ -z "$DOCKERHUB_TOKEN" ]; then
             echo "::warning title=dockerhub::HUMAN_REQUIRED: DOCKERHUB_USERNAME / DOCKERHUB_TOKEN secrets not set; evaluation image not pushed"; exit 0; fi
           echo "$DOCKERHUB_TOKEN" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
+          # Keep the verified artifact stable: if latest already carries this runtime revision, do not replace it.
+          if docker pull -q "$DOCKERHUB_USERNAME/hyperion:latest" >/dev/null 2>&1; then
+            current=$(docker image inspect "$DOCKERHUB_USERNAME/hyperion:latest" --format '{{index .Config.Labels "org.opencontainers.image.revision"}}')
+            if [ "$current" = "${{ steps.rev.outputs.sha }}" ]; then
+              echo "::notice title=dockerhub::latest already at runtime ${current::7}; not re-pushed ($(docker image inspect "$DOCKERHUB_USERNAME/hyperion:latest" --format '{{index .RepoDigests 0}}'))"; exit 0
+            fi
+          fi
           docker tag ghcr.io/faadil1/hyperion-steward:${{ github.sha }} "$DOCKERHUB_USERNAME/hyperion:latest"
           docker tag ghcr.io/faadil1/hyperion-steward:${{ github.sha }} "$DOCKERHUB_USERNAME/hyperion:${GITHUB_SHA::7}"
           docker push "$DOCKERHUB_USERNAME/hyperion:latest"; docker push "$DOCKERHUB_USERNAME/hyperion:${GITHUB_SHA::7}"

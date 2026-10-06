@@ -1,0 +1,72 @@
+{
+  "evidence_class": "LIVE GUI + backend (official images in CI) / browser-driven",
+  "suite": "deterministic",
+  "passed": 4,
+  "total": 4,
+  "results": [
+    {
+      "sid": "G1",
+      "text": "What's the weather in Valencia today?",
+      "passed": true,
+      "reason": "ok",
+      "reply": "I'm Hyperion, the assistant for the HYPER-AI IDE, so I can only help with HYPER-AI and your workspace: questions about the platform, and creating, checking, fixing or deleting application profiles and files. Try something like “Create a device app for the nginx image” or “What are Open Connectors?”.",
+      "seconds": 4.2,
+      "files": [
+        "cloud/app.yaml",
+        "cookbook/native.yaml",
+        "edge/app.yaml"
+      ],
+      "status_log_tail": [
+        "[INFO 4:25:23 PM] Workspace ready. Waiting for messages."
+      ]
+    },
+    {
+      "sid": "G2",
+      "text": "check cookbook/native.yaml",
+      "passed": true,
+      "reason": "ok",
+      "reply": "cookbook/native.yaml\nIDE validator: valid.\nRunnability: will not run as written.\n- specs.runtime: entry point uvicorn needs a Python runtime, but image nginx does not ship one. The container will fail at start. Fix: Use an image that contains your app and uvicorn (e.g. your own image built FROM python:3.x-slim), or change the entry point to what nginx actually runs.\n- specs.runtime.baseOS says python but the container image is nginx. One of them is wrong. Fix: Make baseOS describe the image you actually run.\n- A port is publicly exposed while dataClassification is private. Fix: Confirm the exposure is intended, or set publicExposure: false.",
+      "seconds": 4.7,
+      "files": [
+        "cloud/app.yaml",
+        "cookbook/native.yaml",
+        "edge/app.yaml"
+      ],
+      "status_log_tail": [
+        "[INFO 4:25:23 PM] Workspace ready. Waiting for messages."
+      ]
+    },
+    {
+      "sid": "G3",
+      "text": "check app.yaml",
+      "passed": true,
+      "reason": "ok",
+      "reply": "There are 2 files named app.yaml, so I didn't touch any of them. Which one do you mean?\n- cloud/app.yaml\n- edge/app.yaml",
+      "seconds": 3.2,
+      "files": [
+        "cloud/app.yaml",
+        "cookbook/native.yaml",
+        "edge/app.yaml"
+      ],
+      "status_log_tail": [
+        "[INFO 4:25:23 PM] Workspace ready. Waiting for messages."
+      ]
+    },
+    {
+      "sid": "G4",
+      "text": "undo",
+      "passed": true,
+      "reason": "ok",
+      "reply": "There's nothing of mine to undo in this session.",
+      "seconds": 2.7,
+      "files": [
+        "cloud/app.yaml",
+        "cookbook/native.yaml",
+        "edge/app.yaml"
+      ],
+      "status_log_tail": [
+        "[INFO 4:25:23 PM] Workspace ready. Waiting for messages."
+      ]
+    }
+  ]
+}
