@@ -130,6 +130,7 @@ class SafeOps:
         self.effect_timeout_s = effect_timeout_s
         self.effect_poll_s = effect_poll_s
         self.last_effect = "none"
+        self.spoken: list[str] = []  # what Steward said this turn, for session memory on deterministic paths
 
     # -- reads ------------------------------------------------------------------------------------
 
@@ -169,6 +170,7 @@ class SafeOps:
     async def say(self, text: str) -> None:
         # The IDE panel shows text as is (no markdown rendering, OBSERVED in the GUI), so emphasis marks and
         # backticks would appear literally. Strip them at the single exit point for user-facing text.
+        self.spoken.append(plain_text(text))
         await self.emit(response_event(plain_text(text)))
 
     async def _act(self, action: str, path: str, content: str | None, before: str | None,

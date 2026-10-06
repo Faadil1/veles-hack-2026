@@ -259,3 +259,19 @@ Timezone of record: UTC (local Toronto = UTC-4).
 - **Consequence:** no key is ever baked into the image (unchanged). The team key `HYPERAI_API_KEY` is no longer needed for evaluation; it remains useful only to test on legion1 from CI before the freeze (optional). Docker Hub credentials remain HUMAN_REQUIRED (account-owner action). The deterministic intent fallback (D-028) stays as a safety net, not the main path.
 - **Evidence:** screenshot of the Discord thread provided by the human (2026-10-06 09:18 local).
 - **Reversible:** n/a. **Human required:** Docker Hub secrets; optional team key.
+
+## D-031 — First runs in the official GUI with llama3.1 8B: diagnose and re-route actions
+- **Timestamp:** 2026-10-06T15:45Z
+- **Observed (official GUI + backend images, llama3.1:8b on Ollama CPU):** run 07a7343 5/7; run 7f81593 4/7 (step M1 hit the 420 s limit while video recording slowed the CPU runner). Passing: off-topic refusal, "What is HyperAI?" grounded answer, ambiguous delete (real 409), undo. Failing in both runs: (M2) on the official example "Create a deployment YAML for a service using the nginx Docker image" the model asked "which architecture?" instead of acting; (M4/M5) asked to fix cookbook/native.yaml, the model pasted an invented YAML into the chat and asked to confirm, then on "yes" (nothing pending in Steward) it asked what to build. No workspace damage in any step.
+- **Root cause:** an 8B model is unreliable at deciding to act and at re-emitting whole profiles; the conversational "yes" refers to a model-side proposal that Steward never registered.
+- **Options:** (a) prompt tuning only; (b) route unambiguous action requests deterministically before the model, and give the model a field-level `edit_profile` tool instead of whole-file rewrites; (c) both.
+- **Decision:** (c). Intent-first routing for create (image named), fix (path + stated facts), delete, create folder: same SafeOps path, no model call, deterministic text that is also written to session memory. New `edit_profile` tool (dotted fields). A "yes"/"no" with nothing pending reaches the model with a note to act now. Prompt forbids pasting profiles as proposals. Model suite step M5 now tests memory ("Which container image did you just put in that file?").
+- **Evidence:** tests/test_intents.py (official create example and fix request run without calling the model; undo restores bytes); tests/test_tools_through_agent.py (edit_profile). 100 tests.
+- **Expected consequence:** M2 and M4 pass independent of model quality; latency for actions drops from minutes (CPU 8B) to about a second.
+- **Reversible:** yes. **Human required:** no.
+
+## D-032 — Evidence push failed on a 110 MB recording
+- **Timestamp:** 2026-10-06T15:45Z
+- **Observed:** the gui-model publish step failed: the raw WebM (110.64 MB) exceeds GitHub's 100 MB limit. A pre-fix live-model publish (workflow of d6924d9) had also wiped other evidence folders again; they were restored from their commits (0a0c8ec, d02b9e2, 6b07870, e9c26e7).
+- **Decision:** transcode the recording in CI to an 8x time-lapse MP4 at 1280 px (libx264, crf 30), delete the WebM, refuse any file over 90 MB before pushing.
+- **Reversible:** yes. **Human required:** no.

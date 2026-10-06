@@ -40,3 +40,27 @@ async def test_without_a_model_delete_still_asks_and_ambiguity_still_holds():
     assert ask.actions == [] and "Reply yes or no" in ask.text
     done = await h2.say("yes")
     assert "demo/a.yaml" not in h2.ws.files and "Deleted" in done.text
+
+
+async def test_fix_request_runs_deterministically_even_with_a_model():
+    from pathlib import Path
+
+    from steward.llm import LLMTurn, ScriptedLLM
+    native = (Path(__file__).parent / "fixtures" / "cookbook" / "native-hello-world.yaml").read_text()
+    llm = ScriptedLLM([LLMTurn(text="I should not be called")])
+    h = Harness({"cookbook/native.yaml": native}, llm=llm)
+    turn = await h.say("Fix cookbook/native.yaml so that it will actually run. My app image is acme/hello-api:1.0.0 "
+                       "and it starts with uvicorn on port 8000.")
+    assert not llm.calls and "Updated cookbook/native.yaml" in turn.text and "valid" in turn.text
+    assert "acme/hello-api" in h.ws.files["cookbook/native.yaml"]
+    undo = await h.say("undo")
+    assert h.ws.files["cookbook/native.yaml"] == native and "Undone" in undo.text
+
+
+async def test_official_create_example_skips_the_model():
+    from steward.llm import LLMTurn, ScriptedLLM
+    llm = ScriptedLLM([LLMTurn(text="Which architecture do you want?")])
+    h = Harness({}, llm=llm)
+    turn = await h.say("Create a deployment YAML for a service using the nginx Docker image")
+    assert not llm.calls and "nginx.yaml" in h.ws.files and "Created nginx.yaml" in turn.text
+    assert h.sessions.get("u1").history[-1]["role"] == "assistant"  # remembered for later model turns

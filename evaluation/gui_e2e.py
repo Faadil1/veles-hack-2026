@@ -109,13 +109,15 @@ DETERMINISTIC = [
 ]
 
 MODEL = [
-    Step("M1", "What is HyperAI?", says("continuum"), timeout_s=420, shot="what-is-hyperai"),
+    Step("M1", "What is HyperAI?", says("continuum"), timeout_s=600, shot="what-is-hyperai"),
     Step("M2", "Create a deployment YAML for a service using the nginx Docker image", new_valid_profile(),
          timeout_s=600, shot="create-nginx"),
-    Step("M3", "delete app.yaml", all_of(says("edge/app.yaml", "cloud/app.yaml")), timeout_s=420, shot="delete-ambiguous"),
+    Step("M3", "delete app.yaml", all_of(says("edge/app.yaml", "cloud/app.yaml")), timeout_s=600, shot="delete-ambiguous"),
     Step("M4", "Fix cookbook/native.yaml so that it will actually run. My app image is acme/hello-api:1.0.0 and it "
-               "starts with uvicorn on port 8000.", lambda r, f, log: (True, "see M5"), timeout_s=600, shot="fix-native"),
-    Step("M5", "yes", changed_and_valid("cookbook/native.yaml"), timeout_s=600, shot="fix-confirmed"),
+               "starts with uvicorn on port 8000.", changed_and_valid("cookbook/native.yaml"), timeout_s=600,
+         shot="fix-native"),
+    Step("M5", "Which container image did you just put in that file?", says("acme/hello-api"), timeout_s=600,
+         shot="memory"),
     Step("M6", "undo", lambda r, f, log: (f.get("cookbook/native.yaml") == NATIVE, "native restored"
                                           if f.get("cookbook/native.yaml") == NATIVE else "native not restored"),
          timeout_s=120, shot="undo"),

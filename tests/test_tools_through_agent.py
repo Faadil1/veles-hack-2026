@@ -74,3 +74,14 @@ def test_every_tool_has_an_agent_level_test():
     for spec in TOOLS:
         name = spec["name"]
         assert f'"{name}"' in source, f"no agent-level test references tool {name}"
+
+
+async def test_edit_profile_changes_only_the_named_fields():
+    native = (Path(__file__).parent / "fixtures" / "cookbook" / "native-hello-world.yaml").read_text()
+    h, llm, turn = await _run({"cookbook/native.yaml": native}, [call(
+        "edit_profile", path="cookbook/native.yaml",
+        changes={"specs.runtime.containerImage.uri": "acme/hello-api", "specs.runtime.containerImage.tag": "1.0.0"})])
+    result = last_tool_result(llm)
+    assert result["status"] == "written_valid" and result["effect"] == "verified"
+    assert "uri: acme/hello-api" in h.ws.files["cookbook/native.yaml"]
+    assert result["runnability"]["verdict"] != "will_not_run"

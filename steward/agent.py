@@ -16,7 +16,7 @@ import re
 import time
 from typing import Any
 
-from . import intents, guardrail, runnability, spec, templates
+from . import intents, guardrail, patching, runnability, spec, templates
 from .engine import SafeOps, Session
 from .ide import IdeClient
 from .llm import LLM, LLMError, LLMTurn
@@ -56,6 +56,8 @@ Rules:
 - If a tool result has effect "not_seen", the IDE has not applied the change yet: say so, never claim it is done.
 - To change an existing file, read_file it first. Use full paths once you know them.
 - Paths are relative to the workspace root. Never use absolute paths or "..".
+- Never paste a profile into the chat as a proposal. Change files only through tools; to change a few fields of an
+  existing profile, use edit_profile.
 - When the user asks you to create or change something, do it now with your tools. Do not ask "would you like
   me to...?" first. Steward itself asks the user whenever a confirmation is needed.
 - You cannot deploy or start workflows; tell the user to use the IDE's Deploy and Start buttons.
@@ -98,6 +100,12 @@ TOOLS: list[dict[str, Any]] = [
     {"name": "write_profile", "description": "Create or update a .yaml application profile safely (local check, write, IDE validation, auto-rollback).",
      "input_schema": {"type": "object", "properties": {"path": {"type": "string"}, "yaml": {"type": "string"}},
                       "required": ["path", "yaml"]}},
+    {"name": "edit_profile",
+     "description": "Change a few fields of an existing profile. changes maps dotted field paths to new values, e.g. "
+                    "{\"specs.runtime.containerImage.uri\": \"acme/api\", \"specs.network.ports[0].port\": 8000}. "
+                    "Same safety path as write_profile. Prefer this to rewriting the whole file.",
+     "input_schema": {"type": "object", "properties": {"path": {"type": "string"}, "changes": {"type": "object"}},
+                      "required": ["path", "changes"]}},
     {"name": "write_file", "description": "Create or update a non-profile text file (README, notes, scripts).",
      "input_schema": {"type": "object", "properties": {"path": {"type": "string"}, "content": {"type": "string"}},
                       "required": ["path", "content"]}},
@@ -146,9 +154,21 @@ class Steward:
             if not verdict.in_scope:
                 await ops.say(guardrail.REFUSAL)
                 return
+            intent = intents.parse(text)
+            if intent is not None:
+                # Unambiguous action requests run deterministically even when a model is available: faster on the
+                # 8B model, and no chance of the model asking needless questions or inventing YAML (D-031).
+                session.receipt("intent_route", intent=intent.kind, args=dict(intent.args))
+                await self._run_intent(ops, intent)
+                self._remember(session, text, ops)
+                return
             if self.llm is None:
                 await self._degraded(ops, text, reason="no language model is configured")
                 return
+            if YES.match(text) or NO.match(text):
+                text = (f"{text}\n\n(Steward note: nothing was waiting for confirmation. If your previous message "
+                        "proposed a change, make it now with edit_profile, write_profile or create_profile; do not "
+                        "ask again.)")
             await self._llm_turn(session, text, ops)
         finally:
             session.receipt("turn_done", latency_ms=int((time.perf_counter() - started) * 1000))
@@ -190,7 +210,39 @@ class Steward:
         else:
             await ops.say(f"My language model is unavailable right now ({reason}). " + _DEGRADED_CAN_DO)
 
+    async def _edit_profile(self, ops: SafeOps, target: str, changes: dict[str, Any]) -> dict[str, Any]:
+        res = await ops.resolve(target)
+        if res.status != "resolved":
+            return {"status": res.status, "matches": res.matches, "reason": res.detail}
+        try:
+            new_text, changed = patching.apply_changes(res.content or "", changes)
+        except patching.PatchError as exc:
+            return {"status": "needs_input", "detail": str(exc)}
+        if not changed:
+            return {"status": "unchanged", "path": res.path}
+        ops.s.receipt("edit_profile", path=res.path, fields=changed)
+        ops.explicit_targets.add(res.path)  # the user asked for these exact fields to change; a restore point is kept
+        result = await ops.write_profile(res.path, new_text)
+        result["fields_changed"] = changed
+        result["changes"] = {patching.normalise_path({"applicationProfile": 1} if k.startswith(("specs.", "metadata."))
+                                                     and "applicationProfile" in (res.content or "") else {}, k): v
+                             for k, v in changes.items()}
+        return result
+
     async def _run_intent(self, ops: SafeOps, intent: intents.Intent) -> None:
+        if intent.kind == "fix_profile":
+            res = await ops.resolve(intent.args["path"])
+            if res.status == "ambiguous":
+                await ops.say(_ambiguity_text(intent.args["path"], res.matches))
+                return
+            if res.status != "resolved":
+                await ops.say(_unresolved_text(intent.args["path"], res.status, res.detail))
+                return
+            doc, _ = spec.parse_profile(res.content or "")
+            changes = intents.fix_changes(doc, intent.args)
+            result = await self._edit_profile(ops, res.path, changes)
+            await ops.say(_edited_text(result))
+            return
         if intent.kind == "create_profile":
             result = await self._create_profile(ops, intent.args)
             await ops.say(_created_text(intent.args, result))
@@ -277,6 +329,13 @@ class Steward:
         del session.history[:-24]
 
 
+    @staticmethod
+    def _remember(session: Session, text: str, ops: SafeOps) -> None:
+        """Deterministic turns still go into session memory, so a later model turn knows what happened."""
+        said = " ".join(ops.spoken).strip()
+        session.history.extend([{"role": "user", "content": text}, {"role": "assistant", "content": said or "(done)"}])
+        del session.history[:-24]
+
     async def _create_profile(self, ops: SafeOps, args: dict[str, Any]) -> dict[str, Any]:
         kind = str(args.get("kind", "")).lower()
         try:
@@ -350,6 +409,11 @@ class Steward:
                 return await self._create_profile(ops, args)
             if name == "write_profile":
                 return await ops.write_profile(str(args.get("path", "")), str(args.get("yaml", "")))
+            if name == "edit_profile":
+                changes = args.get("changes")
+                if not isinstance(changes, dict) or not changes:
+                    return {"status": "needs_input", "detail": "changes must map field paths to values"}
+                return await self._edit_profile(ops, str(args.get("path", "")), changes)
             if name == "write_file":
                 return await ops.write_text_file(str(args.get("path", "")), str(args.get("content", "")))
             if name == "create_folder":
@@ -447,6 +511,30 @@ def _unresolved_text(target: str, status: str, detail: str) -> str:
 _DEGRADED_CAN_DO = ("Without the model I can still create a profile from a simple request (for example: create a "
                     "deployment YAML for the nginx Docker image), delete a file with your confirmation, create a "
                     "folder, check <file>.yaml, and undo my last change.")
+
+
+def _edited_text(r: dict[str, Any]) -> str:
+    status, path = r.get("status"), r.get("path")
+    if status in ("sent_unverified",) or r.get("effect") in ("not_seen", "unobservable"):
+        return _unconfirmed_text({"status": "sent_unverified", "path": path})
+    if status == "written_valid":
+        values = r.get("changes") or {}
+        fields = ", ".join(f"{f.replace('applicationProfile.', '')} = {values.get(f, '?')}"
+                           for f in r.get("fields_changed", []))
+        run = r.get("runnability") or {}
+        verdict = {"will_not_run": "still will not run as written", "at_risk": "no blocker left, some risks",
+                   "no_known_blocker": "no known blocker"}.get(run.get("verdict"), "not assessed")
+        notes = "".join(f"\n- {f['message']}" for f in run.get("findings", [])[:3])
+        return (f"Updated {path} ({fields}). The IDE validator reports it valid. Runnability: {verdict}.{notes}\n"
+                "Say undo to restore the previous version.")
+    if status == "unchanged":
+        return f"{path} already has those values; nothing to change."
+    if status == "local_check_failed":
+        errs = "; ".join(f"{i['field']}: {i['message']}" for i in r.get("issues", [])[:4])
+        return f"That change would make {path} invalid ({errs}), so I didn't write it."
+    if status == "rolled_back_invalid":
+        return _result_text("write_profile", r)
+    return f"I couldn't update {path} ({status}: {r.get('detail') or r.get('reason') or ''})."
 
 
 def _created_text(args: dict[str, Any], r: dict[str, Any]) -> str:

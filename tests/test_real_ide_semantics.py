@@ -33,7 +33,7 @@ async def test_every_action_is_read_back_before_steward_claims_it():
     llm = ScriptedLLM([call("create_profile", path="demo/web.yaml", kind="device", name="web", image="nginx:1.27"),
                        LLMTurn(text="ok")])
     h = Harness({}, llm=llm)
-    await h.say("create a device app for nginx in demo/web.yaml")
+    await h.say("go ahead with the web server we discussed")
     result = last_tool_result(llm)
     assert result["status"] == "written_valid" and result["effect"] == "verified"
     kinds = [r["kind"] for r in h.sessions.get("u1").receipts]
@@ -45,7 +45,7 @@ async def test_when_the_ide_does_not_apply_actions_steward_does_not_claim_succes
                        LLMTurn(text="ok")])
     h = Harness({}, llm=llm)
     h.ws.drop_actions = True  # the IDE page is closed: nothing executes the streamed actions
-    await h.say("create a device app for nginx in demo/web.yaml")
+    await h.say("go ahead with the web server we discussed")
     result = last_tool_result(llm)
     assert result["status"] == "sent_unverified" and result["effect"] == "not_seen"
     assert result["validator"]["outcome"] == "skipped"

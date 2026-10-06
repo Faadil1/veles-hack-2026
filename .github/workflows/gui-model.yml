@@ -52,6 +52,17 @@ jobs:
           echo "$ENDPOINT" > /tmp/gui-model/endpoint.txt; echo "${GITHUB_SHA}" > /tmp/gui-model/commit.txt
           tail -50 /tmp/steward.log > /tmp/gui-model/steward-log-tail.txt
           echo "::notice title=gui-model::$ENDPOINT $(python3 -c 'import json;d=json.load(open("/tmp/gui-model/gui-e2e-model.json"));print(d["passed"],"/",d["total"],[(r["sid"],r["passed"],r["seconds"]) for r in d["results"]])')"
+      - name: Make the recording publishable (GitHub refuses files over 100 MB)
+        if: always()
+        run: |
+          sudo apt-get install -y -qq ffmpeg >/dev/null
+          for f in /tmp/gui-model/video/*.webm; do
+            [ -f "$f" ] || continue
+            ffmpeg -loglevel error -y -i "$f" -vf "setpts=0.125*PTS,scale=1280:-2" -an -c:v libx264 -crf 30 \
+              -preset veryfast -pix_fmt yuv420p /tmp/gui-model/session-timelapse-8x.mp4
+          done
+          rm -rf /tmp/gui-model/video; ls -la /tmp/gui-model
+          find /tmp/gui-model -size +90M -print -delete
       - name: Publish evidence
         if: always()
         run: |
