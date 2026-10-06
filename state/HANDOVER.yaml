@@ -1,15 +1,17 @@
 handover:
-  updated_at: 2026-10-06T10:48Z
+  updated_at: 2026-10-06T13:40Z
   summary: >-
-    Build phase. Deadline 2026-10-07 14:59 UTC (corrected D-015), internal freeze 2026-10-07 11:59 UTC. Four tracks identified from official
-    co-organiser pages. Product repo created by human and seeded. No concept locked, no code yet.
+    Hyperion Steward for Challenge 1 (HYPER-AI). Aligned to the official starter and to the shipped IDE code.
+    Live against the official backend and GUI images in CI. Deadline 2026-10-07 14:59 UTC, internal freeze
+    2026-10-07 11:59 UTC.
   read_first:
     - state/CURRENT.yaml
-    - AUTONOMY-LOG.md
-    - docs/CHALLENGE-REALITY.md
-  exact_next_gate: TRACK_AND_CONCEPT_QUALIFICATION
+    - AUTONOMY-LOG.md (D-023 onward)
+    - docs/REALITY-LEDGER.md
+    - README.md
+  exact_next_gate: POST_VERTICAL_SLICE_DEPTH_GAP_REVIEW
   human_checkpoints_open:
-    - hyperion-starter ZIP
-    - authenticated TAIKAI Rules / Categories / FAQs + Challenge 1 announcements
-  conditional_dependencies:
-    - LLM provider key (D-016)
+    - repo secrets HYPERAI_API_KEY, DOCKERHUB_USERNAME, DOCKERHUB_TOKEN
+    - ask organisers how API_KEY is provided at evaluation (message drafted)
+    - final submit on TAIKAI and image tag to the organiser
+  conditional_dependencies: []

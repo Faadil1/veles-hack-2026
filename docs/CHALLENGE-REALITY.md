@@ -1,7 +1,7 @@
-# Veles Hack 2026 — Challenge Reality Matrix
+# Veles Hack 2026: Challenge Reality Matrix
 
 Status: QUALIFY (living). Each fact carries OBSERVED / INFERRED / UNKNOWN and its source.
-Last update: 2026-10-06T10:10Z.
+Last update: 2026-10-06T13:35Z.
 
 ## 1. Timeline (OBSERVED — TAIKAI timeline page, UTC)
 
@@ -33,28 +33,30 @@ Internal submission freeze: **2026-10-07 11:59 UTC** (3 h before deadline). Corr
 | 3 | ENACT | Kubernetes Dynamic Adaptation: deploy to live K8s clusters, runtime policies, adaptation | ENACT CCC, K8s/Helm | Java/Python/Go, Eclipse IDE |
 | 4 | CoGNETs | Smart Edge Resource Auctions: dynamic node registration, game-theory bidding agents competing for resources | Auction mechanisms | Python, Docker, REST, JSON |
 
-## 4. Rules, judging, deliverables
+## 4. Rules, judging, deliverables (OBSERVED: TAIKAI rules and FAQ pasted by the human at 08:49 local; Challenge 1 PDF)
 
-| Item | State | Note |
+| Item | State | Source / note |
 |---|---|---|
-| Rules page text | UNKNOWN | TAIKAI renders client-side; fetchers return shell only; workspace egress to taikai.network blocked; Browserbase errored; built-in browser not connected. |
-| Judging criteria | UNKNOWN | Not published on any reachable page. |
-| Deliverables (repo/video/deck) | UNKNOWN | aicompetition.dev lists "working solution for chosen challenge" (aggregator, INFERRED only). |
-| License requirement | UNKNOWN | Sponsor code observed: aeriOS repos Apache-2.0. Product will use Apache-2.0 (compatible, Eclipse norm). |
-| AI-use rules | UNKNOWN | Disclosure will be made in README regardless (benchmark protocol requires it). |
-| Pre-existing code | UNKNOWN | Product is built from an empty repo created 2026-10-06T10:06Z; history proves in-event authorship. |
+| Fresh code only, public GitHub/GitLab repo created at event start | OBSERVED | TAIKAI rules. Repo created 2026-10-06T10:06Z; full history in-event. |
+| Licence file defined by the challenge | OBSERVED | Starter LICENCE is Apache-2.0; repo LICENSE is Apache-2.0. |
+| Submission: repo link + brief README on TAIKAI; template deck | OBSERVED | VelesHack_ProjectSubmissionTemplate.pptx (Project name, GitHub repo, Summary, Highlights). |
+| Pitch | OBSERVED | 6 minutes, live, free format; independent jury. |
+| Evaluation (Challenge 1) | OBSERVED | Organisers run `<dockerhub-user>/hyperion:latest` and test against 5 criteria: (1) /chat microservice answering HYPER-AI questions and turning NL into IDE actions, e.g. "What is HyperAI?" and "Create a deployment YAML for a service using the nginx Docker image" (writes the file and opens it in the editor); (2) guardrails reject irrelevant queries ("What is the weather today?"); (3) RAG on HYPER-AI docs; (4) memory within a session; (5) optional human-in-the-loop confirmation for delete/overwrite. |
+| How the evaluation container gets its model key | UNKNOWN | Starter reads `API_KEY` from env (`.env` excluded from the image). Mitigation: deterministic intent fallback (D-028). Question for the organisers is a human action. |
+| Prizes | OBSERVED | Per track 1st and 2nd. |
+| AI-use rules | UNKNOWN | Disclosure in README regardless. |
 
-## 5. Sponsor resources discovered
+## 5. Sponsor resources
 
-| Resource | Track | Access from workspace | Class |
-|---|---|---|---|
-| ide-tutorial.hyperai.di.uoa.gr (Hyperion contract, DSL native + device, cookbook) | 1 | READ via web fetch | REFERENCE (official) |
-| gitlab.eclipse.org/eclipse-research-labs/hyper-ai-project/hyperion-starter | 1 | BLOCKED (shell egress denied; robots.txt disallows fetchers) | REQUIRED if track 1 |
-| ide.hyperai.di.uoa.gr (live IDE, login) | 1 | BLOCKED from shell | — |
-| github.com/eclipse-aerios/iota-tangle, iota-messages-api, iota-tangle-peerer | 2 | GitHub reachable (public) | REFERENCE |
-| ENACT CCC clusters | 3 | UNKNOWN credentials; organiser-hosted | — |
-| CoGNETs auction boilerplate | 4 | NOT FOUND publicly yet | — |
+| Resource | Access from workspace | Class |
+|---|---|---|
+| ide-tutorial.hyperai.di.uoa.gr (contract, DSL, cookbook) | READ via web fetch | REFERENCE (secondary to shipped code) |
+| hyperion-starter | Received as ZIP from the human | REQUIRED, aligned (D-023) |
+| donmichael/ide-backend:latest, donmichael/ide-gui:latest | Run in GitHub Actions (Docker Hub unreachable from the workspace) | CONTRACT (D-024); digests sha256:3b29068… and sha256:a805e9d… |
+| legion1.di.uoa.gr/v1 (llama3.1, 8k context, OpenAI-compatible) | Unreachable from workspace; per-team key | REQUIRED for the judged model; HUMAN_REQUIRED key |
+| Official docx set (D3.3, D4.2, D4.3), Hyperai.pdf | Received from the human | RAG corpus |
 
 ## 6. Workspace constraints (OBSERVED, AUTONOMY-LOG D-004)
 
-Reachable: npm, PyPI, api.anthropic.com, GitHub (session-scoped). Unreachable: TAIKAI, GitLab Eclipse, deploy-provider APIs, Docker Hub, sponsor hosts. No product LLM key in env (CONDITIONAL dependency, D-016).
+Reachable: npm, PyPI, api.anthropic.com, GitHub (session-scoped), GitHub Actions (Docker Hub reachable there).
+Unreachable: TAIKAI, GitLab Eclipse, Docker Hub, legion1, deploy providers.

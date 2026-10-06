@@ -237,3 +237,18 @@ Timezone of record: UTC (local Toronto = UTC-4).
 - **Observed:** D-016's three conditions now hold: (1) the hackathon provides the model (legion1) and it suits the chosen path; (2) that path needs the per-team key; (3) the secret lives only in the container env `API_KEY` (never in the image) and, for CI live runs, in the repo secret `HYPERAI_API_KEY`. The evaluation image must be pushed to the team's Docker Hub account (account-owner action).
 - **Decision:** HUMAN_REQUIRED request sent for `HYPERAI_API_KEY`, `DOCKERHUB_USERNAME`, `DOCKERHUB_TOKEN` as repo secrets. CI step pushes `<user>/hyperion:latest` and a SHA tag when the secrets exist and warns otherwise. Work continues without blocking.
 - **Reversible:** yes. **Human required:** yes (secrets; later, sending the image tag to the organiser and the final submit).
+
+## D-028 — Robustness when the evaluation container has no model
+- **Timestamp:** 2026-10-06T13:12Z
+- **Observed:** the Challenge PDF says the organisers run our image and test it; how `API_KEY` reaches the container is not stated (UNKNOWN). The starter excludes `.env` from the image.
+- **Options:** (a) bake a key into the public image (rejected: leaks a secret); (b) assume a key; (c) make the canonical requests work without a model.
+- **Decision:** (c) plus asking the human to confirm with the organisers. `steward/intents.py` parses the official example requests (create a profile for an image, delete, create folder) and runs them through the same SafeOps path. Questions fall back to cited documentation passages; guardrail, check and undo never needed a model.
+- **Evidence:** tests/test_intents.py (official example creates a valid nginx.yaml with no model).
+- **Reversible:** yes. **Human required:** a question to the organisers (how the key is injected at evaluation).
+
+## D-029 — Browser end to end in the official IDE; plain text output
+- **Timestamp:** 2026-10-06T13:20Z
+- **Observed:** the official GUI shows agent text as is; `**` and backticks appeared literally in the panel (screenshot from the first browser run).
+- **Decision:** strip emphasis marks and backticks at the single exit point; system prompt asks for plain text. CI job `gui-e2e` runs the official GUI and backend images with Chromium typing into the Hyperion panel: 4/4 deterministic steps. Workflow `gui-model-e2e` runs the same with llama3.1 8B (or legion1 once the key exists).
+- **Evidence:** ci-evidence:gui-e2e/ (images sha256:a805e9d…, sha256:3b29068…).
+- **Reversible:** yes. **Human required:** no.

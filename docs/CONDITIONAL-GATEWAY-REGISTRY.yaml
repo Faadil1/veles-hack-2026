@@ -25,38 +25,41 @@ gateways:
     evidence: state/CURRENT.yaml canonical_baseline; AUTONOMY-LOG D-003
     note: central main advanced to c4404a1; delta not adopted (benchmark fairness pin). Classify only if a material transition depends on it.
   RULES_ELIGIBILITY_SUBMISSION_REQUIREMENTS:
-    status: ACTIVE
-    note: eligibility CONFIRMED (registration by human); rules text, deliverables UNKNOWN (TAIKAI client-rendered). See docs/CHALLENGE-REALITY.md.
+    status: PROVEN
+    evidence: docs/CHALLENGE-REALITY.md §4 (TAIKAI rules + FAQ pasted by human; Challenge 1 PDF). Repo public, created in-event, Apache-2.0.
   RUBRIC:
-    status: UNKNOWN
-    note: requested from human (D-010). Calibration only from Eclipse SDV 2025 (usability, creativity, coding).
+    status: PROVEN
+    evidence: Challenge 1 PDF "Expectations" 1-5; mapped in README "Evaluation criteria" table and deck slide 8.
   PAIN:
-    status: ACTIVE
-    evidence: docs/PRD.md §4, §5A (contract hazards OBSERVED; user frequency UNVERIFIED)
+    status: PROVEN
+    evidence: GUI bundle (fire-and-forget actions, silent no-ops) OBSERVED in donmichael/ide-gui:latest; D-026.
   PROBLEM:
     status: ACTIVE
     evidence: docs/PRD.md §3-4
   NEGATIVE_EVENT:
-    status: ACTIVE
-    evidence: official cookbook native example pairs nginx image with uvicorn entry point (OBSERVED in docs; runtime failure INFERRED); first-match delete hazard OBSERVED in contract. Live confirmation PENDING.
+    status: PROVEN
+    evidence: an agent reports done while nothing changed (ambiguous name, existing file, closed tab); ablation S1,S2,S7,S8,S9 false claims for naive arm. First-match claim WITHDRAWN (D-026).
   DIFFERENTIATOR:
-    status: ACTIVE
-    evidence: evidence/ablation/ABLATION.md (LOCAL_STUB, scripted calls) A=1/7 B=1/7 C=7/7 acceptable; damage A/B=4, C=0
+    status: PROVEN
+    evidence: evidence/ablation/ABLATION.md A=B=1/9, C=9/9, false claims 5/5/0; validator parity 0/5,536 on official image code.
   EXECUTION:
-    status: ACTIVE
-    evidence: steward/ (core), tests/ 31 passing locally, CI test job green
+    status: PROVEN
+    evidence: 97 tests; CI test, real-ide, gui-e2e, image jobs green.
   LIVE_DEPTH:
-    status: BLOCKED
-    note: no live IDE backend (starter pending, D-010); model endpoint is a CONDITIONAL dependency (D-016). Everything so far is LOCAL / LOCAL_STUB.
+    status: ACTIVE
+    evidence: live slice 6/6 on official backend image; GUI e2e 4/4 official images; model e2e (llama3.1 8B) running. legion1 path BLOCKED on team key (HUMAN_REQUIRED).
   EVIDENCE:
     status: ACTIVE
-    note: evidence/ folder, Reality Ledger and Evidence Graph to be created at first runtime.
+    evidence: evidence/, ci-evidence branch (digests + commit SHAs), docs/REALITY-LEDGER.md.
   STORY:
-    status: BLOCKED
+    status: ACTIVE
+    evidence: README "The problem we found in the shipped IDE"; deck slides 5-6.
   DEMO:
-    status: BLOCKED
+    status: ACTIVE
+    evidence: browser-driven screenshots of the official IDE (ci-evidence:gui-e2e); model demo pending gui-model-e2e.
   Q_AND_A:
-    status: BLOCKED
+    status: ACTIVE
+    note: Q&A prep in docs/pitch/ before freeze.
 
   OPPORTUNITY_INTELLIGENCE_HOI:
     status: ACTIVE
@@ -88,9 +91,9 @@ gateways:
   CREATIVE_DIVERGENCE:
     status: PENDING
   CAUSAL_MECHANISM_ASSURANCE:
-    status: ACTIVE
-    trigger_reason: guard/validator/rollback/undo are the differentiator
-    evidence: evaluation/ablation.py, evidence/ablation/ (TECHNICAL_PROOF on stub). Live ablation PENDING.
+    status: PROVEN
+    trigger_reason: guard/validator/read-back/rollback/undo are the differentiator
+    evidence: ablation (stub mirroring shipped GUI) + live slice on official backend image.
   REFERENCE_INTELLIGENCE:
     status: PENDING
     note: lookup when architecture domain is known.
@@ -103,8 +106,8 @@ gateways:
     status: BLOCKED
     note: requires locked architecture
   TECHNICAL_REALITY_CHECK:
-    status: BLOCKED
-    note: requires starter + IDE backend to confirm 409 behaviour, validator schema, action/backend visibility timing (A-02, A-03)
+    status: PROVEN
+    evidence: A-02 409 confirmed live; A-03 resolved (actions fire-and-forget, read-back verification); validator contract ported with parity. D-024..D-026.
   TRUTH_BOUNDARY:
     status: ACTIVE
   NEGATIVE_PATH:
@@ -113,11 +116,11 @@ gateways:
   EVIDENCE_INTEGRITY:
     status: ACTIVE
   CLAIM_RUNTIME_EVIDENCE_GRAPH:
-    status: PENDING
-    activation_condition: first live claim
+    status: ACTIVE
+    evidence: docs/REALITY-LEDGER.md maps each claim to evidence file, class and commit.
   RUNTIME_COMMIT_BINDING:
-    status: BLOCKED
-    note: no runtime yet
+    status: ACTIVE
+    evidence: CI evidence carries commit SHA and image digests (real-ide/commit.txt, gui-e2e/images.txt). Docker Hub image digest pending secrets.
   DETERMINISTIC_DEMO:
     status: PENDING
   FAILURE_RECOVERY:
