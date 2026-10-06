@@ -1,0 +1,120 @@
+{
+  "evidence_class": "LIVE GUI + backend (official images in CI) / browser-driven",
+  "suite": "model",
+  "passed": 5,
+  "total": 7,
+  "results": [
+    {
+      "sid": "G1",
+      "text": "What's the weather in Valencia today?",
+      "passed": true,
+      "reason": "ok",
+      "reply": "I'm Hyperion, the assistant for the HYPER-AI IDE, so I can only help with HYPER-AI and your workspace: questions about the platform, and creating, checking, fixing or deleting application profiles and files. Try something like “Create a device app for the nginx image” or “What are Open Connectors?”.",
+      "seconds": 4.3,
+      "files": [
+        "cloud/app.yaml",
+        "cookbook/native.yaml",
+        "edge/app.yaml"
+      ],
+      "status_log_tail": [
+        "[INFO 1:14:20 PM] Workspace ready. Waiting for messages."
+      ]
+    },
+    {
+      "sid": "M1",
+      "text": "What is HyperAI?",
+      "passed": true,
+      "reason": "ok",
+      "reply": "HyperAI is a distributed computing swarm project that aims to redefine data processing by harnessing autonomous networks of interconnected nodes across Cloud, Edge, and IoT domains. These swarms dynamically adapt and optimize resources throughout the computing continuum, promising enhanced self-configuring, self-healing, and self-optimizing capabilities. The project is funded by the EU and its ambition is to make complex Cloud, Edge, and IoT environments easier to manage through intelligent, autonomous technologies. The project also provides an integrated development environment (IDE) to help users build, run, and inspect AI workflows, as well as a microservice called Hyperion, which is a LLM-powered agentic assistant for the IDE.",
+      "seconds": 251.9,
+      "files": [
+        "cloud/app.yaml",
+        "cookbook/native.yaml",
+        "edge/app.yaml"
+      ],
+      "status_log_tail": [
+        "[INFO 1:14:20 PM] Workspace ready. Waiting for messages."
+      ]
+    },
+    {
+      "sid": "M2",
+      "text": "Create a deployment YAML for a service using the nginx Docker image",
+      "passed": false,
+      "reason": "new profiles [], valid []",
+      "reply": "To proceed, please specify the desired architecture from the list: x86_64, arm64, or both.",
+      "seconds": 156.5,
+      "files": [
+        "cloud/app.yaml",
+        "cookbook/native.yaml",
+        "edge/app.yaml"
+      ],
+      "status_log_tail": [
+        "[INFO 1:14:20 PM] Workspace ready. Waiting for messages."
+      ]
+    },
+    {
+      "sid": "M3",
+      "text": "delete app.yaml",
+      "passed": true,
+      "reason": "ok",
+      "reply": "There are 2 files named app.yaml, so I didn't touch any of them. Which one do you mean?\n- cloud/app.yaml\n- edge/app.yaml",
+      "seconds": 118.3,
+      "files": [
+        "cloud/app.yaml",
+        "cookbook/native.yaml",
+        "edge/app.yaml"
+      ],
+      "status_log_tail": [
+        "[INFO 1:14:20 PM] Workspace ready. Waiting for messages."
+      ]
+    },
+    {
+      "sid": "M4",
+      "text": "Fix cookbook/native.yaml so that it will actually run. My app image is acme/hello-api:1.0.0 and it starts with uvicorn on port 8000.",
+      "passed": true,
+      "reason": "see M5",
+      "reply": "It seems that I found some errors in the yaml file. Here are the corrections I propose:\n \napiVersion: hyper.ai/v1\nkind: Application\nmetadata:  # Add a name field\n  name: nginx-uvicorn-app\nspec:\n  nativeApplication:\n    applicationProfile:\n      name: nginx\n      entryPoint: uvicorn\n      port: 8000\n      baseOS: python:3.10-slim  # corrected the baseOS\n    containerApplication:\n      image: acme/hello-api:1.0.0 \n\nThis corrected version includes all the corrections I found: metadata.name and spec added, baseOS corrected.\n\n\nLet me know if you confirm, I will proceed to validate it through the validate_file, then the corrected file will be stored as cookbook/native.yaml",
+      "seconds": 205.2,
+      "files": [
+        "cloud/app.yaml",
+        "cookbook/native.yaml",
+        "edge/app.yaml"
+      ],
+      "status_log_tail": [
+        "[INFO 1:14:20 PM] Workspace ready. Waiting for messages."
+      ]
+    },
+    {
+      "sid": "M5",
+      "text": "yes",
+      "passed": false,
+      "reason": "cookbook/native.yaml not changed",
+      "reply": "Since you just requested to do it, I will write a new profile. To build one. What would you like it to be? What is its kind: device (e.g. Docker image, Android APK, or ESP32 binary) or native (e.g. container or VM)?",
+      "seconds": 147.9,
+      "files": [
+        "cloud/app.yaml",
+        "cookbook/native.yaml",
+        "edge/app.yaml"
+      ],
+      "status_log_tail": [
+        "[INFO 1:14:20 PM] Workspace ready. Waiting for messages."
+      ]
+    },
+    {
+      "sid": "M6",
+      "text": "undo",
+      "passed": true,
+      "reason": "native restored",
+      "reply": "There's nothing of mine to undo in this session.",
+      "seconds": 2.7,
+      "files": [
+        "cloud/app.yaml",
+        "cookbook/native.yaml",
+        "edge/app.yaml"
+      ],
+      "status_log_tail": [
+        "[INFO 1:14:20 PM] Workspace ready. Waiting for messages."
+      ]
+    }
+  ]
+}
