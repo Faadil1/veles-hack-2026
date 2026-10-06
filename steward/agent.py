@@ -60,10 +60,10 @@ TOOLS: list[dict[str, Any]] = [
      "input_schema": {"type": "object", "properties": {"query": {"type": "string"}}, "required": ["query"]}},
     {"name": "read_file", "description": "Read a workspace file by full path or bare name. Returns content, or matches if ambiguous.",
      "input_schema": {"type": "object", "properties": {"path": {"type": "string"}}, "required": ["path"]}},
-    {"name": "validate_file", "description": "Ask the IDE validator to check an existing profile file.",
+    {"name": "validate_file", "description": "Check an existing profile file: IDE validator result plus runnability verdict. Use this to answer 'will this file run?'.",
      "input_schema": {"type": "object", "properties": {"path": {"type": "string"}}, "required": ["path"]}},
     {"name": "check_profile", "description": "Check YAML text locally (spec rules + runnability) without writing anything.",
-     "input_schema": {"type": "object", "properties": {"yaml": {"type": "string"}}, "required": ["yaml"]}},
+     "input_schema": {"type": "object", "properties": {"yaml": {"type": "string", "description": "YAML text, or a workspace .yaml path"}}, "required": ["yaml"]}},
     {"name": "create_profile",
      "description": "Build a complete new profile from parameters and write it safely. kind=device (Docker image, "
                     "Android APK or ESP32 firmware on edge devices) or kind=native (container/VM on the continuum).",
@@ -196,11 +196,22 @@ class Steward:
             if not turn.tool_calls:
                 break
             results = []
+            stop = False
             for call in turn.tool_calls:
                 output = await self._run_tool(ops, call.name, call.input)
+                guard_text = _guard_message(call.input, output)
+                if guard_text:
+                    # Safety questions are part of the product, not something the model may forget to say.
+                    await ops.say(("\n\n" if final_text else "") + guard_text)
+                    final_text.append(guard_text)
+                    output = {**output, "already_told_user": guard_text,
+                              "instruction": "The user has been asked. Do not repeat the question; end your turn."}
+                    stop = True
                 results.append({"type": "tool_result", "tool_use_id": call.id,
                                 "content": json.dumps(output, ensure_ascii=False)[:12000]})
             messages.append({"role": "user", "content": results})
+            if stop:
+                break
         else:
             await ops.say("\n\n(I stopped after several steps to avoid looping. Tell me how to continue.)")
         changed = [f"{e.action} {e.path}" for e in session.journal[actions_before:]]
@@ -270,7 +281,12 @@ class Steward:
                         "errors": report.errors, "warnings": report.warnings,
                         "runnability": runnability.assess(res.content or "").as_dict()}
             if name == "check_profile":
-                text = str(args.get("yaml", ""))
+                text = str(args.get("yaml", "") or args.get("path", ""))
+                if "\n" not in text and text.strip().endswith((".yaml", ".yml")):
+                    res = await ops.resolve(text.strip())  # the model passed a file path, not YAML text
+                    if res.status != "resolved":
+                        return {"status": res.status, "matches": res.matches, "detail": res.detail}
+                    text = res.content or ""
                 local = spec.check_profile(text)
                 return {"status": "ok", "kind": local.kind.value, "parse_error": local.parse_error,
                         "issues": [i.as_dict() for i in local.issues],
@@ -309,6 +325,22 @@ def _context_block(session: Session) -> str:
         last = undoable[-1]
         lines.append(f"Last reversible change: {last.action} {last.path}")
     return ("\n\nSession context:\n" + "\n".join(lines)) if lines else ""
+
+
+def _guard_message(args: dict[str, Any], output: dict[str, Any]) -> str:
+    status = output.get("status")
+    if status == "ambiguous":
+        target = str(args.get("path", "that name"))
+        return _ambiguity_text(target, output.get("matches") or [])
+    if status == "needs_confirmation":
+        path = output.get("path", "")
+        if output.get("reversible") is False:
+            return f"Delete the folder `{path}` and everything in it? This can't be undone. Reply **yes** or **no**."
+        if "size" in output:
+            return f"Delete `{path}`? I'll keep a copy so you can `undo`. Reply **yes** or **no**."
+        return (f"`{path}` already exists and I didn't create it in this session. Overwrite it? "
+                "I'll keep a copy so you can `undo`. Reply **yes** or **no**.")
+    return ""
 
 
 def _ambiguity_text(target: str, matches: list[str]) -> str:

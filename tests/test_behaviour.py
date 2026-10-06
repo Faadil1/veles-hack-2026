@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 import pytest
@@ -164,3 +165,27 @@ async def test_sessions_are_isolated_per_user():
     await h.say("create", user_id="alice")
     turn = await h.say("undo", user_id="bob")
     assert turn.actions == [] and "u1.yaml" in h.ws.files
+
+
+async def test_guard_question_is_said_even_if_model_stays_silent():
+    h = Harness({"edge/app.yaml": APP_A, "cloud/app.yaml": APP_B},
+                llm=ScriptedLLM([tool("delete_file", path="app.yaml")]))  # model says nothing afterwards
+    turn = await h.say("delete app.yaml")
+    assert "edge/app.yaml" in turn.text and "cloud/app.yaml" in turn.text and turn.actions == []
+
+
+async def test_confirmation_question_is_deterministic_and_ends_turn():
+    h = Harness({"demo/app.yaml": DEVICE_OK}, llm=ScriptedLLM([tool("delete_file", path="demo/app.yaml")]))
+    turn = await h.say("delete demo/app.yaml")
+    assert "Reply **yes** or **no**" in turn.text and turn.actions == []
+
+
+async def test_check_profile_accepts_a_path():
+    h = Harness({"cookbook/native.yaml": NATIVE_BROKEN},
+                llm=ScriptedLLM([tool("check_profile", yaml="cookbook/native.yaml"), say("It won't run.")]))
+    await h.say("will it run?")
+    messages = h.steward.llm.calls[-1]
+    results = [b for m in messages if isinstance(m["content"], list) for b in m["content"]
+               if b.get("type") == "tool_result"]
+    result = json.loads(results[0]["content"])
+    assert result["runnability"]["verdict"] == "will_not_run"
