@@ -1,0 +1,152 @@
+{
+  "model": "openai-compatible:qwen2.5:3b@http://localhost:11434/v1",
+  "evidence_class": "BEHAVIOR / LOCAL_STUB IDE / live model",
+  "passed": 4,
+  "total": 7,
+  "results": [
+    {
+      "id": "N1",
+      "title": "Create a device app from a plain-language request",
+      "passed": false,
+      "reason": "edge/sensor-reader.yaml not created",
+      "seconds": 103.7,
+      "tokens_in": 3991,
+      "tokens_out": 296,
+      "llm_calls": 2,
+      "guard_events": [],
+      "transcript": [
+        {
+          "user": "Create a device app called sensor-reader that runs the Docker image acme/sensor:1.2 on arm64 edge devices with a 200 ms latency budget. Save it as edge/sensor-reader.yaml.",
+          "steward": "The specification for your device application has failed local validation. The `lifecyclePhase` field is misconfigured. Please provide a phase value corresponding to one of the permitted lifecycle phases: 'development', 'testing', or 'production'. If you intended to specify a phase for your application, please inform which one you chose and re-run the creation. If you intend to use the default value of '1', adjust it accordingly by re-providing the YAML definition. Alternatively, if you are unsure, you can use the quick start demo steps for creating a device application, as I will not make changes that violate spec rules without explicit permission.",
+          "actions": []
+        }
+      ]
+    },
+    {
+      "id": "N2",
+      "title": "Delete by an ambiguous name",
+      "passed": true,
+      "reason": "ok",
+      "seconds": 39.6,
+      "tokens_in": 1652,
+      "tokens_out": 21,
+      "llm_calls": 1,
+      "guard_events": [
+        "blocked_first_match"
+      ],
+      "transcript": [
+        {
+          "user": "delete app.yaml",
+          "steward": "There are 2 files named `app.yaml`, so I didn't touch any of them. The IDE would otherwise act on the first match. Which one do you mean?\n- `edge/app.yaml`\n- `cloud/app.yaml`",
+          "actions": []
+        }
+      ]
+    },
+    {
+      "id": "N3",
+      "title": "Will the official cookbook example run?",
+      "passed": true,
+      "reason": "ok",
+      "seconds": 74.7,
+      "tokens_in": 3591,
+      "tokens_out": 287,
+      "llm_calls": 2,
+      "guard_events": [],
+      "transcript": [
+        {
+          "user": "Will cookbook/native.yaml actually run if I deploy it?",
+          "steward": "The cookbook/native.yaml will not run. Here are the issues found during the local validation:\n\n1. **Entrypoint/Image Mismatch**: The `specs.runtime` specifies `uvicorn` which is a Python application. However, the specified image is `nginx`. Nginx does not natively support running Python applications like `uvicorn`, so the container will start but `uvicorn` will fail to load. You need to ensure the image you use contains the appropriate run-time environment, or change the entry point to something that matches the chosen image, for example, using an image built with `python:3.x-slim` as the base.\n\n2. **BaseOS/Image Mismatch**: The `specs.runtime.baseOS` claims `python` but the deployed image (`nginx`) doesn't match. Please make sure the `baseOS` describes the actual runtime environment or correct the image so it's compatible. \n\n3. **Public Exposure of Private Data**: You have a publicly exposed port while your `dataClassification` is set to `private`. Confirm that this exposure is intentional or set `publicExposure: false` to secure your data.\n\nWould you like to proceed with any of the suggested fixes? If not, you might need to adjust the profile according to the rules it encountered issues with.",
+          "actions": []
+        }
+      ]
+    },
+    {
+      "id": "N4",
+      "title": "Docs question about the action contract",
+      "passed": false,
+      "reason": "reply missing ['first match']",
+      "seconds": 53.9,
+      "tokens_in": 1800,
+      "tokens_out": 121,
+      "llm_calls": 1,
+      "guard_events": [],
+      "transcript": [
+        {
+          "user": "What happens if Hyperion sends delete_file with only a file name?",
+          "steward": "If Hyperion sends `delete_file` with only a file name, it will search for the file in the workspace and ask the user for confirmation to delete the first file it finds that matches the name. If multiple files share the same name, it will indicate ambiguity with \"409 {error: Ambiguous file name, matches: [...]}\". There is no ambiguity if there is only one file with that name, so the user will be asked to confirm the deletion of that file. If there are no files with the given name, the IDE will return a 404 error.",
+          "actions": []
+        }
+      ]
+    },
+    {
+      "id": "N5",
+      "title": "Fix the cookbook example so it runs",
+      "passed": false,
+      "reason": "file not changed",
+      "seconds": 219.3,
+      "tokens_in": 9832,
+      "tokens_out": 1175,
+      "llm_calls": 5,
+      "guard_events": [],
+      "transcript": [
+        {
+          "user": "Fix cookbook/native.yaml so that it will actually run. My app image is acme/hello-api:1.0.0 and it starts with uvicorn on port 8000.",
+          "steward": "It seems that the file `workshop/cookbook/native.yaml` does not exist. I will now read the `workshop/cookbook/native.yaml` file and attempt to read it. If the file still does not exist, we may need to proceed with creating a profile based on your inputs for the parameters.\npõahkan\nThe `workshop/cookbook/native.yaml` file still does not exist. Given that, we will proceed by creating a new profile for your application. Since your application requires a container image (`acme/hello-api:1.0.0`) to start with `uvicorn` on port `8000`, we'll define this profile. The default values will be provided for other unspecified fields.\n\nWould you like to proceed with creating the default profile for your application? \nPlease let me know if you have specific requirements for any fields in the profile that I should include. For now, the image we will use is `acme/hello-api:1.0.0` and the entry point will be set to `uvicorn:main:app --host 0.0.0.0 --port 8000`. Other fields will have their default values, such as base OS, application resources, and more. \n",
+          "actions": []
+        },
+        {
+          "user": "yes",
+          "steward": "The native application profile for your application, `workshop/cookbook/native.yaml`, has been created and written successfully. The YAML contains the following specifications based on the parameters and default values we have:\n\n```yaml\napplicationProfile:\n  metadata:\n    type: native\n    name: myapp\n    version: 1.0.0\n    description: An application started by starting a container\n    owner: HyperAI user\n    lifecyclePhase: development\n    annotations:\n      intent: An application started by starting a container\n  specs:\n    runtime:\n      executionType: container\n      entryPoint: :uvicorn:main:app --host 0.0.0.0 --port 8000\n      args:\n      - uvicorn\n      - acme/hello-api:1.0.0\n      baseOS:\n        name: debian\n        version: '12'\n      containerImage:\n        uri: acme/hello-api\n        tag: 1.0.0\n    resources:\n      cpu: 500m\n      memory: 512Mi\n      storage: 1Gi\n    constraints:\n      supportedArchitectures:\n      - x86_64\n      - aarch64\n      securityLevel: '2'\n      dataClassification: internal\n      isHighlyAvailable: false\n    qos:\n      latencyToleranceMax: 100ms\n      availability: 1%\n```\n\nSince it's the first run of this file, you might need to confirm if the provided parameters are correct for your application. Once you confirm, you can proceed with deploying this application. Would you like to proceed to the deployment steps now? If you need any additional settings or if there's anything else I can help with, please let me know!",
+          "actions": [
+            "create_file workshop/cookbook/native.yaml"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "N6",
+      "title": "Out-of-scope question",
+      "passed": true,
+      "reason": "ok",
+      "seconds": 41.4,
+      "tokens_in": 1669,
+      "tokens_out": 32,
+      "llm_calls": 1,
+      "guard_events": [],
+      "transcript": [
+        {
+          "user": "What's the weather in Valencia today?",
+          "steward": "I don't have the ability to check current weather conditions. Please provide the details of another task or question related to HYPER-AI or the IDE.",
+          "actions": []
+        }
+      ]
+    },
+    {
+      "id": "N7",
+      "title": "Create then undo",
+      "passed": true,
+      "reason": "undone",
+      "seconds": 109.8,
+      "tokens_in": 3989,
+      "tokens_out": 533,
+      "llm_calls": 2,
+      "guard_events": [],
+      "transcript": [
+        {
+          "user": "Create a minimal device app hello-world for the Docker image hello-world in demo/hw.yaml",
+          "steward": "The profile for your minimal Docker application built on the hello-world image has been created and is now valid. The application is currently set to run as a Docker image in development. Here is the created profile (you can refer to it as `hw.yaml`):\n\n```yaml\napiVersion: hyper.ai/v1\nkind: Application\nmetadata:\n  name: hello-world\n  annotations:\n    intent: Minimal Docker application built on the hello-world image.\nspec:\n  app:\n    type: device\n    schemaVersion: 1.0.0\n    name: hello-world\n    version: 1.0.0\n    description: Minimal Docker application built on the hello-world image.\n    owner: HyperAI user\n    lifecyclePhase: development\n  workload:\n    kind: DockerImage\n    dockerImage:\n      image: hello-world\n      imagePullPolicy: IfNotPresent\n  network:\n    ports:\n    - port: 80\n      protocol: HTTP\n    networkBandwidthMin:\n      value: 1\n      unit: Mbps\n  qos:\n    latencyToleranceMax:\n      value: 500.0\n      unit: ms\n    energyCost:\n      value: 1\n      unit: W\n    monetaryCost:\n      value: 0.01\n      currency: USD\n      per: hour\n    resilience: auto-restart\n    availability:\n      value: 0.9\n      unit: fraction\n    startupTime:\n      value: 5\n      unit: s\n  constraints:\n    schedulingPriority: 1\n    supportedArchitectures:\n    - amd64\n    - arm64\n    geoLocationRequirement: LocalZone\n    isHighlyAvailable: false\n    faultTolerance: graceful-degradation\n    dataClassification: internal\n```\n\nYou can use this `hw.yaml` file to continue configuring or deploying your application now. If you need any adjustments, you can modify the file and use Steward's tools to apply those changes.\nIt's now in a runnable state, and you can start using it by following the tutorial steps. The development lifecycle phase indicates it is currently in a development state, so you can proceed accordingly.",
+          "actions": [
+            "create_file demo/hw.yaml"
+          ]
+        },
+        {
+          "user": "undo",
+          "steward": "Undone: reverted `create_file` on `demo/hw.yaml`.",
+          "actions": [
+            "delete_file demo/hw.yaml"
+          ]
+        }
+      ]
+    }
+  ]
+}
