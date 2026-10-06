@@ -16,11 +16,12 @@ import asyncio
 import json
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any
+from collections.abc import Callable
 
 import httpx
 
-from steward import runnability, spec
+from steward import spec
 from steward.engine import SafeOps, Session
 from steward.ide import IdeClient, Outcome, action_event
 from stub_ide.app import Workspace, create_app

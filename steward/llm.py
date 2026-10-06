@@ -6,7 +6,8 @@ import json
 import os
 import time
 from dataclasses import dataclass, field
-from typing import Any, Awaitable, Callable, Protocol
+from typing import Any, Protocol
+from collections.abc import Awaitable, Callable
 
 OnText = Callable[[str], Awaitable[None]]
 
@@ -187,7 +188,7 @@ class OpenAICompatibleLLM:
                        latency_ms=int((time.perf_counter() - started) * 1000), model=self.model, raw_content=raw)
 
 
-def build_llm_from_env() -> "LLM | None":
+def build_llm_from_env() -> LLM | None:
     """STEWARD_PROVIDER = anthropic | openai_compatible | none. Default: auto (first configured)."""
     provider = os.environ.get("STEWARD_PROVIDER", "auto").lower()
     if provider == "none" or os.environ.get("STEWARD_DISABLE_LLM") == "1":

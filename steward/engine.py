@@ -15,7 +15,8 @@ import itertools
 import time
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
-from typing import Any, Awaitable, Callable
+from typing import Any
+from collections.abc import Awaitable, Callable
 
 from . import runnability, spec
 from .ide import (

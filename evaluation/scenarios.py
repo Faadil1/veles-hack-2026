@@ -16,7 +16,8 @@ import json
 import time
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any
+from collections.abc import Callable
 
 from steward import runnability, spec
 from steward.llm import LLM, build_llm_from_env

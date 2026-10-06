@@ -14,8 +14,7 @@ from pathlib import Path
 
 DOCS_DIR = Path(__file__).parent / "docs"
 _TOKEN = re.compile(r"[a-z0-9_]+")
-_STOP = set("a an the and or of to in for on is are be with by as it this that from at you your how what do does "
-            "can i me my we our".split())
+_STOP = set(["a", "an", "the", "and", "or", "of", "to", "in", "for", "on", "is", "are", "be", "with", "by", "as", "it", "this", "that", "from", "at", "you", "your", "how", "what", "do", "does", "can", "i", "me", "my", "we", "our"])
 
 
 @dataclass(frozen=True)
