@@ -1,1 +1,0 @@
-      1 /usr/share/nginx/html/assets/index-RTP-3qes.js:localhost:8000/chat
