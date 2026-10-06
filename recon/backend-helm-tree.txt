@@ -1,0 +1,4 @@
+/app/helm-charts
+/app/helm-charts/hello
+/app/helm-charts/hello/whatever.yaml
+/app/helm-charts/hello/hello.yaml
