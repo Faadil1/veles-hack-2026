@@ -35,7 +35,7 @@
       "id": "L1",
       "title": "Create a device profile from parameters (builder, real validator)",
       "passed": true,
-      "seconds": 0.3,
+      "seconds": 0.29,
       "actions": [
         "create_file steward-live/web.yaml"
       ],
