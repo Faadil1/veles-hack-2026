@@ -1,18 +1,18 @@
 {
   "evidence_class": "LIVE ide-backend + real validator; GUI action handlers replicated",
   "backend": "http://localhost:3001/api",
-  "passed": 3,
+  "passed": 6,
   "total": 6,
-  "undo_restored_file": "not_found",
+  "undo_restored_file": "ok",
   "undo_restored_identical_bytes": true,
   "effects": {
-    "verified": 3,
+    "verified": 4,
     "not_seen": 0,
     "unobservable": 0
   },
   "validator_calls": [
     {
-      "path": "nginx.yaml",
+      "path": "steward-live/web.yaml",
       "outcome": "ok",
       "valid": true,
       "attempts": 1
@@ -25,32 +25,40 @@
     }
   ],
   "gui_log": [
-    "OK create_file nginx.yaml [200]",
+    "OK create_file steward-live/web.yaml [200]",
     "OK create_file steward-live/native.yaml [200]",
-    "OK delete_file steward-live/native.yaml [200]"
+    "OK delete_file steward-live/web.yaml [200]",
+    "OK create_file steward-live/web.yaml [200]"
   ],
   "results": [
     {
       "id": "L1",
       "title": "Create a device profile from parameters (builder, real validator)",
-      "passed": false,
-      "seconds": 0.28,
+      "passed": true,
+      "seconds": 0.29,
       "actions": [
-        "create_file nginx.yaml"
+        "create_file steward-live/web.yaml"
       ],
-      "steward_said": "Created nginx.yaml (device profile for the image nginx, port 80) and opened it in the editor. The IDE validator reports it valid. Fields I wasn't told (owner, QoS, resources) use defaults you can see and edit in the file. Say undo to remove it.",
+      "steward_said": "ok",
       "result": {
-        "status": null,
-        "effect": null,
+        "status": "written_valid",
+        "effect": "verified",
         "matches": null,
-        "validator": null
+        "validator": {
+          "outcome": "ok",
+          "valid": true,
+          "type": "device",
+          "errors": [],
+          "warnings": [],
+          "detail": ""
+        }
       }
     },
     {
       "id": "L2",
       "title": "Write the official native cookbook example: schema-valid, runnability blocker surfaced",
       "passed": true,
-      "seconds": 0.27,
+      "seconds": 0.28,
       "actions": [
         "create_file steward-live/native.yaml"
       ],
@@ -72,7 +80,7 @@
     {
       "id": "L3",
       "title": "Seed a second app.yaml, then delete by the shared bare name: Steward asks, nothing sent",
-      "passed": false,
+      "passed": true,
       "seconds": 0.0,
       "actions": [],
       "steward_said": "There are 2 files named app.yaml, so I didn't touch any of them. Which one do you mean?\n- steward-live/cloud/app.yaml\n- steward-live/edge/app.yaml",
@@ -100,14 +108,16 @@
     {
       "id": "L5",
       "title": "Delete with confirmation, verified by read-back",
-      "passed": false,
-      "seconds": 0.0,
-      "actions": [],
-      "steward_said": "I couldn't find steward-live/web.yaml in the workspace.ok",
+      "passed": true,
+      "seconds": 0.26,
+      "actions": [
+        "delete_file steward-live/web.yaml"
+      ],
+      "steward_said": "Delete steward-live/web.yaml? I'll keep a copy so you can undo. Reply yes or no.Deleted steward-live/web.yaml. Say undo to bring it back.",
       "result": {
-        "status": "missing",
+        "status": null,
         "effect": null,
-        "matches": [],
+        "matches": null,
         "validator": null
       }
     },
@@ -117,9 +127,9 @@
       "passed": true,
       "seconds": 0.26,
       "actions": [
-        "delete_file steward-live/native.yaml"
+        "create_file steward-live/web.yaml"
       ],
-      "steward_said": "Undone: reverted create_file on steward-live/native.yaml.",
+      "steward_said": "Undone: reverted delete_file on steward-live/web.yaml.",
       "result": {
         "status": null,
         "effect": null,
