@@ -83,14 +83,11 @@
       "passed": true,
       "seconds": 0.0,
       "actions": [],
-      "steward_said": "There are 2 files named `app.yaml`, so I didn't touch any of them. Which one do you mean?\n- `steward-live/cloud/app.yaml`\n- `steward-live/edge/app.yaml`",
+      "steward_said": "There are 4 files named app.yaml, so I didn't touch any of them. Which one do you mean?\n- cloud/app.yaml\n- edge/app.yaml\n- steward-live/cloud/app.yaml\n- steward-live/edge/app.yaml",
       "result": {
-        "status": "ambiguous",
+        "status": null,
         "effect": null,
-        "matches": [
-          "steward-live/cloud/app.yaml",
-          "steward-live/edge/app.yaml"
-        ],
+        "matches": null,
         "validator": null
       }
     },
@@ -116,9 +113,9 @@
       "actions": [
         "delete_file steward-live/web.yaml"
       ],
-      "steward_said": "Delete `steward-live/web.yaml`? I'll keep a copy so you can `undo`. Reply **yes** or **no**.Deleted `steward-live/web.yaml`. Say `undo` to bring it back.",
+      "steward_said": "Delete steward-live/web.yaml? I'll keep a copy so you can undo. Reply yes or no.Deleted steward-live/web.yaml. Say undo to bring it back.",
       "result": {
-        "status": "needs_confirmation",
+        "status": null,
         "effect": null,
         "matches": null,
         "validator": null
@@ -132,7 +129,7 @@
       "actions": [
         "create_file steward-live/web.yaml"
       ],
-      "steward_said": "Undone: reverted `delete_file` on `steward-live/web.yaml`.",
+      "steward_said": "Undone: reverted delete_file on steward-live/web.yaml.",
       "result": {
         "status": null,
         "effect": null,

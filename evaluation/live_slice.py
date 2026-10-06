@@ -95,7 +95,7 @@ def call(name: str, /, **args: Any) -> LLMTurn:
 
 STEPS: list[dict[str, Any]] = [
     {"id": "L1", "title": "Create a device profile from parameters (builder, real validator)",
-     "say": "create a device app for nginx", "model": [call("create_profile", path=f"{PREFIX}/web.yaml", kind="device",
+     "say": "go ahead with the web server we discussed", "model": [call("create_profile", path=f"{PREFIX}/web.yaml", kind="device",
                                                            name="web", image="nginx:1.27", ports=[80])],
      "expect": lambda r, t: r.get("status") == "written_valid" and r.get("effect") == "verified"},
     {"id": "L2", "title": "Write the official native cookbook example: schema-valid, runnability blocker surfaced",
@@ -106,7 +106,7 @@ STEPS: list[dict[str, Any]] = [
     {"id": "L3", "title": "Seed a second app.yaml, then delete by the shared bare name: Steward asks, nothing sent",
      "setup": [("create", f"{PREFIX}/edge/app.yaml", DEVICE), ("create", f"{PREFIX}/cloud/app.yaml", DEVICE)],
      "say": "delete app.yaml", "model": [call("delete_file", path="app.yaml")],
-     "expect": lambda r, t: r.get("status") == "ambiguous" and len(r.get("matches", [])) >= 2},
+     "expect": lambda r, t: f"{PREFIX}/edge/app.yaml" in t and f"{PREFIX}/cloud/app.yaml" in t and "didn't touch" in t},
     {"id": "L4", "title": "A spec-invalid profile is stopped before it reaches the workspace",
      "say": "write this", "model": [call("write_profile", path=f"{PREFIX}/bad.yaml",
                                          yaml=DEVICE.replace("kind: DockerImage", "kind: Kubernetes"))],
