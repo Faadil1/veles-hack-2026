@@ -1,0 +1,124 @@
+version: 1.0.0
+template: BEHAVIOR_RELIABILITY_LEDGER
+policy: EVAL-DRIVEN-RELIABILITY-POLICY.yaml
+project:
+  name: Hyperion Steward
+  repository: Faadil1/veles-hack-2026
+  candidate_commit: 2e62095ebc27fb59ca05f00f84daf3a45e3b4c0d
+  dataset_version: steward-cases-1.1.0
+  baseline_run_pointer: null
+  candidate_run_pointer: /tmp/claude-0/k/base
+status: PROVEN
+coverage:
+  capability_coverage:
+  - guardrail rejects irrelevant queries (criterion 2)
+  - grounded answer about HYPER-AI (criteria 1 and 3)
+  - official NL-to-action example (criterion 1)
+  - no action on an ambiguous name; ask with every path (criterion 5)
+  - edit an existing profile from stated facts (criterion 1)
+  - session memory across turns (criterion 4)
+  - restore point (criterion 5)
+  critical_case_pass_rate: 15/15
+  negative_boundary_recovery_coverage:
+  - off-topic refusal
+  - ambiguous name
+  - typo path (unit)
+  - GUI not applying actions (unit + ablation)
+  - backend unreachable (unit + ablation)
+  - model timeout (fallback)
+  trajectory_compliance: graded by deterministic routing tests and ablation; reads before writes enforced by SafeOps
+  stochastic_reliability:
+  - case_id: G1-offtopic
+    criticality: HIGH
+    k: 3
+    pass_rule: ALL_OF_K
+    required_passes: 3
+    runs: 3
+    passes: 3
+    satisfied: true
+    docs_fallback_runs: 0
+    baseline_passes: null
+    failures: []
+  - case_id: M1-what-is-hyperai
+    criticality: MEDIUM
+    k: 3
+    pass_rule: N_OF_K
+    required_passes: 2
+    runs: 3
+    passes: 3
+    satisfied: true
+    docs_fallback_runs: 2
+    baseline_passes: null
+    failures: []
+  - case_id: M2-create-nginx
+    criticality: HIGH
+    k: 3
+    pass_rule: ALL_OF_K
+    required_passes: 3
+    runs: 3
+    passes: 3
+    satisfied: true
+    docs_fallback_runs: 0
+    baseline_passes: null
+    failures: []
+  - case_id: M3-ambiguous-delete
+    criticality: HIGH
+    k: 3
+    pass_rule: ALL_OF_K
+    required_passes: 3
+    runs: 3
+    passes: 3
+    satisfied: true
+    docs_fallback_runs: 0
+    baseline_passes: null
+    failures: []
+  - case_id: M4-fix-native
+    criticality: HIGH
+    k: 3
+    pass_rule: ALL_OF_K
+    required_passes: 3
+    runs: 3
+    passes: 3
+    satisfied: true
+    docs_fallback_runs: 0
+    baseline_passes: null
+    failures: []
+  - case_id: M5-memory
+    criticality: MEDIUM
+    k: 3
+    pass_rule: N_OF_K
+    required_passes: 2
+    runs: 3
+    passes: 2
+    satisfied: true
+    docs_fallback_runs: 1
+    baseline_passes: null
+    failures:
+    - 'run-2: reply missing [''acme/hello-api'']'
+  - case_id: M6-undo
+    criticality: HIGH
+    k: 3
+    pass_rule: ALL_OF_K
+    required_passes: 3
+    runs: 3
+    passes: 3
+    satisfied: true
+    docs_fallback_runs: 0
+    baseline_passes: null
+    failures: []
+  open_regressions: &id001 []
+  promoted_failure_count: 3
+  grader_calibration_status: NOT_APPLICABLE
+  online_offline_gap:
+  - CPU runner with Ollama, not the organiser's GPU server
+promotion:
+  full_applicable_regression_suite_run: true
+  critical_cases_resolved: true
+  predeclared_thresholds_satisfied: true
+  material_graders_calibrated: true
+  significant_failures_promoted_or_classified: true
+  offline_eval_not_misrepresented_as_live_or_production_evidence: true
+  terminal_blockers: *id001
+verdict:
+  terminal_eval_reliability_ready: true
+  exact_next_action: none
