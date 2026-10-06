@@ -64,6 +64,13 @@ def says(*words: str) -> Check:
     return check
 
 
+def never_says(*phrases: str) -> Check:
+    def check(reply: str, files: dict[str, str], log: str) -> tuple[bool, str]:
+        found = [p for p in phrases if p.lower() in reply.lower()]
+        return (not found), ("ok" if not found else f"truth constraint violated: reply contains {found}")
+    return check
+
+
 def all_of(*checks: Check) -> Check:
     def check(reply: str, files: dict[str, str], log: str) -> tuple[bool, str]:
         for c in checks:
@@ -116,7 +123,9 @@ MODEL = [
     Step("M4", "Fix cookbook/native.yaml so that it will actually run. My app image is acme/hello-api:1.0.0 and it "
                "starts with uvicorn on port 8000.", changed_and_valid("cookbook/native.yaml"), timeout_s=600,
          shot="fix-native"),
-    Step("M5", "Which container image did you just put in that file?", says("acme/hello-api"), timeout_s=600,
+    Step("M5", "Which container image did you just put in that file?",
+         all_of(says("acme/hello-api"), never_says("does not exist", "apiVersion:", "applicationProfile:")),
+         timeout_s=600,
          shot="memory"),
     Step("M6", "undo", lambda r, f, log: (f.get("cookbook/native.yaml") == NATIVE, "native restored"
                                           if f.get("cookbook/native.yaml") == NATIVE else "native not restored"),

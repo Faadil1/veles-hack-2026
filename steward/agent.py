@@ -56,6 +56,8 @@ Rules:
 - If a tool result has effect "not_seen", the IDE has not applied the change yet: say so, never claim it is done.
 - To change an existing file, read_file it first. Use full paths once you know them.
 - Paths are relative to the workspace root. Never use absolute paths or "..".
+- Only show file contents you read with read_file in this conversation. If a file is not found, say so; never
+  reconstruct or invent its contents.
 - Never paste a profile into the chat as a proposal. Change files only through tools; to change a few fields of an
   existing profile, use edit_profile.
 - When the user asks you to create or change something, do it now with your tools. Do not ask "would you like
@@ -181,7 +183,7 @@ class Steward:
             await ops.say(_ambiguity_text(target, res.matches))
             return
         if res.status != "resolved":
-            await ops.say(_unresolved_text(target, res.status, res.detail))
+            await ops.say(_unresolved_text(target, res.status, res.detail, res.matches))
             return
         report = await ops.validate(res.path)
         run = runnability.assess(res.content or "")
@@ -236,7 +238,7 @@ class Steward:
                 await ops.say(_ambiguity_text(intent.args["path"], res.matches))
                 return
             if res.status != "resolved":
-                await ops.say(_unresolved_text(intent.args["path"], res.status, res.detail))
+                await ops.say(_unresolved_text(intent.args["path"], res.status, res.detail, res.matches))
                 return
             doc, _ = spec.parse_profile(res.content or "")
             changes = intents.fix_changes(doc, intent.args)
@@ -250,7 +252,8 @@ class Steward:
             result = await ops.request_delete(intent.args["path"])
             message = _guard_message(intent.args, result)
             if not message:
-                message = _unresolved_text(intent.args["path"], str(result.get("status")), str(result.get("reason", "")))
+                message = _unresolved_text(intent.args["path"], str(result.get("status")), str(result.get("reason", "")),
+                                           result.get("matches") or [])
             await ops.say(message)
         elif intent.kind == "create_folder":
             result = await ops.create_folder(intent.args["path"])
@@ -383,6 +386,10 @@ class Steward:
                     for i, (_, c) in enumerate(hits, 1)]}
             if name == "read_file":
                 res = await ops.resolve(str(args.get("path", "")))
+                if res.status == "missing":
+                    return {"status": "missing", "did_you_mean": res.matches,
+                            "note": "There is no file at this path. Never describe or invent its contents. "
+                                    "Retry with one of did_you_mean, or tell the user it was not found."}
                 return {"status": res.status, "path": res.path, "content": res.content, "matches": res.matches,
                         "detail": res.detail}
             if name == "validate_file":
@@ -500,9 +507,10 @@ def _ambiguity_text(target: str, matches: list[str]) -> str:
             f"Which one do you mean?\n{listed}")
 
 
-def _unresolved_text(target: str, status: str, detail: str) -> str:
+def _unresolved_text(target: str, status: str, detail: str, close: list[str] | None = None) -> str:
     if status == "missing":
-        return f"I couldn't find `{target}` in the workspace."
+        hint = f" Did you mean {' or '.join(close)}?" if close else ""
+        return f"I couldn't find `{target}` in the workspace.{hint}"
     if status == "invalid":
         return f"I can't use that path: {detail}"
     return f"I couldn't reach the IDE backend to look up `{target}` ({detail}). I didn't change anything."

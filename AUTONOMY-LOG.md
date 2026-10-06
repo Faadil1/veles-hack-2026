@@ -299,3 +299,9 @@ Timezone of record: UTC (local Toronto = UTC-4).
 - **Timestamp:** 2026-10-06T16:08Z
 - **Observed:** entries D-031 to D-035, the depth review, FINAL-HANDOVER and CURRENT.yaml carried times up to 40 minutes ahead of the clock (written from estimates instead of `date -u`). Corrected to the commit times. Lesson already recorded once (timestamps from `date -u`); now also checked against `git log` before each log entry.
 - **Reversible:** n/a. **Human required:** no.
+
+## D-037 — Clean pull of the published image: 4/4 and 7/7, but one truth failure the grader missed
+- **Timestamp:** 2026-10-06T16:17Z
+- **Observed (workflow published-image, pulled faadil12/hyperion@sha256:6b1c8ebb…, revision ac1eb67, official GUI + backend, browser):** without a model 4/4; with llama3.1 8B 7/7 by the declared graders, and "What is HyperAI?" answered by the model itself this time (258 s). But M5 ("Which container image did you just put in that file?") was graded pass on a string match while the reply was untrue: the model asked for coobook/native.yaml (typo), got a 404, then said the file did not exist and printed invented YAML before naming acme/hello-api. No workspace damage.
+- **Decision:** classify M5 in that run as FAIL (truth constraint); grader tightened (dataset 1.1.0, never loosened); failure promoted to a regression case and two tests. Product fix: a missing path now returns near-miss suggestions (did_you_mean) and an explicit no-invention note to the model; deterministic paths say "Did you mean …?"; system prompt forbids showing contents not read. Runtime changed, so the k=3 runs and the published-image verification are repeated on the new candidate.
+- **Reversible:** yes. **Human required:** no.

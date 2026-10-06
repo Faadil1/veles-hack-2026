@@ -66,3 +66,20 @@ async def test_no_markdown_reaches_the_ide_panel():
     h = Harness({"edge/app.yaml": DEVICE, "cloud/app.yaml": DEVICE})
     turn = await h.say("check app.yaml")
     assert "edge/app.yaml" in turn.text and "**" not in turn.text and "`" not in turn.text
+
+
+async def test_typo_path_gets_suggestions_and_a_no_invention_note():
+    # Promoted from the published-image run (ac1eb67): the model asked for "coobook/native.yaml", got a 404,
+    # then invented the file's contents. The tool result now offers the close match and forbids invention.
+    llm = ScriptedLLM([call("read_file", path="coobook/native.yaml"), LLMTurn(text="ok")])
+    h = Harness({"cookbook/native.yaml": DEVICE}, llm=llm)
+    await h.say("what image is in that file?")
+    result = last_tool_result(llm)
+    assert result["status"] == "missing" and result["did_you_mean"] == ["cookbook/native.yaml"]
+    assert "invent" in result["note"] and "content" not in result
+
+
+async def test_deterministic_paths_suggest_close_matches():
+    h = Harness({"cookbook/native.yaml": DEVICE})
+    turn = await h.say("delete coobook/native.yaml")
+    assert "Did you mean cookbook/native.yaml?" in turn.text and turn.actions == []

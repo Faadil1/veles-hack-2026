@@ -129,6 +129,22 @@ class IdeClient:
             return Outcome.ERROR, []
         return Outcome.OK, [v for v in value if isinstance(v, dict)] if isinstance(value, list) else []
 
+    async def list_files(self, limit: int = 2000) -> list[str]:
+        """Every file path in the workspace (breadth-first, bounded). Empty on any error."""
+        out: list[str] = []
+        queue = [""]
+        while queue and len(out) < limit:
+            outcome, entries = await self.list_dir(queue.pop(0))
+            if outcome is not Outcome.OK:
+                return out
+            for e in entries:
+                path = str(e.get("path") or "")
+                if e.get("type") == "folder":
+                    queue.append(path)
+                elif path:
+                    out.append(path)
+        return out
+
     async def folder_exists(self, path: str) -> Outcome | bool:
         parent, _, name = path.rpartition("/")
         outcome, entries = await self.list_dir(parent)

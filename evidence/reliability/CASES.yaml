@@ -1,8 +1,8 @@
 # Behavior case set for Hyperion Steward (EVAL-DRIVEN-RELIABILITY-POLICY v1.0.0, central faadil-agent-system 2ef16fd).
 # Declared BEFORE the k-repeat runs: reliability policy (k, pass rule, criticality) is fixed here and must not be
 # lowered after a failure without a recorded reason (AUTONOMY-LOG).
-version: 1.0.0
-dataset_version: steward-cases-1.0.0
+version: 1.1.0
+dataset_version: steward-cases-1.1.0  # 1.1.0: M5 truth constraint added after the published-image run ac1eb67 (D-037); grader tightened, never loosened
 declared_at: 2026-10-06T16:08Z  # commit 535148f, before any k-repeat run
 declared_before_run: true
 candidate_runtime_commit: 2e62095ebc27fb59ca05f00f84daf3a45e3b4c0d
@@ -57,10 +57,11 @@ cases:
     reliability_policy: {criticality: HIGH, k: 3, pass_rule: ALL_OF_K, required_passes: 3}
   - case_id: M5-memory
     capability: session memory across turns (criterion 4)
-    source: PROACTIVE
+    source: PROMOTED_QA_FAILURE  # published-image run ac1eb67: typo path 404 then invented contents (D-037)
     input: "Which container image did you just put in that file?"
     expected_outcome: names acme/hello-api from the previous turn
-    graders: {deterministic: [reply contains "acme/hello-api"]}
+    truth_constraints: [no claim that the file is missing, no file contents that were not read]
+    graders: {deterministic: [reply contains "acme/hello-api", reply contains none of "does not exist", "apiVersion:", "applicationProfile:"]}
     reliability_policy: {criticality: MEDIUM, k: 3, pass_rule: N_OF_K, required_passes: 2,
                          accepted_variance_reason: "model-mediated answer on a CPU runner; a timeout falls back to docs, which cannot answer a memory question"}
   - case_id: M6-undo

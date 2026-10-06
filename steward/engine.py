@@ -12,6 +12,7 @@ Invariants enforced here, independent of any LLM output:
 from __future__ import annotations
 
 import asyncio
+import difflib
 import itertools
 import time
 from dataclasses import dataclass, field
@@ -149,8 +150,17 @@ class SafeOps:
             self.s.receipt("guard", rule="I1", decision="blocked_first_match", target=target, matches=result.matches)
             return Resolution("ambiguous", matches=result.matches)
         if result.outcome is Outcome.NOT_FOUND:
-            return Resolution("missing", detail=result.detail)
+            close = await self.near_misses(target)
+            return Resolution("missing", matches=close, detail=result.detail)
         return Resolution("unreachable", detail=result.detail)
+
+    async def near_misses(self, target: str) -> list[str]:
+        """Paths that look like a typo of `target` (e.g. coobook/x.yaml), to recover instead of guessing."""
+        files = await self.ide.list_files()
+        name = target.rsplit("/", 1)[-1]
+        by_path = difflib.get_close_matches(target, files, n=3, cutoff=0.8)
+        by_name = [f for f in files if f.rsplit("/", 1)[-1] == name and f not in by_path]
+        return (by_path + by_name)[:3]
 
     async def validate(self, path: str, wait_for_file: bool = False) -> ValidationResult:
         attempts = self.validate_retries if wait_for_file else 1
