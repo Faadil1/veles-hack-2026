@@ -71,8 +71,10 @@ class Session:
     known_paths: list[str] = field(default_factory=list)
     lock: asyncio.Lock = field(default_factory=asyncio.Lock)
 
-    def receipt(self, kind: str, **data: Any) -> dict[str, Any]:
-        item = {"seq": len(self.receipts) + 1, "at": _now(), "kind": kind, **data}
+    def receipt(self, kind: str, /, **data: Any) -> dict[str, Any]:
+        # `kind` is positional-only so callers can log a field that is itself named "kind"
+        # (a keyword collision here crashed tool calls twice before this change).
+        item = {**data, "seq": len(self.receipts) + 1, "at": _now(), "kind": kind}
         self.receipts.append(item)
         return item
 

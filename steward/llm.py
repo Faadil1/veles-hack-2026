@@ -159,7 +159,16 @@ class OpenAICompatibleLLM:
                         delta = choice.get("delta") or {}
                         if delta.get("content"):
                             text_parts.append(delta["content"])
-                            await on_text(delta["content"])
+                            # Some local models print tool calls as text (<tool_call>{...}</tool_call>).
+                            # Stop streaming once that marker appears; it is parsed into a real call below.
+                            shown = "".join(text_parts[:-1])
+                            if "<tool_call>" not in shown:
+                                visible = delta["content"]
+                                joined = shown + visible
+                                if "<tool_call>" in joined:
+                                    visible = joined[: joined.index("<tool_call>")][len(shown):]
+                                if visible:
+                                    await on_text(visible)
                         for tc in delta.get("tool_calls") or []:
                             slot = calls.setdefault(tc.get("index", 0), {"id": "", "name": "", "args": ""})
                             slot["id"] = tc.get("id") or slot["id"]
@@ -180,12 +189,36 @@ class OpenAICompatibleLLM:
                 args = {"_unparsed_arguments": slot["args"][:500]}
             tool_calls.append(ToolCall(slot["id"] or f"call_{idx}", slot["name"], args))
         text = "".join(text_parts)
+        if not tool_calls and "<tool_call>" in text:
+            text, tool_calls = _extract_text_tool_calls(text)
         raw = ([{"type": "text", "text": text}] if text else []) + [
             {"type": "tool_use", "id": c.id, "name": c.name, "input": c.input} for c in tool_calls]
         return LLMTurn(text=text, tool_calls=tool_calls, stop_reason=finish or "stop",
                        input_tokens=int(usage.get("prompt_tokens") or 0),
                        output_tokens=int(usage.get("completion_tokens") or 0),
                        latency_ms=int((time.perf_counter() - started) * 1000), model=self.model, raw_content=raw)
+
+
+def _extract_text_tool_calls(text: str) -> tuple[str, list[ToolCall]]:
+    """Parse <tool_call>{"name": ..., "arguments": {...}}</tool_call> blocks a model printed as text."""
+    import re
+
+    calls: list[ToolCall] = []
+    for i, block in enumerate(re.findall(r"<tool_call>\s*(\{.*?\})\s*(?:</tool_call>|$)", text, re.S)):
+        try:
+            data = json.loads(block)
+        except json.JSONDecodeError:
+            continue
+        args = data.get("arguments", data.get("parameters", {}))
+        if isinstance(args, str):
+            try:
+                args = json.loads(args)
+            except json.JSONDecodeError:
+                args = {}
+        if data.get("name"):
+            calls.append(ToolCall(f"text_call_{i}", str(data["name"]), dict(args)))
+    visible = text[: text.index("<tool_call>")].rstrip()
+    return visible, calls
 
 
 def build_llm_from_env() -> LLM | None:

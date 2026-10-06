@@ -174,9 +174,23 @@ class Steward:
 
     # -- model-driven path ------------------------------------------------------------------------
 
+
+    def _docs_block(self, session: Session, text: str) -> str:
+        """Retrieval by default: the most relevant official passages go into context on every turn, so answers
+        stay grounded even when the model forgets to call search_docs."""
+        hits = self.docs.search(text, k=3, min_score=2.0)
+        if not hits:
+            return ""
+        session.receipt("docs_prefetch", hits=[c.citation for _, c in hits])
+        lines = ["\n\nRelevant official HYPER-AI documentation for this message (cite as [D1], [D2]...; "
+                 "answer from these when the user asks about HYPER-AI or the IDE):"]
+        for i, (_, chunk) in enumerate(hits, 1):
+            lines.append(f"[D{i}] {chunk.citation}\n{chunk.text[:1200]}")
+        return "\n\n".join(lines)
+
     async def _llm_turn(self, session: Session, text: str, ops: SafeOps) -> None:
         assert self.llm is not None
-        system = SYSTEM_PROMPT + _context_block(session)
+        system = SYSTEM_PROMPT + _context_block(session) + self._docs_block(session, text)
         messages = [*session.history, {"role": "user", "content": text}]
         final_text: list[str] = []
         actions_before = len(session.journal)
@@ -252,7 +266,7 @@ class Steward:
                 return {"status": "needs_input", "missing": ["kind (device|native)"]}
         except (ValueError, TypeError) as exc:
             return {"status": "needs_input", "detail": str(exc)}
-        ops.s.receipt("create_profile", kind=kind, path=args.get("path"))
+        ops.s.receipt("create_profile", profile_kind=kind, path=args.get("path"))
         result = await ops.write_profile(str(args.get("path", "")), yaml_text)
         result["generated_yaml"] = yaml_text
         result["note"] = "Built from parameters; unspecified fields use cookbook-aligned defaults visible in the YAML."

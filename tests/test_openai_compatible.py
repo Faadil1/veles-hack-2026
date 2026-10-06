@@ -80,3 +80,32 @@ async def test_http_error_becomes_llm_error_and_degrades():
 
 async def _noop(_: str) -> None:
     return None
+
+
+async def test_tool_call_printed_as_text_is_parsed_and_hidden():
+    args = json.dumps({"path": "demo/t.yaml", "yaml": DEVICE})
+    seen: list[dict] = []
+    app = FastAPI()
+
+    @app.post("/v1/chat/completions")
+    async def chat(request: Request):
+        body = await request.json()
+        seen.append(body)
+        if any(m["role"] == "tool" for m in body["messages"]):
+            chunks = [{"choices": [{"delta": {"content": "Done."}, "finish_reason": "stop"}]}]
+        else:
+            text = 'Creating it now. <tool_call>\n{"name": "write_profile", "arguments": ' + args + '}\n</tool_call>'
+            chunks = [{"choices": [{"delta": {"content": text[:20]}}]}, {"choices": [{"delta": {"content": text[20:]}}]}]
+
+        async def gen():
+            for c in chunks:
+                yield f"data: {json.dumps(c)}\n\n"
+            yield "data: [DONE]\n\n"
+
+        return StreamingResponse(gen(), media_type="text/event-stream")
+
+    llm = OpenAICompatibleLLM(base_url="http://fake/v1", model="m", api_key="", transport=httpx.ASGITransport(app=app))
+    h = Harness({}, llm=llm)
+    turn = await h.say("make it")
+    assert turn.actions and turn.actions[0]["path"] == "demo/t.yaml"
+    assert "<tool_call>" not in turn.text and "Creating it now." in turn.text

@@ -17,7 +17,7 @@ APP_A = "apiVersion: hyper.ai/v1\nkind: Application\nmetadata:\n  name: a\n"
 APP_B = "apiVersion: hyper.ai/v1\nkind: Application\nmetadata:\n  name: b\n"
 
 
-def tool(name: str, **args) -> LLMTurn:
+def tool(name: str, /, **args) -> LLMTurn:
     return LLMTurn(text="", tool_calls=[ToolCall(f"t-{name}", name, args)])
 
 
@@ -189,3 +189,20 @@ async def test_check_profile_accepts_a_path():
                if b.get("type") == "tool_result"]
     result = json.loads(results[0]["content"])
     assert result["runnability"]["verdict"] == "will_not_run"
+
+
+async def test_create_profile_through_the_agent_writes_valid_profile():
+    args = {"architectures": ["arm64"], "image": "acme/sensor:1.2", "kind": "device", "latency_ms": 200,
+            "name": "sensor-reader", "path": "edge/sensor-reader.yaml", "workload": "DockerImage"}
+    h = Harness({}, llm=ScriptedLLM([tool("create_profile", **args), say("Created.")]))
+    turn = await h.say("create the sensor reader")
+    assert turn.actions[0]["action"] == "create_file" and turn.actions[0]["path"] == "edge/sensor-reader.yaml"
+    assert "acme/sensor:1.2" in h.ws.files["edge/sensor-reader.yaml"]
+    assert not [r for r in h.sessions.get("u1").receipts if r["kind"] == "tool_error"]
+
+
+def test_receipt_accepts_a_field_named_kind():
+    from steward.engine import Session
+    s = Session("x")
+    item = s.receipt("event", kind="device")
+    assert item["kind"] == "event"

@@ -50,4 +50,7 @@ jobs:
           git rm -rq --cached . 2>/dev/null || true
           mkdir -p scenarios && cp /tmp/out/*.json scenarios/ 2>/dev/null || true
           git add scenarios && git commit -m "scenario report ${GITHUB_SHA::7} ${MODEL}" || echo "nothing to commit"
-          git push origin ci-evidence
+          for i in 1 2 3 4; do
+            git push origin ci-evidence && break
+            sleep $((i * 5)); git fetch origin ci-evidence && git rebase origin/ci-evidence
+          done
