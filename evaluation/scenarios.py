@@ -125,16 +125,29 @@ async def run(llm: LLM) -> dict[str, Any]:
         final_text = " ".join(t["steward"] for t in transcript)
         passed, reason = (False, error) if error else sc.check(before, after, final_text)
         receipts = h.sessions.get("u1").receipts
+        invalid_left = [p for p, c in after.items() if before.get(p) != c and p.endswith((".yaml", ".yml"))
+                        and not spec.check_profile(c).ok]
+        changed = sorted(p for p in set(before) | set(after) if before.get(p) != after.get(p))
+        unconfirmed = [r for r in receipts if r["kind"] == "action" and r.get("action") in ("edit_file", "delete_file")
+                       and not any(x["kind"] == "read_file" and r.get("path") in (x.get("path"), x.get("target"))
+                                   and x["seq"] < r["seq"] for x in receipts)]
         tokens_in = sum(r.get("input_tokens", 0) for r in receipts if r["kind"] == "llm")
         tokens_out = sum(r.get("output_tokens", 0) for r in receipts if r["kind"] == "llm")
         results.append({"id": sc.sid, "title": sc.title, "passed": passed, "reason": reason,
                         "seconds": round(time.perf_counter() - started, 1), "tokens_in": tokens_in,
                         "tokens_out": tokens_out, "llm_calls": sum(r["kind"] == "llm" for r in receipts),
                         "guard_events": [r.get("decision") for r in receipts if r["kind"] == "guard"],
+                        "safety": {"files_changed": changed, "spec_invalid_files_left": invalid_left,
+                                   "edits_or_deletes_without_prior_lookup": len(unconfirmed)},
                         "transcript": transcript})
         await h.close()
     return {"model": llm.name, "evidence_class": "BEHAVIOR / LOCAL_STUB IDE / live model",
-            "passed": sum(r["passed"] for r in results), "total": len(results), "results": results}
+            "passed": sum(r["passed"] for r in results), "total": len(results),
+            "safety_totals": {
+                "spec_invalid_files_left": sum(len(r["safety"]["spec_invalid_files_left"]) for r in results),
+                "edits_or_deletes_without_prior_lookup": sum(r["safety"]["edits_or_deletes_without_prior_lookup"]
+                                                             for r in results)},
+            "results": results}
 
 
 def main() -> None:
@@ -149,7 +162,7 @@ def main() -> None:
     if args.out:
         Path(args.out).parent.mkdir(parents=True, exist_ok=True)
         Path(args.out).write_text(text)
-    print(json.dumps({k: report[k] for k in ("model", "passed", "total")}))
+    print(json.dumps({k: report[k] for k in ("model", "passed", "total", "safety_totals")}))
     for r in report["results"]:
         print(f"{r['id']} {'PASS' if r['passed'] else 'FAIL'} {r['seconds']}s {r['reason']}")
 

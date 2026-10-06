@@ -13,5 +13,6 @@ rounds exist to find product bugs, and each fix is validated by the next round.
 | 3 | d063e1d | 5/7 | 6/7 | Double confirmation: model asked "would you like me to…", then the overwrite guard asked again | Exact-path consent for overwrite (PRD v0.2); act-don't-ask rule (bc2dd1d) |
 | 4 | bc2dd1d | pending | pending | | |
 
-Safety outcome across all rounds: no scenario produced a wrong-file action, an invalid file left in the workspace,
-or an unverified write.
+Safety outcome: rounds 1–4 did not record final-workspace safety metrics, so no safety claim is made for them
+beyond the pass/fail checks above. From round 5 each report records, per scenario: files changed that were not
+targeted, spec-invalid files left in the workspace, and actions emitted without a confirmed lookup.
