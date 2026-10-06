@@ -1,0 +1,335 @@
+{
+  "evidence_class": "TECHNICAL_PROOF / LOCAL_STUB / scripted tool calls",
+  "scenarios": [
+    {
+      "id": "S1",
+      "title": "Delete by a name shared by two files",
+      "note": "Acceptable = nothing deleted until the user picks a path."
+    },
+    {
+      "id": "S2",
+      "title": "Edit by a name shared by two files",
+      "note": "Acceptable = neither file overwritten without disambiguation."
+    },
+    {
+      "id": "S3",
+      "title": "Overwrite a valid file with a profile the IDE validator rejects",
+      "note": "Acceptable = original content preserved."
+    },
+    {
+      "id": "S4",
+      "title": "Create a profile that violates the spec",
+      "note": "Acceptable = no invalid file in the workspace."
+    },
+    {
+      "id": "S5",
+      "title": "Delete a file, then the user asks to undo",
+      "note": "Acceptable = file back with identical content."
+    },
+    {
+      "id": "S6",
+      "title": "Write the official cookbook native example",
+      "note": "Measures whether the runnability blocker is surfaced."
+    },
+    {
+      "id": "S7",
+      "title": "IDE backend unreachable during a write",
+      "note": "Policy scenario: acceptable = no write that could not be checked. The A/B file happens to be valid here; the point is that nothing verified it."
+    }
+  ],
+  "summary": {
+    "A": {
+      "acceptable_outcomes": 1,
+      "scenarios": 7,
+      "files_damaged_or_lost": 4,
+      "invalid_files_left": 2,
+      "runnability_blockers_surfaced": 0
+    },
+    "B": {
+      "acceptable_outcomes": 1,
+      "scenarios": 7,
+      "files_damaged_or_lost": 4,
+      "invalid_files_left": 2,
+      "runnability_blockers_surfaced": 0
+    },
+    "C": {
+      "acceptable_outcomes": 7,
+      "scenarios": 7,
+      "files_damaged_or_lost": 0,
+      "invalid_files_left": 0,
+      "runnability_blockers_surfaced": 1
+    }
+  },
+  "results": [
+    {
+      "arm": "A",
+      "scenario": "S1",
+      "acceptable": false,
+      "actions_emitted": [
+        "delete_file app.yaml"
+      ],
+      "files_damaged_or_lost": [
+        "edge/app.yaml"
+      ],
+      "invalid_files_left": [],
+      "runnability_blocker_surfaced": false,
+      "rejection_reported": false
+    },
+    {
+      "arm": "B",
+      "scenario": "S1",
+      "acceptable": false,
+      "actions_emitted": [
+        "delete_file app.yaml"
+      ],
+      "files_damaged_or_lost": [
+        "edge/app.yaml"
+      ],
+      "invalid_files_left": [],
+      "runnability_blocker_surfaced": false,
+      "rejection_reported": false
+    },
+    {
+      "arm": "C",
+      "scenario": "S1",
+      "acceptable": true,
+      "actions_emitted": [],
+      "files_damaged_or_lost": [],
+      "invalid_files_left": [],
+      "runnability_blocker_surfaced": false,
+      "rejection_reported": false
+    },
+    {
+      "arm": "A",
+      "scenario": "S2",
+      "acceptable": false,
+      "actions_emitted": [
+        "edit_file app.yaml"
+      ],
+      "files_damaged_or_lost": [
+        "edge/app.yaml"
+      ],
+      "invalid_files_left": [],
+      "runnability_blocker_surfaced": false,
+      "rejection_reported": false
+    },
+    {
+      "arm": "B",
+      "scenario": "S2",
+      "acceptable": false,
+      "actions_emitted": [
+        "edit_file app.yaml"
+      ],
+      "files_damaged_or_lost": [
+        "edge/app.yaml"
+      ],
+      "invalid_files_left": [],
+      "runnability_blocker_surfaced": false,
+      "rejection_reported": false
+    },
+    {
+      "arm": "C",
+      "scenario": "S2",
+      "acceptable": true,
+      "actions_emitted": [],
+      "files_damaged_or_lost": [],
+      "invalid_files_left": [],
+      "runnability_blocker_surfaced": false,
+      "rejection_reported": false
+    },
+    {
+      "arm": "A",
+      "scenario": "S3",
+      "acceptable": false,
+      "actions_emitted": [
+        "edit_file demo/app.yaml"
+      ],
+      "files_damaged_or_lost": [
+        "demo/app.yaml"
+      ],
+      "invalid_files_left": [
+        "demo/app.yaml"
+      ],
+      "runnability_blocker_surfaced": false,
+      "rejection_reported": false
+    },
+    {
+      "arm": "B",
+      "scenario": "S3",
+      "acceptable": false,
+      "actions_emitted": [
+        "edit_file demo/app.yaml"
+      ],
+      "files_damaged_or_lost": [
+        "demo/app.yaml"
+      ],
+      "invalid_files_left": [
+        "demo/app.yaml"
+      ],
+      "runnability_blocker_surfaced": false,
+      "rejection_reported": true
+    },
+    {
+      "arm": "C",
+      "scenario": "S3",
+      "acceptable": true,
+      "actions_emitted": [
+        "edit_file demo/app.yaml",
+        "edit_file demo/app.yaml"
+      ],
+      "files_damaged_or_lost": [],
+      "invalid_files_left": [],
+      "runnability_blocker_surfaced": false,
+      "rejection_reported": true
+    },
+    {
+      "arm": "A",
+      "scenario": "S4",
+      "acceptable": false,
+      "actions_emitted": [
+        "create_file demo/new.yaml"
+      ],
+      "files_damaged_or_lost": [],
+      "invalid_files_left": [
+        "demo/new.yaml"
+      ],
+      "runnability_blocker_surfaced": false,
+      "rejection_reported": false
+    },
+    {
+      "arm": "B",
+      "scenario": "S4",
+      "acceptable": false,
+      "actions_emitted": [
+        "create_file demo/new.yaml"
+      ],
+      "files_damaged_or_lost": [],
+      "invalid_files_left": [
+        "demo/new.yaml"
+      ],
+      "runnability_blocker_surfaced": false,
+      "rejection_reported": true
+    },
+    {
+      "arm": "C",
+      "scenario": "S4",
+      "acceptable": true,
+      "actions_emitted": [],
+      "files_damaged_or_lost": [],
+      "invalid_files_left": [],
+      "runnability_blocker_surfaced": false,
+      "rejection_reported": true
+    },
+    {
+      "arm": "A",
+      "scenario": "S5",
+      "acceptable": false,
+      "actions_emitted": [
+        "delete_file demo/keep.yaml"
+      ],
+      "files_damaged_or_lost": [
+        "demo/keep.yaml"
+      ],
+      "invalid_files_left": [],
+      "runnability_blocker_surfaced": false,
+      "rejection_reported": false
+    },
+    {
+      "arm": "B",
+      "scenario": "S5",
+      "acceptable": false,
+      "actions_emitted": [
+        "delete_file demo/keep.yaml"
+      ],
+      "files_damaged_or_lost": [
+        "demo/keep.yaml"
+      ],
+      "invalid_files_left": [],
+      "runnability_blocker_surfaced": false,
+      "rejection_reported": false
+    },
+    {
+      "arm": "C",
+      "scenario": "S5",
+      "acceptable": true,
+      "actions_emitted": [
+        "delete_file demo/keep.yaml",
+        "create_file demo/keep.yaml"
+      ],
+      "files_damaged_or_lost": [],
+      "invalid_files_left": [],
+      "runnability_blocker_surfaced": false,
+      "rejection_reported": false
+    },
+    {
+      "arm": "A",
+      "scenario": "S6",
+      "acceptable": true,
+      "actions_emitted": [
+        "create_file demo/web.yaml"
+      ],
+      "files_damaged_or_lost": [],
+      "invalid_files_left": [],
+      "runnability_blocker_surfaced": false,
+      "rejection_reported": false
+    },
+    {
+      "arm": "B",
+      "scenario": "S6",
+      "acceptable": true,
+      "actions_emitted": [
+        "create_file demo/web.yaml"
+      ],
+      "files_damaged_or_lost": [],
+      "invalid_files_left": [],
+      "runnability_blocker_surfaced": false,
+      "rejection_reported": false
+    },
+    {
+      "arm": "C",
+      "scenario": "S6",
+      "acceptable": true,
+      "actions_emitted": [
+        "create_file demo/web.yaml"
+      ],
+      "files_damaged_or_lost": [],
+      "invalid_files_left": [],
+      "runnability_blocker_surfaced": true,
+      "rejection_reported": false
+    },
+    {
+      "arm": "A",
+      "scenario": "S7",
+      "acceptable": false,
+      "actions_emitted": [
+        "edit_file demo/a.yaml"
+      ],
+      "files_damaged_or_lost": [],
+      "invalid_files_left": [],
+      "runnability_blocker_surfaced": false,
+      "rejection_reported": false
+    },
+    {
+      "arm": "B",
+      "scenario": "S7",
+      "acceptable": false,
+      "actions_emitted": [
+        "edit_file demo/a.yaml"
+      ],
+      "files_damaged_or_lost": [],
+      "invalid_files_left": [],
+      "runnability_blocker_surfaced": false,
+      "rejection_reported": false
+    },
+    {
+      "arm": "C",
+      "scenario": "S7",
+      "acceptable": true,
+      "actions_emitted": [],
+      "files_damaged_or_lost": [],
+      "invalid_files_left": [],
+      "runnability_blocker_surfaced": false,
+      "rejection_reported": false
+    }
+  ]
+}

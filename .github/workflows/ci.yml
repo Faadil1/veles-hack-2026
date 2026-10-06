@@ -32,18 +32,23 @@ jobs:
       - uses: docker/build-push-action@v6
         with:
           context: .
-          push: ${{ github.event_name != 'pull_request' }}
-          load: ${{ github.event_name == 'pull_request' }}
+          load: true
           tags: |
             ghcr.io/faadil1/hyperion-steward:${{ github.sha }}
             ghcr.io/faadil1/hyperion-steward:latest
           labels: org.opencontainers.image.source=https://github.com/Faadil1/veles-hack-2026
       - name: Container smoke test (degraded mode, no secrets)
-        if: github.event_name != 'pull_request'
         run: |
           docker run -d --name s -p 8000:8000 -e STEWARD_DISABLE_LLM=1 ghcr.io/faadil1/hyperion-steward:${{ github.sha }}
-          for i in $(seq 1 20); do curl -fs localhost:8000/health && break; sleep 1; done
+          ok=0; for i in $(seq 1 30); do if curl -fs localhost:8000/health; then ok=1; break; fi; sleep 1; done
+          if [ $ok -ne 1 ]; then echo "::error title=container-smoke::health never came up: $(docker logs s 2>&1 | tail -20 | tr '\n' ' ')"; exit 1; fi
           curl -fsN -X POST localhost:8000/chat -H 'content-type: application/json' \
-            -d '{"user_id":"ci","text":"how do I deploy a workflow?"}' | tee /tmp/sse.txt
-          grep -q '^data: {"response"' /tmp/sse.txt
+            -d '{"user_id":"ci","text":"how do I deploy a workflow?"}' > /tmp/sse.txt
+          grep -q '^data: {"response"' /tmp/sse.txt || { echo "::error title=container-smoke::$(head -c 400 /tmp/sse.txt | tr '\n' ' ')"; exit 1; }
           echo "::notice title=container-smoke::$(head -c 300 /tmp/sse.txt | tr '\n' ' ')"
+      - name: Push image
+        if: github.event_name != 'pull_request'
+        run: |
+          docker push ghcr.io/faadil1/hyperion-steward:${{ github.sha }}
+          docker push ghcr.io/faadil1/hyperion-steward:latest
+          echo "::notice title=image::ghcr.io/faadil1/hyperion-steward:${{ github.sha }}"
