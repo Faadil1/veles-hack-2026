@@ -182,3 +182,12 @@ Timezone of record: UTC (local Toronto = UTC-4).
 - **Evidence:** tests/test_templates.py.
 - **Reversible:** yes.
 - **Next:** re-run scenarios on 3B and 7B with f8c8f3d to measure the delta (product learning loop: feedback → decision → shipped delta → observed result).
+
+## D-021 — Second live-model round: fixes replicated, two more product bugs found
+- **Timestamp:** 2026-10-06T11:06Z
+- **Observed (code f8c8f3d / 66b1d2f):** qwen2.5:3b 4/7 on two independent runs (up from 2/7); qwen2.5:7b 5/7. N2 (silent guard) and N3 (path to check_profile) fixed on every model. N1 failed on every model; N4 failed on every model.
+- **Root causes:** N1: `create_profile` crashed with a TypeError (receipt keyword collision, the same class as the earlier `kind=` bug) on every call; the builder unit tests never went through the agent, so they missed it. N4: the model answered from assumptions without calling `search_docs`.
+- **Decision:** (1) fix the bug class, not the instance: `Session.receipt` takes `kind` positional-only; agent-level test for `create_profile`; (2) retrieval by default: top passages are injected into context every turn with [Dn] citations; (3) parse tool calls a local model prints as text, and never show that markup to the user; (4) CI report publishing retries with rebase (one report was lost to a concurrent push).
+- **Evidence:** ci-evidence:scenarios/qwen2.5_3b-66b1d2f.json, qwen2.5_7b-f8c8f3d.json; fix commit d063e1d; tests 46 passing.
+- **Lesson:** a passing unit test of a component is not evidence the agent can use it. Every tool needs at least one test through the agent loop.
+- **Reversible:** yes. **Human required:** no.
