@@ -329,3 +329,9 @@ Timezone of record: UTC (local Toronto = UTC-4).
 - **Timestamp:** 2026-10-07T08:38Z
 - **Decision:** docs/SUBMISSION.md, docs/pitch/PITCH.md (Q&A "Who built it?") and deck slide 9 now carry the neutral note "AI-assisted development was used during this hackathon; full build provenance is documented in the Autonomy Log". Deck rebuilt and validated. Full provenance unchanged in this log and FINAL-HANDOVER.md. Runtime untouched (d00df7b).
 - **Reversible:** yes. **Human required:** no.
+
+## D-042 — Submission format from the organiser announcement
+- **Timestamp:** 2026-10-07T08:40Z
+- **Observed (announcement by Marco Jahn, Eclipse Foundation, 2026-10-07 07:35Z, screenshot from the human):** deadline today 16:59 UTC+2 (= 14:59 UTC, unchanged); the project must exist on TAIKAI and be associated with the challenge category; the submission must include the 3-slide template presentation attached as PDF; mentors shortlist up to three projects per challenge, notice around 17:00Z, finalists pitch Thursday. Also observed: the tutorial publishes /llms-full.txt (organiser tip).
+- **Decision:** produce docs/pitch/Hyperion-Steward-Submission.pdf with only the official template slides (title, GitHub repo, Summary, Highlights) from the same build; keep the 9-slide deck for the final-round pitch. SUBMISSION.md and FINAL-HANDOVER.md list the exact TAIKAI steps. The /llms-full.txt corpus is not ingested: it would change the runtime (steward/docs is in the image) and invalidate the verified image hours before the deadline, for no observed defect.
+- **Reversible:** yes. **Human required:** TAIKAI steps and organiser message.

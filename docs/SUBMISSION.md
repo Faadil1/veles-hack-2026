@@ -18,7 +18,8 @@ and 5).
 
 - Repo: https://github.com/Faadil1/veles-hack-2026 (Apache-2.0)
 - Docker image: `faadil12/hyperion:latest` (exposes :8000/chat; set `API_KEY`)
-- Deck: docs/pitch/Hyperion-Steward-VelesHack.pptx
+- Submission presentation (official 3-slide template, PDF): docs/pitch/Hyperion-Steward-Submission.pdf
+- Pitch deck for the final round (9 slides): docs/pitch/Hyperion-Steward-VelesHack.pptx
 - Development note: AI-assisted development was used during this hackathon; full build provenance is documented in the Autonomy Log.
 
 ## Message to the organiser (image tag)
@@ -28,7 +29,15 @@ and 5).
 > default is http://host.docker.internal:3001/api (add `--add-host host.docker.internal:host-gateway` on Linux).
 > Thanks!
 
-## Human steps, in order
+## Human steps, in order (organiser announcement, 2026-10-07 03:35 local)
 
-1. Send the message above to Michael.
-2. On TAIKAI: paste the project text, link the repo, upload the deck, press Submit before 2026-10-07 14:59 UTC.
+Deadline: today 2026-10-07, 16:59 UTC+2 = 14:59 UTC = 10:59 Toronto.
+
+1. Send the message above to Michael (image tag).
+2. On TAIKAI: make sure the project exists and is **associated with the Challenge 1 (HYPER-AI) category**.
+3. Paste the project text above and the repo link.
+4. **Attach `docs/pitch/Hyperion-Steward-Submission.pdf`** (the 3-slide template: GitHub repo, Summary, Highlights, plus the title slide) as PDF.
+5. Press Submit before 14:59 UTC.
+
+Mentors shortlist up to three projects per challenge; teams are informed around 19:00 UTC+2 (17:00 UTC, 13:00 Toronto).
+Finalists pitch on Thursday with docs/pitch/Hyperion-Steward-VelesHack.pptx and docs/pitch/PITCH.md.

@@ -39,7 +39,7 @@ Internal submission freeze: **2026-10-07 11:59 UTC** (3 h before deadline). Corr
 |---|---|---|
 | Fresh code only, public GitHub/GitLab repo created at event start | OBSERVED | TAIKAI rules. Repo created 2026-10-06T10:06Z; full history in-event. |
 | Licence file defined by the challenge | OBSERVED | Starter LICENCE is Apache-2.0; repo LICENSE is Apache-2.0. |
-| Submission: repo link + brief README on TAIKAI; template deck | OBSERVED | VelesHack_ProjectSubmissionTemplate.pptx (Project name, GitHub repo, Summary, Highlights). |
+| Submission: TAIKAI project in the challenge category, repo link + brief README, 3-slide template attached as PDF | OBSERVED | Announcement 2026-10-07 07:35Z (Marco Jahn, Eclipse Foundation); template VelesHack_ProjectSubmissionTemplate.pptx. Mentors shortlist max 3 per challenge; notice ~17:00Z; finalists pitch Thursday. |
 | Pitch | OBSERVED | 6 minutes, live, free format; independent jury. |
 | Evaluation (Challenge 1) | OBSERVED | Organisers run `<dockerhub-user>/hyperion:latest` and test against 5 criteria: (1) /chat microservice answering HYPER-AI questions and turning NL into IDE actions, e.g. "What is HyperAI?" and "Create a deployment YAML for a service using the nginx Docker image" (writes the file and opens it in the editor); (2) guardrails reject irrelevant queries ("What is the weather today?"); (3) RAG on HYPER-AI docs; (4) memory within a session; (5) optional human-in-the-loop confirmation for delete/overwrite. |
 | How the evaluation container gets its model key | OBSERVED | The organiser runs the image with his own key in `API_KEY` (Discord answer, D-030). Deterministic fallback kept as a safety net (D-028). |

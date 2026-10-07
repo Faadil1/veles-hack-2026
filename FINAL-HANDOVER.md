@@ -12,7 +12,8 @@ Status at 2026-10-07T08:27Z: **SUBMISSION_READY (Final Canonical Assurance PASS)
 | Tests | `tests/` | 103 passing, CI green |
 | Live evidence | `evidence/`, branch `ci-evidence` | Official GUI + backend images, browser-driven; k=3 with llama3.1 8B 21/21 on d00df7b; validator parity 0/5,536; live slice 6/6 |
 | Final Canonical Assurance | `docs/assurance/FINAL-CANONICAL-ASSURANCE-RECEIPT.yaml` | SUBMISSION_READY, Finisher validator b5ea200 PASS; independent cross-check in `docs/assurance/INDEPENDENT-CHECK.md` |
-| Deck | `docs/pitch/Hyperion-Steward-VelesHack.pptx` (official template) | Ready |
+| Submission PDF | `docs/pitch/Hyperion-Steward-Submission.pdf` (official 3-slide template + title) | Ready: attach on TAIKAI |
+| Pitch deck (final round) | `docs/pitch/Hyperion-Steward-VelesHack.pptx` | Ready |
 | Pitch script and Q&A | `docs/pitch/PITCH.md` | Ready |
 | Submission text and organiser message | `docs/SUBMISSION.md` | Ready |
 | Decisions | `AUTONOMY-LOG.md` D-000 to D-038 | Current |
@@ -21,8 +22,8 @@ Status at 2026-10-07T08:27Z: **SUBMISSION_READY (Final Canonical Assurance PASS)
 ## Human steps (only these)
 
 1. Send the organiser message in `docs/SUBMISSION.md` (image tag).
-2. Submit on TAIKAI before 2026-10-07 14:59 UTC: project text, repo link, deck.
-3. Pitch on 2026-10-08 with `docs/pitch/PITCH.md`.
+2. On TAIKAI before 2026-10-07 14:59 UTC: project associated with the Challenge 1 category, project text, repo link, `Hyperion-Steward-Submission.pdf` attached, Submit.
+3. If shortlisted (notice around 17:00 UTC today), pitch on 2026-10-08 with the pitch deck and `docs/pitch/PITCH.md`.
 
 ## Known limits (stated in the README and deck)
 
