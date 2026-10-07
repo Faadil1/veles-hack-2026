@@ -106,10 +106,7 @@ The model handles language. Everything that touches the workspace goes through `
 
 [PRD](docs/PRD.md) · [Autonomy log](AUTONOMY-LOG.md) · [Reality ledger](docs/REALITY-LEDGER.md) · [Challenge reality](docs/CHALLENGE-REALITY.md) · [Gateway registry](docs/CONDITIONAL-GATEWAY-REGISTRY.yaml)
 
-## AI use disclosure
-
-Built by Claude (Anthropic) as the autonomous arm of a build benchmark run by Faadil Boussari, who acted only on
-identity, account and submission steps. Steward runs on the organisers' model by default.
+Development note: AI-assisted development was used during this hackathon; full build provenance is documented in the [Autonomy Log](AUTONOMY-LOG.md).
 
 ## License
 

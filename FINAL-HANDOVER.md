@@ -43,3 +43,9 @@ browser-driven: 4/4 without a model, 7/7 with llama3.1 8B (evidence/published-im
 
 Fresh clone of 5fea8f8: install, 97/97 tests, official example created and undone against the real backend source
 with no model (LOCAL). CI rebuilds and tests the image on every commit and runs it against the official backend image.
+
+## Build provenance
+
+Built by Claude (Anthropic) as the autonomous arm of AUTONOMOUS_BUILD_BENCHMARK_V1_ROUND_1, run by Faadil Boussari,
+who acted only on identity, account and submission steps. Full decision record: `AUTONOMY-LOG.md` (D-000 onward).
+The public README carries a short development note instead of a dedicated disclosure section (D-040).
