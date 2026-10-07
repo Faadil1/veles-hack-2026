@@ -342,3 +342,9 @@ Timezone of record: UTC (local Toronto = UTC-4).
 - **State:** SUBMITTED_HUMAN_REPORTED. Readiness is not execution proof: SUBMITTED_VERIFIED needs a capture of the TAIKAI submission (optional, requested). Freeze holds; runtime revision d00df7b; Docker Hub latest sha256:438f8bfa… unchanged.
 - **Next:** shortlist notice around 17:00Z; pitch 2026-10-08 07:30Z if selected; post-mortem after the event.
 - **Human required:** optional confirmation capture; pitch if shortlisted.
+
+## D-044 — TAIKAI project page observed
+- **Timestamp:** 2026-10-07T09:10Z
+- **Observed (photo from the owner, evidence/submission/taikai-project-page-2026-10-07.jpg):** project "Hyperion Steward" exists on taikai.network under eclipse-foundation / veles-hack-2026 (project id cmuxv79vc026z6f2537fq44ky), owner faadil1, with the short pitch and a description consistent with the evidence (problem, approach with exact confirmation/undo wording, 7/7 on the published image, 6/6 live slice).
+- **Not visible in this capture:** the Challenge 1 category association, the attached PDF and a submitted status. State stays SUBMITTED_HUMAN_REPORTED until those are seen (owner reports them done).
+- **Human required:** optional capture of the category and attachments section.
