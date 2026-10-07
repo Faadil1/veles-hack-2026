@@ -1,6 +1,6 @@
 # Final handover: Hyperion Steward (Veles Hack 2026, Challenge 1)
 
-Status at 2026-10-06T15:54Z: **SUBMITTABLE, pending human steps.** Deadline 2026-10-07 14:59 UTC; internal freeze
+Status at 2026-10-07T08:27Z: **SUBMISSION_READY (Final Canonical Assurance PASS); only protected human actions remain.** Deadline 2026-10-07 14:59 UTC; internal freeze
 2026-10-07 11:59 UTC. Pitches 2026-10-08 07:30 UTC.
 
 ## What exists
@@ -28,13 +28,18 @@ Status at 2026-10-06T15:54Z: **SUBMITTABLE, pending human steps.** Deadline 2026
 
 - Any change to Dockerfile, requirements.txt or steward/ invalidates the assurance receipt: re-run k=3, published-image and the receipt.
 - Memory answers from the 8B model can include untrue asides (1 of 3 runs); no workspace effect.
-
+- The 9/9 vs 1/9 ablation is a scripted LOCAL_STUB experiment mirroring the shipped IDE; the live evidence is separate.
+- Folder deletion is confirmed but not reversible; overwrites skip confirmation when the exact path was named or Steward created the file in this session.
 - Answer quality on the organiser's legion1 server not measured before submission (he injects his own key).
 - Runnability findings are rules, not a deployment on HYPER-AI.
 - On a CPU runner the 8B model can exceed the 300 s CI timeout; Steward then answers from cited documents.
 - The GUI generates a new `user_id` per page load, so session memory resets on reload.
 
 ## Clean-room verification
+
+Clean pull of faadil12/hyperion:latest (sha256:438f8bfa…, revision d00df7b) behind the official IDE images,
+browser-driven: 4/4 without a model, 7/7 with llama3.1 8B (evidence/published-image/d00df7b-438f8bf/).
+
 
 Fresh clone of 5fea8f8: install, 97/97 tests, official example created and undone against the real backend source
 with no model (LOCAL). CI rebuilds and tests the image on every commit and runs it against the official backend image.

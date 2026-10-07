@@ -159,7 +159,8 @@ bullets(body3, [
     "We read the IDE the judges run, not only its tutorial. Its actions are fire-and-forget: a naive agent says "
     "done when nothing happened.",
     "Steward checks every profile with an exact copy of the IDE validator, then reads the workspace back and only "
-    "claims what it saw. Confirmation, restore points and undo for every change.",
+    "claims what it saw. Deletes always ask; overwrites ask unless you named the file or Steward created it; "
+    "file changes can be undone (a folder delete cannot).",
 ], size=13)
 picture(s3, IMG / "03-ambiguous.png", 5.3, 1.45, w=4.3, crop=(1085, 625, 1595, 810), name="panel-screenshot")
 text(s3, 5.3, 3.15, 4.3, 0.4, "The official IDE (organisers' GUI and backend images), a browser typing into the "
@@ -281,7 +282,7 @@ rows = [("Criterion", "Steward", "Proof"),
         ("2  Guardrails", "Scope check before any model call", "Tests; off-topic scenario"),
         ("3  RAG on HYPER-AI docs", "Official tutorial, cookbook, deliverables; cited", "\"What is HyperAI?\" scenario"),
         ("4  Session memory", "Per user_id, sized to the 8k model", "Tests"),
-        ("5  Human-in-the-loop (optional)", "Confirm delete and overwrite; restore points; undo",
+        ("5  Human-in-the-loop (optional)", "Deletes always confirmed; overwrites unless path named or self-created; undo for file changes",
          "Live slice: undo restores identical bytes")]
 tbl = s8.shapes.add_table(len(rows), 3, Inches(0.45), Inches(1.3), Inches(9.1), Inches(3.4)).table
 tbl.columns[0].width, tbl.columns[1].width, tbl.columns[2].width = Inches(3.3), Inches(3.2), Inches(2.6)

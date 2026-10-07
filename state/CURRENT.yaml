@@ -8,7 +8,7 @@ project:
     version: 0.1.57-submission-execution-assurance-promoted
     commit: 61f853a461634ca46746c63bbf6ced5fa05f8649
     benchmark_overlay_commit: 9b1db87
-  updated_at: 2026-10-06T16:47Z
+  updated_at: 2026-10-07T08:27Z
   lifecycle_stage: DELIVER (post vertical slice, depth)
   judged_build_stage: LIVE DEPTH / EVIDENCE / STORY
   track: CHALLENGE_1_HYPERION_HYPER_AI
@@ -21,16 +21,17 @@ project:
     first_live_slice_proven: true  # official backend image in CI, live slice 6/6 (d6924d9)
     validator_parity: "0 disagreements / 5,536 docs (official image code)"
     gui_e2e_deterministic: "4/4 official GUI + backend images, browser-driven"
-    gui_e2e_model: "7/7 official GUI + llama3.1:8b (2e62095); M1 via docs fallback after CPU timeout"
-    dockerhub_image: "faadil12/hyperion:latest sha256:438f8bfa... revision d00df7b, clean-pull verified"
+    gui_e2e_model: "k=3 21/21 official GUI + llama3.1:8b on d00df7b; 7/7 on the clean-pulled image"
+    dockerhub_user: faadil12  # resolved
+    dockerhub_image: "faadil12/hyperion:latest sha256:438f8bfab6da59254fbcd7361a0fe6e707620c3d05445edc582d793b04268afb, revision d00df7b63dcf8aca7e11fdb72572b6cfe40b975c, clean pull 4/4 no-model, 7/7 model"
     final_canonical_assurance: "SUBMISSION_READY (validator PASS), docs/assurance/"
-    tests_local: 100 passing
-    ablation: "C 9/9, A 1/9, B 1/9; false success claims 0/5/5"
+    tests_local: 103 passing
+    ablation: "LOCAL_STUB scripted: C 9/9, A 1/9, B 1/9; false success claims 0/5/5"
   open_unknowns:
-    - none on key provisioning: organiser injects API_KEY at evaluation (D-030)
-    - Steward quality on legion1 llama3.1 (needs team key)
+    - Steward answer quality on legion1 llama3.1 (not measured; organiser injects his own API_KEY at evaluation, D-030; team key optional)
   blockers:
-    - HUMAN_REQUIRED Docker Hub username (for docs), organiser message, TAIKAI submit
+    - PROTECTED_HUMAN_ACTION organiser message (image tag)
+    - PROTECTED_HUMAN_ACTION TAIKAI submission before 2026-10-07T14:59Z
   exact_next_gate: PROTECTED_SUBMISSION (human)
   exact_next_action: >-
     Human sends the organiser message and submits on TAIKAI. Agent: no runtime change before the deadline unless a

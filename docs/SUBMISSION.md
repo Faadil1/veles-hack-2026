@@ -9,8 +9,7 @@ fire-and-forget and never reports the result; many actions silently do nothing (
 that already exists, a closed tab), and nothing validates a profile unless asked. Steward answers HYPER-AI questions
 from the official documents and turns plain language into IDE actions, but every change goes through one gate: scope
 guard, lookup, a copy of the IDE validator (0 disagreements with the real one over 5,536 test profiles), confirmation
-when it matters, the action, a read-back of the workspace, then the IDE validator with rollback. Restore points and
-undo for every change.
+when required, the action, a read-back of the workspace, then the IDE validator with rollback. Deletions always ask; overwrites ask unless you named the exact file or Steward created it in this session. File creates, edits and deletes keep a restore point that undo reverts; deleting a folder asks first and cannot be undone.
 
 Proof, all reproducible from the repo: official GUI and backend images driven by a browser in CI with llama3.1 8B
 (7/7); live slice against the official backend image (6/6, undo restores identical bytes); ablation with identical tool

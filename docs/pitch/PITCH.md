@@ -33,12 +33,15 @@ writes the profile, so the model never hand-writes forty typed fields.
 5. "delete app.yaml" with two such files. It lists both and asks.
 6. "undo". Restores the exact bytes.
 
-**4:35 Highlights (45 s).** Zero disagreements with the real validator over 5,536 test profiles. Nine out of nine
-safety scenarios against one out of nine for a naive agent with the same tool calls. Zero false "done" claims
-against five. Six of six steps live against the official backend image.
+**4:35 Highlights (45 s).** Zero disagreements with the real validator over 5,536 test profiles (validator code
+taken from the official image). In a scripted experiment on a local stub that mirrors the shipped IDE, with the same
+tool calls for both agents: nine out of nine safety scenarios against one out of nine for a naive agent, and zero
+false "done" claims against five. That experiment is separate from the live evidence: six of six steps against the
+official backend image, and the official GUI driven by a browser with llama3.1 8B, 7/7 on the published image.
 
 **5:20 Criteria and limits (40 s).** All five criteria, each with its proof in the repo. What is not proven yet, we
-say: quality on your server needs the team key; runnability checks are rules, not a real deployment. Every claim in
+say: answer quality on your server was not measured before submission (you run the image with your own key);
+runnability checks are rules, not a real deployment. Every claim in
 the repo carries its evidence class. Thank you.
 
 ## Q&A preparation
@@ -51,5 +54,6 @@ the repo carries its evidence class. Thank you.
 | Does the read-back slow things down? | One or two GET calls per action against the local backend, typically well under a second. It also stops two actions on the same file from racing, since the GUI does not wait between them. |
 | Memory? | Per `user_id` session history and a journal of changes, trimmed to fit the 8k context of the provided model. |
 | Isn't the first-match hazard in your README? | It was, from the tutorial. When we read the shipped GUI we found it refuses ambiguous names instead, so we withdrew the claim and logged the correction (AUTONOMY-LOG D-026). |
+| Is the 9/9 vs 1/9 a live result? | No. It is a scripted LOCAL_STUB experiment: a stub that mirrors the shipped GUI and backend, identical tool calls, three action layers. The live evidence is separate: 6/6 against the official backend image and the browser runs in the official GUI. |
 | Who built it? | Claude (Anthropic), running autonomously as one arm of a build benchmark; Faadil Boussari handled accounts and submission. Disclosed in the README. |
 | What's next? | Hybrid retrieval with the server's embedding models; deployment-aware runnability using the IDE's Deploy API; per-team policies on what needs confirmation. |

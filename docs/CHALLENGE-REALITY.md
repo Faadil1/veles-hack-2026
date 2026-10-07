@@ -53,7 +53,7 @@ Internal submission freeze: **2026-10-07 11:59 UTC** (3 h before deadline). Corr
 | ide-tutorial.hyperai.di.uoa.gr (contract, DSL, cookbook) | READ via web fetch | REFERENCE (secondary to shipped code) |
 | hyperion-starter | Received as ZIP from the human | REQUIRED, aligned (D-023) |
 | donmichael/ide-backend:latest, donmichael/ide-gui:latest | Run in GitHub Actions (Docker Hub unreachable from the workspace) | CONTRACT (D-024); digests sha256:3b29068… and sha256:a805e9d… |
-| legion1.di.uoa.gr/v1 (llama3.1, 8k context, OpenAI-compatible) | Unreachable from workspace; per-team key | REQUIRED for the judged model; HUMAN_REQUIRED key |
+| legion1.di.uoa.gr/v1 (llama3.1, 8k context, OpenAI-compatible) | Unreachable from workspace; per-team key | Judged model. The organiser runs the image with his own key (D-030); the team key is optional (pre-submission testing only) |
 | Official docx set (D3.3, D4.2, D4.3), Hyperai.pdf | Received from the human | RAG corpus |
 
 ## 6. Workspace constraints (OBSERVED, AUTONOMY-LOG D-004)

@@ -28,7 +28,7 @@ something the IDE will reject.
 | Any change to the workspace | Sends the action, then **reads the workspace back** through the IDE backend. It says "done" only when it saw the change; otherwise it says it could not confirm it. The next action on that file waits for the previous one to land. |
 | Writing a profile | Checks it first with an **exact port of the IDE's own validator** (0 disagreements with the original on 5,536 test documents), writes it, waits until the file is visible, then asks the IDE validator. If the IDE still rejects it, the file is rolled back. |
 | A name that matches several files | Looks it up first (the backend answers 409) and asks which one, listing every path. |
-| Overwrite, delete | Keeps a restore point. Deletions ask first. `undo` restores the exact bytes. |
+| Overwrite, delete | Deletions always ask first; overwrites ask unless you named the exact file or Steward created it in this session. File creates, edits and deletes keep a restore point and `undo` restores the exact bytes. Deleting a folder asks first and cannot be undone. |
 | A profile that is valid but will not run | Says so: the official cookbook's native example starts `uvicorn` inside an `nginx` image. Steward checks the image against the entry point, the listen port against the exposed ports, the workload against the architecture, and more. |
 | New profiles from plain language | The model extracts parameters; a deterministic builder emits the full profile, so the model never hand-writes 40 typed fields. Every builder output passes the real validator with no warnings. |
 | Questions about HYPER-AI | Answers from the official documents (tutorial, cookbook, D3.3/D4.2/D4.3 deliverables), with citations. |
@@ -42,7 +42,7 @@ something the IDE will reject.
 | Guardrails reject irrelevant queries | Deterministic topical guard before the model | `tests/test_guardrail.py`; scenario N6 |
 | RAG grounded in HYPER-AI docs | BM25 over the official document set, HYPER-AI spelling normalised, cited `[n]` | `steward/docs/`, scenario N8 ("What is HyperAI?") |
 | Session memory | Per-`user_id` history and journal, bounded to the 8k context of the provided model | `tests/test_behaviour.py` |
-| Optional: human confirmation for delete/overwrite | Built in, plus restore points and undo | `tests/test_tools_through_agent.py`, ablation S1 to S5 |
+| Optional: human confirmation for delete/overwrite | Built in (deletes always; overwrites unless the exact path was named), plus undo for file changes | `tests/test_tools_through_agent.py`, ablation S1 to S5 |
 
 ## Proof
 
@@ -60,7 +60,7 @@ What is real and what is not is kept in [`docs/REALITY-LEDGER.md`](docs/REALITY-
 
 ```bash
 docker run -p 8000:8000 --add-host host.docker.internal:host-gateway \
-  -e API_KEY=<team key> \
+  -e API_KEY=<key> \
   faadil12/hyperion:latest
 ```
 
