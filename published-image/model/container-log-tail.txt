@@ -1,40 +1,40 @@
-INFO:     127.0.0.1:60284 - "GET /health HTTP/1.1" 200 OK
-INFO:     127.0.0.1:41432 - "GET /health HTTP/1.1" 200 OK
-INFO:     127.0.0.1:51356 - "GET /health HTTP/1.1" 200 OK
-2026-10-06 17:06:37,202 INFO httpx HTTP Request: POST http://host.docker.internal:11434/v1/chat/completions "HTTP/1.1 200 OK"
-INFO:     127.0.0.1:34606 - "GET /health HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57060 - "GET /health HTTP/1.1" 200 OK
-2026-10-06 17:07:34,530 INFO httpx HTTP Request: POST http://host.docker.internal:11434/v1/chat/completions "HTTP/1.1 200 OK"
-INFO:     127.0.0.1:37000 - "GET /health HTTP/1.1" 200 OK
-INFO:     172.17.0.1:53212 - "POST /chat HTTP/1.1" 200 OK
-2026-10-06 17:07:54,097 INFO httpx HTTP Request: GET http://host.docker.internal:3001/api/agent/file?path=nginx.yaml "HTTP/1.1 404 Not Found"
-2026-10-06 17:07:54,099 INFO httpx HTTP Request: GET http://host.docker.internal:3001/api/files?path= "HTTP/1.1 200 OK"
-2026-10-06 17:07:54,100 INFO httpx HTTP Request: GET http://host.docker.internal:3001/api/files?path=cloud "HTTP/1.1 200 OK"
-2026-10-06 17:07:54,101 INFO httpx HTTP Request: GET http://host.docker.internal:3001/api/files?path=cookbook "HTTP/1.1 200 OK"
-2026-10-06 17:07:54,103 INFO httpx HTTP Request: GET http://host.docker.internal:3001/api/files?path=edge "HTTP/1.1 200 OK"
-2026-10-06 17:07:54,105 INFO httpx HTTP Request: GET http://host.docker.internal:3001/api/agent/file?path=nginx.yaml "HTTP/1.1 404 Not Found"
-2026-10-06 17:07:54,357 INFO httpx HTTP Request: GET http://host.docker.internal:3001/api/agent/file?path=nginx.yaml "HTTP/1.1 200 OK"
-2026-10-06 17:07:54,364 INFO httpx HTTP Request: GET http://host.docker.internal:3001/api/agent/validation/file?path=nginx.yaml "HTTP/1.1 200 OK"
-INFO:     172.17.0.1:53212 - "POST /chat HTTP/1.1" 200 OK
-2026-10-06 17:07:58,364 INFO httpx HTTP Request: GET http://host.docker.internal:3001/api/agent/file?path=app.yaml "HTTP/1.1 409 Conflict"
-INFO:     172.17.0.1:53212 - "POST /chat HTTP/1.1" 200 OK
-2026-10-06 17:08:01,598 INFO httpx HTTP Request: GET http://host.docker.internal:3001/api/agent/file?path=cookbook%2Fnative.yaml "HTTP/1.1 200 OK"
-2026-10-06 17:08:01,604 INFO httpx HTTP Request: GET http://host.docker.internal:3001/api/agent/file?path=cookbook%2Fnative.yaml "HTTP/1.1 200 OK"
-2026-10-06 17:08:01,625 INFO httpx HTTP Request: GET http://host.docker.internal:3001/api/agent/file?path=cookbook%2Fnative.yaml "HTTP/1.1 200 OK"
-2026-10-06 17:08:01,627 INFO httpx HTTP Request: GET http://host.docker.internal:3001/api/agent/file?path=cookbook%2Fnative.yaml "HTTP/1.1 200 OK"
-2026-10-06 17:08:01,880 INFO httpx HTTP Request: GET http://host.docker.internal:3001/api/agent/file?path=cookbook%2Fnative.yaml "HTTP/1.1 200 OK"
-2026-10-06 17:08:01,888 INFO httpx HTTP Request: GET http://host.docker.internal:3001/api/agent/validation/file?path=cookbook%2Fnative.yaml "HTTP/1.1 200 OK"
-INFO:     172.17.0.1:53212 - "POST /chat HTTP/1.1" 200 OK
-INFO:     127.0.0.1:34470 - "GET /health HTTP/1.1" 200 OK
-INFO:     127.0.0.1:49248 - "GET /health HTTP/1.1" 200 OK
-INFO:     127.0.0.1:42656 - "GET /health HTTP/1.1" 200 OK
-INFO:     127.0.0.1:45094 - "GET /health HTTP/1.1" 200 OK
-INFO:     127.0.0.1:52710 - "GET /health HTTP/1.1" 200 OK
-2026-10-06 17:10:29,367 INFO httpx HTTP Request: POST http://host.docker.internal:11434/v1/chat/completions "HTTP/1.1 200 OK"
-2026-10-06 17:10:29,634 INFO httpx HTTP Request: GET http://host.docker.internal:3001/api/agent/file?path=cookbook%2Fnative.yaml "HTTP/1.1 200 OK"
-INFO:     127.0.0.1:38966 - "GET /health HTTP/1.1" 200 OK
-2026-10-06 17:11:05,244 INFO httpx HTTP Request: POST http://host.docker.internal:11434/v1/chat/completions "HTTP/1.1 200 OK"
-INFO:     127.0.0.1:39990 - "GET /health HTTP/1.1" 200 OK
-INFO:     172.17.0.1:53212 - "POST /chat HTTP/1.1" 200 OK
-2026-10-06 17:11:23,042 INFO httpx HTTP Request: GET http://host.docker.internal:3001/api/agent/file?path=cookbook%2Fnative.yaml "HTTP/1.1 200 OK"
-2026-10-06 17:11:23,294 INFO httpx HTTP Request: GET http://host.docker.internal:3001/api/agent/file?path=cookbook%2Fnative.yaml "HTTP/1.1 200 OK"
+INFO:     127.0.0.1:42068 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34912 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53600 - "GET /health HTTP/1.1" 200 OK
+2026-10-07 08:40:40,695 INFO httpx HTTP Request: POST http://host.docker.internal:11434/v1/chat/completions "HTTP/1.1 200 OK"
+INFO:     127.0.0.1:38104 - "GET /health HTTP/1.1" 200 OK
+2026-10-07 08:41:38,360 INFO httpx HTTP Request: POST http://host.docker.internal:11434/v1/chat/completions "HTTP/1.1 200 OK"
+INFO:     127.0.0.1:56086 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52470 - "GET /health HTTP/1.1" 200 OK
+INFO:     172.17.0.1:42910 - "POST /chat HTTP/1.1" 200 OK
+2026-10-07 08:42:18,963 INFO httpx HTTP Request: GET http://host.docker.internal:3001/api/agent/file?path=nginx.yaml "HTTP/1.1 404 Not Found"
+2026-10-07 08:42:18,965 INFO httpx HTTP Request: GET http://host.docker.internal:3001/api/files?path= "HTTP/1.1 200 OK"
+2026-10-07 08:42:18,966 INFO httpx HTTP Request: GET http://host.docker.internal:3001/api/files?path=cloud "HTTP/1.1 200 OK"
+2026-10-07 08:42:18,969 INFO httpx HTTP Request: GET http://host.docker.internal:3001/api/files?path=cookbook "HTTP/1.1 200 OK"
+2026-10-07 08:42:18,971 INFO httpx HTTP Request: GET http://host.docker.internal:3001/api/files?path=edge "HTTP/1.1 200 OK"
+2026-10-07 08:42:18,974 INFO httpx HTTP Request: GET http://host.docker.internal:3001/api/agent/file?path=nginx.yaml "HTTP/1.1 404 Not Found"
+2026-10-07 08:42:19,227 INFO httpx HTTP Request: GET http://host.docker.internal:3001/api/agent/file?path=nginx.yaml "HTTP/1.1 200 OK"
+2026-10-07 08:42:19,235 INFO httpx HTTP Request: GET http://host.docker.internal:3001/api/agent/validation/file?path=nginx.yaml "HTTP/1.1 200 OK"
+INFO:     172.17.0.1:42910 - "POST /chat HTTP/1.1" 200 OK
+2026-10-07 08:42:23,228 INFO httpx HTTP Request: GET http://host.docker.internal:3001/api/agent/file?path=app.yaml "HTTP/1.1 409 Conflict"
+INFO:     172.17.0.1:42910 - "POST /chat HTTP/1.1" 200 OK
+2026-10-07 08:42:26,478 INFO httpx HTTP Request: GET http://host.docker.internal:3001/api/agent/file?path=cookbook%2Fnative.yaml "HTTP/1.1 200 OK"
+2026-10-07 08:42:26,485 INFO httpx HTTP Request: GET http://host.docker.internal:3001/api/agent/file?path=cookbook%2Fnative.yaml "HTTP/1.1 200 OK"
+2026-10-07 08:42:26,503 INFO httpx HTTP Request: GET http://host.docker.internal:3001/api/agent/file?path=cookbook%2Fnative.yaml "HTTP/1.1 200 OK"
+2026-10-07 08:42:26,506 INFO httpx HTTP Request: GET http://host.docker.internal:3001/api/agent/file?path=cookbook%2Fnative.yaml "HTTP/1.1 200 OK"
+2026-10-07 08:42:26,758 INFO httpx HTTP Request: GET http://host.docker.internal:3001/api/agent/file?path=cookbook%2Fnative.yaml "HTTP/1.1 200 OK"
+2026-10-07 08:42:26,767 INFO httpx HTTP Request: GET http://host.docker.internal:3001/api/agent/validation/file?path=cookbook%2Fnative.yaml "HTTP/1.1 200 OK"
+INFO:     172.17.0.1:42910 - "POST /chat HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43040 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:35342 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54322 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50878 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55142 - "GET /health HTTP/1.1" 200 OK
+2026-10-07 08:44:59,415 INFO httpx HTTP Request: POST http://host.docker.internal:11434/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-07 08:44:59,695 INFO httpx HTTP Request: GET http://host.docker.internal:3001/api/agent/file?path=nginx.yaml "HTTP/1.1 200 OK"
+INFO:     127.0.0.1:33916 - "GET /health HTTP/1.1" 200 OK
+2026-10-07 08:45:33,274 INFO httpx HTTP Request: POST http://host.docker.internal:11434/v1/chat/completions "HTTP/1.1 200 OK"
+INFO:     127.0.0.1:55100 - "GET /health HTTP/1.1" 200 OK
+INFO:     172.17.0.1:42910 - "POST /chat HTTP/1.1" 200 OK
+2026-10-07 08:45:51,456 INFO httpx HTTP Request: GET http://host.docker.internal:3001/api/agent/file?path=cookbook%2Fnative.yaml "HTTP/1.1 200 OK"
+2026-10-07 08:45:51,708 INFO httpx HTTP Request: GET http://host.docker.internal:3001/api/agent/file?path=cookbook%2Fnative.yaml "HTTP/1.1 200 OK"
