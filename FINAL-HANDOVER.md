@@ -1,6 +1,6 @@
 # Final handover: Hyperion Steward (Veles Hack 2026, Challenge 1)
 
-Status at 2026-10-07T08:27Z: **SUBMISSION_READY (Final Canonical Assurance PASS); only protected human actions remain.** Deadline 2026-10-07 14:59 UTC; internal freeze
+Status at 2026-10-07T09:06Z: **SUBMITTED (reported by the owner; organiser message sent, TAIKAI submitted).** Deadline 2026-10-07 14:59 UTC; internal freeze
 2026-10-07 11:59 UTC. Pitches 2026-10-08 07:30 UTC.
 
 ## What exists

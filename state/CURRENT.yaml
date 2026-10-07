@@ -8,12 +8,12 @@ project:
     version: 0.1.57-submission-execution-assurance-promoted
     commit: 61f853a461634ca46746c63bbf6ced5fa05f8649
     benchmark_overlay_commit: 9b1db87
-  updated_at: 2026-10-07T08:27Z
+  updated_at: 2026-10-07T09:06Z
   lifecycle_stage: DELIVER (post vertical slice, depth)
   judged_build_stage: LIVE DEPTH / EVIDENCE / STORY
   track: CHALLENGE_1_HYPERION_HYPER_AI
   concept: HYPERION_STEWARD (locked; re-framed D-026 around observed fire-and-forget actions)
-  submission_execution_state: SUBMISSION_READY_AWAITING_HUMAN_SUBMIT
+  submission_execution_state: SUBMITTED_HUMAN_REPORTED  # SUBMITTED_VERIFIED once a TAIKAI confirmation capture is filed
   deadline_utc: 2026-10-07T14:59Z
   safety_boundary_utc: 2026-10-07T11:59Z  # internal freeze, 3h margin
   pitches_utc: 2026-10-08T07:30Z
@@ -29,10 +29,8 @@ project:
     ablation: "LOCAL_STUB scripted: C 9/9, A 1/9, B 1/9; false success claims 0/5/5"
   open_unknowns:
     - Steward answer quality on legion1 llama3.1 (not measured; organiser injects his own API_KEY at evaluation, D-030; team key optional)
-  blockers:
-    - PROTECTED_HUMAN_ACTION organiser message (image tag)
-    - PROTECTED_HUMAN_ACTION TAIKAI submission before 2026-10-07T14:59Z
-  exact_next_gate: PROTECTED_SUBMISSION (human)
+  blockers: []
+  exact_next_gate: SHORTLIST_NOTICE (~2026-10-07T17:00Z), then PITCH 2026-10-08T07:30Z if selected
   exact_next_action: >-
-    Human sends the organiser message and submits on TAIKAI. Agent: no runtime change before the deadline unless a
-    defect is found; any runtime change re-runs k=3, published-image and the FCA receipt.
+    Freeze holds (no runtime change). File the TAIKAI confirmation capture to reach SUBMITTED_VERIFIED. If shortlisted,
+    pitch with docs/pitch/Hyperion-Steward-VelesHack.pptx and docs/pitch/PITCH.md. Post-mortem after the event.

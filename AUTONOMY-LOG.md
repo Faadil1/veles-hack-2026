@@ -335,3 +335,10 @@ Timezone of record: UTC (local Toronto = UTC-4).
 - **Observed (announcement by Marco Jahn, Eclipse Foundation, 2026-10-07 07:35Z, screenshot from the human):** deadline today 16:59 UTC+2 (= 14:59 UTC, unchanged); the project must exist on TAIKAI and be associated with the challenge category; the submission must include the 3-slide template presentation attached as PDF; mentors shortlist up to three projects per challenge, notice around 17:00Z, finalists pitch Thursday. Also observed: the tutorial publishes /llms-full.txt (organiser tip).
 - **Decision:** produce docs/pitch/Hyperion-Steward-Submission.pdf with only the official template slides (title, GitHub repo, Summary, Highlights) from the same build; keep the 9-slide deck for the final-round pitch. SUBMISSION.md and FINAL-HANDOVER.md list the exact TAIKAI steps. The /llms-full.txt corpus is not ingested: it would change the runtime (steward/docs is in the image) and invalidate the verified image hours before the deadline, for no observed defect.
 - **Reversible:** yes. **Human required:** TAIKAI steps and organiser message.
+
+## D-043 — Submission executed by the owner
+- **Timestamp:** 2026-10-07T09:06Z
+- **Observed:** the owner reports that everything is done and submitted (organiser message with the image tag, TAIKAI project in the Challenge 1 category, project text, repo link, 3-slide PDF), before the 14:59Z deadline.
+- **State:** SUBMITTED_HUMAN_REPORTED. Readiness is not execution proof: SUBMITTED_VERIFIED needs a capture of the TAIKAI submission (optional, requested). Freeze holds; runtime revision d00df7b; Docker Hub latest sha256:438f8bfa… unchanged.
+- **Next:** shortlist notice around 17:00Z; pitch 2026-10-08 07:30Z if selected; post-mortem after the event.
+- **Human required:** optional confirmation capture; pitch if shortlisted.

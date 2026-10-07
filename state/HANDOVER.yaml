@@ -1,5 +1,5 @@
 handover:
-  updated_at: 2026-10-07T08:27Z
+  updated_at: 2026-10-07T09:06Z
   summary: >-
     Hyperion Steward for Challenge 1 (HYPER-AI). SUBMISSION_READY (Final Canonical Assurance PASS). Evaluation image
     faadil12/hyperion:latest sha256:438f8bfa..., runtime revision d00df7b, clean-pull verified behind the official IDE
@@ -9,9 +9,9 @@ handover:
     - state/CURRENT.yaml
     - docs/assurance/FINAL-CANONICAL-ASSURANCE-RECEIPT.yaml
     - docs/REALITY-LEDGER.md
-  exact_next_gate: PROTECTED_SUBMISSION (human)
+  exact_next_gate: SHORTLIST_NOTICE then PITCH (if selected)
   human_checkpoints_open:
-    - send the organiser message in docs/SUBMISSION.md (image tag)
-    - submit on TAIKAI before 2026-10-07T14:59Z
+    - optional: TAIKAI confirmation capture (moves SUBMITTED_HUMAN_REPORTED to SUBMITTED_VERIFIED)
+    - pitch on 2026-10-08 if shortlisted
   conditional_dependencies: []
   runtime_change_rule: any change to Dockerfile, requirements.txt or steward/ invalidates the assurance receipt
