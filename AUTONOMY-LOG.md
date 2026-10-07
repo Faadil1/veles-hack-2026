@@ -324,3 +324,8 @@ Timezone of record: UTC (local Toronto = UTC-4).
 - **Decision:** per the owner's instruction, the README's dedicated "AI use disclosure" section is replaced by a short neutral development note under Project records, linking this log. Full Claude / autonomous-benchmark provenance stays here, in FINAL-HANDOVER.md ("Build provenance") and in the benchmark artifacts. README-only product documentation change; runtime untouched (revision d00df7b).
 - **Note:** docs/SUBMISSION.md (TAIKAI text) and the deck still name the autonomous build; unchanged, as not requested.
 - **Reversible:** yes. **Human required:** no.
+
+## D-041 — Same neutral development note in the TAIKAI text, pitch Q&A and deck (owner instruction)
+- **Timestamp:** 2026-10-07T08:38Z
+- **Decision:** docs/SUBMISSION.md, docs/pitch/PITCH.md (Q&A "Who built it?") and deck slide 9 now carry the neutral note "AI-assisted development was used during this hackathon; full build provenance is documented in the Autonomy Log". Deck rebuilt and validated. Full provenance unchanged in this log and FINAL-HANDOVER.md. Runtime untouched (d00df7b).
+- **Reversible:** yes. **Human required:** no.

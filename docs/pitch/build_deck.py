@@ -315,7 +315,7 @@ text(s9, 5.35, 1.45, 4.0, 3.2, [
     "Answer quality on the organisers' server (legion1) not measured before submission",
     "Runnability findings are rules, not a deployment on HYPER-AI",
     "Steward cannot deploy; the IDE's Deploy button does",
-    "Built during the hackathon by an autonomous agent; every claim is labelled in the repo"], size=12, name="not-yet-text")
+    "AI-assisted development; full build provenance in the Autonomy Log"], size=12, name="not-yet-text")
 s9.notes_slide.notes_text_frame.text = "What is proven and what is not. Every claim in the repo carries its evidence class."
 
 prs.save(str(HERE / "Hyperion-Steward-VelesHack.pptx"))

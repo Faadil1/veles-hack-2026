@@ -55,5 +55,5 @@ the repo carries its evidence class. Thank you.
 | Memory? | Per `user_id` session history and a journal of changes, trimmed to fit the 8k context of the provided model. |
 | Isn't the first-match hazard in your README? | It was, from the tutorial. When we read the shipped GUI we found it refuses ambiguous names instead, so we withdrew the claim and logged the correction (AUTONOMY-LOG D-026). |
 | Is the 9/9 vs 1/9 a live result? | No. It is a scripted LOCAL_STUB experiment: a stub that mirrors the shipped GUI and backend, identical tool calls, three action layers. The live evidence is separate: 6/6 against the official backend image and the browser runs in the official GUI. |
-| Who built it? | Claude (Anthropic), running autonomously as one arm of a build benchmark; Faadil Boussari handled accounts and submission. Disclosed in the README. |
+| Who built it? | AI-assisted development was used during this hackathon; full build provenance is documented in the Autonomy Log. |
 | What's next? | Hybrid retrieval with the server's embedding models; deployment-aware runnability using the IDE's Deploy API; per-team policies on what needs confirmation. |

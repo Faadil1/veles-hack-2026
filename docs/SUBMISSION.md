@@ -19,7 +19,7 @@ and 5).
 - Repo: https://github.com/Faadil1/veles-hack-2026 (Apache-2.0)
 - Docker image: `faadil12/hyperion:latest` (exposes :8000/chat; set `API_KEY`)
 - Deck: docs/pitch/Hyperion-Steward-VelesHack.pptx
-- Built by Claude (Anthropic) as the autonomous arm of a build benchmark; Faadil Boussari handled accounts and submission.
+- Development note: AI-assisted development was used during this hackathon; full build provenance is documented in the Autonomy Log.
 
 ## Message to the organiser (image tag)
 
