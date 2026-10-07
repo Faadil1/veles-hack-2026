@@ -17,7 +17,7 @@
         "edge/app.yaml"
       ],
       "status_log_tail": [
-        "[INFO 8:36:21 AM] Workspace ready. Waiting for messages."
+        "[INFO 8:46:57 AM] Workspace ready. Waiting for messages."
       ]
     },
     {
@@ -33,7 +33,7 @@
         "edge/app.yaml"
       ],
       "status_log_tail": [
-        "[INFO 8:36:21 AM] Workspace ready. Waiting for messages."
+        "[INFO 8:46:57 AM] Workspace ready. Waiting for messages."
       ]
     },
     {
@@ -49,7 +49,7 @@
         "edge/app.yaml"
       ],
       "status_log_tail": [
-        "[INFO 8:36:21 AM] Workspace ready. Waiting for messages."
+        "[INFO 8:46:57 AM] Workspace ready. Waiting for messages."
       ]
     },
     {
@@ -65,7 +65,7 @@
         "edge/app.yaml"
       ],
       "status_log_tail": [
-        "[INFO 8:36:21 AM] Workspace ready. Waiting for messages."
+        "[INFO 8:46:57 AM] Workspace ready. Waiting for messages."
       ]
     }
   ]
